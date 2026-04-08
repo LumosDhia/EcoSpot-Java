@@ -140,6 +140,17 @@ public class TicketManagementController {
         ticketTable.getSelectionModel().clearSelection();
     }
 
+    @FXML
+    private void handleBackHome(javafx.event.ActionEvent event) {
+        try {
+            Parent root = FXMLLoader.load(getClass().getResource("/home/Home.fxml"));
+            Stage stage = (Stage) ((javafx.scene.Node) event.getSource()).getScene().getWindow();
+            stage.getScene().setRoot(root);
+        } catch (java.io.IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     private void showAlert(String title, String content) {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle(title);
