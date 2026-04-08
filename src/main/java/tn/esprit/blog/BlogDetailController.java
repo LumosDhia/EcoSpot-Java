@@ -7,11 +7,13 @@ import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.control.TextField;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 
 import java.io.IOException;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 
 public class BlogDetailController {
 
@@ -27,8 +29,18 @@ public class BlogDetailController {
     @FXML private Label likesLabel;
     @FXML private Label authorLabel;
     @FXML private Text contentText;
+    
+    // Comments
+    @FXML private VBox commentsContainer;
+    @FXML private Label commentsCountLabel;
+    @FXML private TextField commentAuthorField;
+    @FXML private javafx.scene.control.TextArea commentArea;
+
+    private Blog currentArticle;
+    private tn.esprit.services.CommentService commentService = new tn.esprit.services.CommentService();
 
     public void setArticle(Blog blog) {
+        this.currentArticle = blog;
         heroTitle.setText(blog.getTitle());
         breadcrumbTitle.setText(blog.getTitle());
         titleLabel.setText(blog.getTitle());
@@ -52,6 +64,45 @@ public class BlogDetailController {
         authorLabel.setText("👤 Writer: " + (blog.getAuthor() != null ? blog.getAuthor() : "Admin User"));
         
         contentText.setText(blog.getContent());
+        
+        loadComments();
+    }
+
+    private void loadComments() {
+        commentsContainer.getChildren().clear();
+        List<Comment> comments = commentService.getByArticleId(currentArticle.getId());
+        commentsCountLabel.setText("Comments (" + comments.size() + ")");
+
+        for (Comment comment : comments) {
+            try {
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("/blog/CommentItem.fxml"));
+                Parent card = loader.load();
+                CommentItemController controller = loader.getController();
+                controller.setData(comment);
+                commentsContainer.getChildren().add(card);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    @FXML
+    private void handlePostComment() {
+        String author = commentAuthorField.getText();
+        String content = commentArea.getText();
+
+        if (author == null || author.trim().isEmpty() || content == null || content.trim().isEmpty()) {
+            // In a real app, show alert. For now, silence or simple check.
+            return;
+        }
+
+        Comment comment = new Comment(author, content, currentArticle.getId());
+        commentService.add(comment);
+        
+        // Clear fields and reload
+        commentAuthorField.clear();
+        commentArea.clear();
+        loadComments();
     }
 
     @FXML

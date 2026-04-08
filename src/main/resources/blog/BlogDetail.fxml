@@ -6,6 +6,7 @@
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.TextArea?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
@@ -126,18 +127,30 @@
                                  </children>
                               </VBox>
                               
-                              <!-- ===== COMMENTS SECTION ===== -->
-                              <VBox spacing="20.0" style="-fx-background-color: #f8fbf9; -fx-padding: 30; -fx-background-radius: 10;">
-                                 <children>
-                                    <Label styleClass="section-title" text="Comments (0)" />
-                                    <Label text="No comments yet. Be the first to comment!" style="-fx-text-fill: #888;" />
-                                    
-                                    <Separator />
-                                    
-                                    <Label styleClass="section-title" text="Leave a comment" />
-                                    <Label text="Please sign in to leave a comment." style="-fx-text-fill: #888;" />
-                                 </children>
-                              </VBox>
+                                                            <!-- ===== COMMENTS SECTION ===== -->
+                               <VBox spacing="25.0" style="-fx-background-color: #f8fbf9; -fx-padding: 30; -fx-background-radius: 10; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.05), 10, 0, 0, 5);">
+                                  <children>
+                                     <Label fx:id="commentsCountLabel" styleClass="section-title" text="Comments (0)" />
+                                     
+                                     <!-- List of comments -->
+                                     <VBox fx:id="commentsContainer" spacing="15.0" />
+                                     
+                                     <Separator />
+                                     
+                                     <VBox spacing="15.0">
+                                        <children>
+                                           <Label styleClass="section-title" text="Leave a comment" />
+                                           <TextField fx:id="commentAuthorField" prefHeight="40.0" promptText="Your name..." styleClass="modern-input" />
+                                           <TextArea fx:id="commentArea" prefHeight="100.0" promptText="Write your comment here..." styleClass="modern-input" wrapText="true" />
+                                           <HBox alignment="CENTER_RIGHT">
+                                              <children>
+                                                 <Button fx:id="postCommentBtn" onAction="#handlePostComment" prefHeight="40.0" prefWidth="150.0" styleClass="btn-primary" text="Post Comment" />
+                                              </children>
+                                           </HBox>
+                                        </children>
+                                     </VBox>
+                                  </children>
+                               </VBox>
                               
                               <HBox>
                                  <children>
