@@ -18,11 +18,26 @@ public class Ticket {
     private boolean isSpam;
     private LocalDateTime createdAt;
 
+    private Integer completedById;
+    private String completionMessage;
+    private String completionImage;
+    private LocalDateTime achievedAt;
+
     public Ticket() {
         this.status = TicketStatus.PENDING;
         this.priority = TicketPriority.MEDIUM;
         this.createdAt = LocalDateTime.now();
     }
+
+    // New getters/setters
+    public Integer getCompletedById() { return completedById; }
+    public void setCompletedById(Integer completedById) { this.completedById = completedById; }
+    public String getCompletionMessage() { return completionMessage; }
+    public void setCompletionMessage(String completionMessage) { this.completionMessage = completionMessage; }
+    public String getCompletionImage() { return completionImage; }
+    public void setCompletionImage(String completionImage) { this.completionImage = completionImage; }
+    public LocalDateTime getAchievedAt() { return achievedAt; }
+    public void setAchievedAt(LocalDateTime achievedAt) { this.achievedAt = achievedAt; }
 
     public Ticket(int id, String title, String description, String location, double latitude, double longitude, int userId) {
         this();
