@@ -43,9 +43,16 @@ public class TicketManagementController {
 
     private void loadTicketData() {
         try {
-            ObservableList<Ticket> tickets = FXCollections.observableArrayList(ticketService.getAll());
-            ticketTable.setItems(tickets);
-            System.out.println("Loaded " + tickets.size() + " tickets.");
+            // Fetch all tickets and filter out those that are "COMPLETED"
+            ObservableList<Ticket> filteredTickets = FXCollections.observableArrayList();
+            for (Ticket t : ticketService.getAll()) {
+                if (t.getStatus() != TicketStatus.COMPLETED) {
+                    filteredTickets.add(t);
+                }
+            }
+            
+            ticketTable.setItems(filteredTickets);
+            System.out.println("Loaded " + filteredTickets.size() + " active tickets.");
         } catch (Exception e) {
             System.err.println("Error fetching tickets: " + e.getMessage());
             e.printStackTrace();
