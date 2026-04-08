@@ -19,95 +19,103 @@
             </padding>
             <children>
                 <Button onAction="#handleBackHome" style="-fx-background-color: transparent; -fx-text-fill: #2d6a4f; -fx-cursor: hand;" text="⬅ Back" />
-                <Label styleClass="breadcrumb-text" text="Admin › Environmental Reports (Tickets)" />
+                <Label styleClass="breadcrumb-text" text="Admin › Environmental Portal" />
                 <Region HBox.hgrow="ALWAYS" />
                 <HBox alignment="CENTER" spacing="10.0">
                     <Label styleClass="admin-profile-name" text="GHACEN" />
-                    <Label style="-fx-background-color: #2d6a4f; -fx-text-fill: white; -fx-padding: 5 10; -fx-background-radius: 15;" text="Eco Monitor" />
+                    <Label style="-fx-background-color: #2d6a4f; -fx-text-fill: white; -fx-padding: 5 10; -fx-background-radius: 15;" text="System Admin" />
                 </HBox>
             </children>
         </HBox>
 
-        <!-- MAIN CONTENT AREA -->
-        <HBox spacing="20.0" VBox.vgrow="ALWAYS">
-            <padding>
-                <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
-            </padding>
-            <children>
-                <!-- LEFT SIDE: FORM -->
-                <VBox prefWidth="380.0" spacing="15.0" styleClass="stat-card">
-                    <children>
-                        <Label text="Report Details">
-                            <font>
-                                <Font name="System Bold" size="18.0" />
-                            </font>
-                        </Label>
-                        
-                        <VBox spacing="5.0">
-                            <Label styleClass="field-label" text="Title" />
-                            <TextField fx:id="titleField" promptText="Brief title of the issue" styleClass="search-field" />
-                        </VBox>
-
-                        <VBox spacing="5.0">
-                            <Label styleClass="field-label" text="Location" />
-                            <TextField fx:id="locationField" promptText="Address or coordinates" styleClass="search-field" />
-                        </VBox>
-
-                        <HBox spacing="10.0">
-                            <VBox spacing="5.0" HBox.hgrow="ALWAYS">
-                                <Label styleClass="field-label" text="Priority" />
-                                <ComboBox fx:id="priorityComboBox" prefWidth="Infinity" styleClass="sort-choice-box" />
-                            </VBox>
-                            <VBox spacing="5.0" HBox.hgrow="ALWAYS">
-                                <Label styleClass="field-label" text="Domain" />
-                                <ComboBox fx:id="domainComboBox" prefWidth="Infinity" styleClass="sort-choice-box" />
-                            </VBox>
-                        </HBox>
-
-                        <VBox spacing="5.0">
-                            <Label styleClass="field-label" text="Status" />
-                            <ComboBox fx:id="statusComboBox" prefWidth="Infinity" styleClass="sort-choice-box" />
-                        </VBox>
-                        
-                        <VBox spacing="5.0" VBox.vgrow="ALWAYS">
-                            <Label styleClass="field-label" text="Description" />
-                            <TextArea fx:id="descriptionArea" prefRowCount="4" promptText="Detailed description of the environmental issue..." styleClass="search-field" wrapText="true" />
-                        </VBox>
-
-                        <Button fx:id="saveButton" onAction="#handleSave" prefWidth="Infinity" styleClass="btn-signin" text="Save Report" />
-                        <Button onAction="#handleClear" prefWidth="Infinity" style="-fx-background-color: transparent; -fx-text-fill: #888;" text="Clear Fields" />
-                    </children>
-                </VBox>
-
-                <!-- RIGHT SIDE: TABLE -->
-                <VBox spacing="15.0" styleClass="stat-card" HBox.hgrow="ALWAYS">
-                    <children>
-                        <HBox alignment="CENTER_LEFT">
+        <TabPane tabClosingPolicy="UNAVAILABLE" VBox.vgrow="ALWAYS">
+            <tabs>
+                <!-- TAB 1: MODERATION -->
+                <Tab text="📋 Moderation Desk">
+                    <content>
+                        <HBox spacing="20.0">
+                            <padding>
+                                <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+                            </padding>
                             <children>
-                                <Label text="Submitted Reports">
-                                    <font>
-                                        <Font name="System Bold" size="18.0" />
-                                    </font>
-                                </Label>
-                                <Region HBox.hgrow="ALWAYS" />
-                                <TextField fx:id="searchField" prefWidth="250.0" promptText="Search reports..." styleClass="search-field" />
+                                <!-- Form Area -->
+                                <VBox prefWidth="380.0" spacing="15.0" styleClass="stat-card">
+                                    <children>
+                                        <Label text="Moderation Panel">
+                                            <font><Font name="System Bold" size="18.0" /></font>
+                                        </Label>
+                                        <VBox spacing="5.0">
+                                            <Label styleClass="field-label" text="Admin Notes / Rejection Reason" />
+                                            <TextArea fx:id="adminNotesArea" prefRowCount="4" styleClass="search-field" wrapText="true" />
+                                        </VBox>
+                                        <Separator />
+                                        <Button onAction="#handlePublish" prefWidth="Infinity" styleClass="btn-signin" text="✅ Approve &amp; Publish" />
+                                        <Button onAction="#handleSendBack" prefWidth="Infinity" style="-fx-background-color: #fca311; -fx-text-fill: white;" text="↩ Send Back for Fixes" />
+                                        <Button onAction="#handleRefuse" prefWidth="Infinity" style="-fx-background-color: #bc4749; -fx-text-fill: white;" text="❌ Refuse Report" />
+                                    </children>
+                                </VBox>
+                                <!-- Table Area -->
+                                <VBox spacing="15.0" styleClass="stat-card" HBox.hgrow="ALWAYS">
+                                    <children>
+                                        <Label text="Pending Submissions">
+                                            <font><Font name="System Bold" size="18.0" /></font>
+                                        </Label>
+                                        <TableView fx:id="pendingTable" VBox.vgrow="ALWAYS">
+                                            <columns>
+                                                <TableColumn fx:id="pIdCol" prefWidth="40.0" text="ID" />
+                                                <TableColumn fx:id="pTitleCol" prefWidth="180.0" text="Title" />
+                                                <TableColumn fx:id="pUserCol" prefWidth="120.0" text="Reporter" />
+                                                <TableColumn fx:id="pPriorityCol" prefWidth="90.0" text="Priority" />
+                                                <TableColumn fx:id="pLocationCol" prefWidth="150.0" text="Location" />
+                                            </columns>
+                                        </TableView>
+                                    </children>
+                                </VBox>
                             </children>
                         </HBox>
-                        
-                        <TableView fx:id="ticketTable" VBox.vgrow="ALWAYS">
-                            <columns>
-                                <TableColumn fx:id="idCol" prefWidth="40.0" text="ID" />
-                                <TableColumn fx:id="titleCol" prefWidth="180.0" text="Title" />
-                                <TableColumn fx:id="statusCol" prefWidth="100.0" text="Status" />
-                                <TableColumn fx:id="priorityCol" prefWidth="90.0" text="Priority" />
-                                <TableColumn fx:id="domainCol" prefWidth="110.0" text="Domain" />
-                                <TableColumn fx:id="locationCol" prefWidth="150.0" text="Location" />
-                                <TableColumn fx:id="actionsCol" prefWidth="120.0" text="Actions" />
-                            </columns>
-                        </TableView>
-                    </children>
-                </VBox>
-            </children>
-        </HBox>
+                    </content>
+                </Tab>
+
+                <!-- TAB 2: COMPLETIONS -->
+                <Tab text="🏆 Achievement Validation">
+                    <content>
+                        <HBox spacing="20.0">
+                            <padding>
+                                <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+                            </padding>
+                            <children>
+                                <VBox prefWidth="400.0" spacing="15.0" styleClass="stat-card">
+                                    <children>
+                                        <Label text="Proof of Work">
+                                            <font><Font name="System Bold" size="18.0" /></font>
+                                        </Label>
+                                        <VBox spacing="5.0">
+                                            <Label styleClass="field-label" text="Completion Message" />
+                                            <Label fx:id="proofMessageLabel" style="-fx-background-color: #f8faf9; -fx-padding: 10;" wrapText="true" text="Select a request to view proof..." />
+                                        </VBox>
+                                        <Button onAction="#handleMarkAchieved" prefWidth="Infinity" styleClass="btn-signin" text="🏆 Validate Achievement" />
+                                    </children>
+                                </VBox>
+                                <VBox spacing="15.0" styleClass="stat-card" HBox.hgrow="ALWAYS">
+                                    <children>
+                                        <Label text="Submitted Proofs">
+                                            <font><Font name="System Bold" size="18.0" /></font>
+                                        </Label>
+                                        <TableView fx:id="completionTable" VBox.vgrow="ALWAYS">
+                                            <columns>
+                                                <TableColumn fx:id="cIdCol" prefWidth="40.0" text="ID" />
+                                                <TableColumn fx:id="cTitleCol" prefWidth="200.0" text="Ticket Title" />
+                                                <TableColumn fx:id="cWorkerCol" prefWidth="150.0" text="Completed By" />
+                                                <TableColumn fx:id="cDateCol" prefWidth="150.0" text="Date Submitted" />
+                                            </columns>
+                                        </TableView>
+                                    </children>
+                                </VBox>
+                            </children>
+                        </HBox>
+                    </content>
+                </Tab>
+            </tabs>
+        </TabPane>
     </children>
 </VBox>
