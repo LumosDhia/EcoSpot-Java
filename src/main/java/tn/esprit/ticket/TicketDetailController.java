@@ -84,10 +84,44 @@ public class TicketDetailController {
         // Load image if path exists
         if (t.getImage() != null && !t.getImage().isEmpty()) {
             try {
-                // If the path starts with /uploads, it's relative to the project root or local storage
-                // For now, I'll attempt to load it. If it fails, I'll hide the view.
-                Image img = new Image(t.getImage(), true); 
+                String imgPath = t.getImage();
+                if (imgPath.startsWith("/uploads/")) {
+                    // Prepend standard local Symfony dev server port
+                    imgPath = "http://127.0.0.1:8000" + imgPath;
+                }
+                
+                System.out.println("Loading ticket image: " + imgPath);
+                
+                // Load in background (true)
+                Image img = new Image(imgPath, true); 
                 ticketImageView.setImage(img);
+                ticketImageView.setManaged(true);
+                ticketImageView.setVisible(true);
+                
+                // Fallback mechanism if 8000 isn't available
+                img.errorProperty().addListener((obs, oldVal, newVal) -> {
+                    if (newVal) {
+                        System.out.println("Warning: HTTP 8000 failed. Trying Apache localhost...");
+                        try {
+                            String fallback = "http://localhost/ecospot-web/public" + t.getImage();
+                            if (t.getImage().startsWith("http")) fallback = t.getImage(); // Just in case it's absolute
+                            Image fallbackImg = new Image(fallback, true);
+                            ticketImageView.setImage(fallbackImg);
+                            
+                            fallbackImg.errorProperty().addListener((o, oldV, newV) -> {
+                                if (newV) {
+                                    System.out.println("All image loading attempts failed. Hiding image view.");
+                                    ticketImageView.setManaged(false);
+                                    ticketImageView.setVisible(false);
+                                }
+                            });
+                        } catch (Exception ex) {
+                            ticketImageView.setManaged(false);
+                            ticketImageView.setVisible(false);
+                        }
+                    }
+                });
+                
             } catch (Exception e) {
                 ticketImageView.setManaged(false);
                 ticketImageView.setVisible(false);
@@ -96,6 +130,7 @@ public class TicketDetailController {
             ticketImageView.setManaged(false);
             ticketImageView.setVisible(false);
         }
+
     }
 
     @FXML

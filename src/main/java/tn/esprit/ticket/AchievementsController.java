@@ -110,10 +110,22 @@ public class AchievementsController {
         loc.getStyleClass().add("ticket-location");
         loc.setWrapText(true);
 
+        // Ticket Image Thumbnail
+        javafx.scene.image.ImageView cardImg = new javafx.scene.image.ImageView();
+        cardImg.setFitWidth(280);
+        cardImg.setFitHeight(120);
+        cardImg.setPreserveRatio(true);
+        if (t.getImage() != null && !t.getImage().isEmpty()) {
+            loadImageRobustly(t.getImage(), cardImg);
+        } else {
+            cardImg.setManaged(false);
+        }
+
         Label completedByLabel = new Label("Completed by: " + (t.getCompletedById() != null ? "User #" + t.getCompletedById() : "—"));
         completedByLabel.getStyleClass().add("achievement-completed-by");
 
-        content.getChildren().addAll(title, loc, completedByLabel);
+        content.getChildren().addAll(title, cardImg, loc, completedByLabel);
+
 
         // Footer / Button
         VBox footer = new VBox();
@@ -146,6 +158,34 @@ public class AchievementsController {
     private void goToDashboard(ActionEvent event) {
         navigate(event, "/user/Dashboard.fxml");
     }
+
+    private void loadImageRobustly(String rawPath, javafx.scene.image.ImageView view) {
+        try {
+            String imgPath = rawPath;
+            if (imgPath.startsWith("/uploads/")) {
+                imgPath = "http://127.0.0.1:8000" + imgPath;
+            }
+            javafx.scene.image.Image img = new javafx.scene.image.Image(imgPath, true);
+            view.setImage(img);
+            
+            img.errorProperty().addListener((obs, oldVal, newVal) -> {
+                if (newVal) {
+                    try {
+                        String fb = "http://localhost/ecospot-web/public" + rawPath;
+                        javafx.scene.image.Image fbImg = new javafx.scene.image.Image(fb, true);
+                        view.setImage(fbImg);
+                        fbImg.errorProperty().addListener((o, old, nw) -> {
+                            if (nw) { view.setManaged(false); view.setVisible(false); }
+                        });
+                    } catch (Exception ex) { view.setManaged(false); view.setVisible(false); }
+                }
+            });
+        } catch (Exception e) {
+            view.setManaged(false);
+            view.setVisible(false);
+        }
+    }
+
 
     @FXML
     void handleLogout(ActionEvent event) {

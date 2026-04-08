@@ -117,6 +117,17 @@ public class TicketManagementController {
         loc.getStyleClass().add("ticket-location");
         loc.setWrapText(true);
 
+        // Ticket Image Thumbnail
+        ImageView cardImg = new ImageView();
+        cardImg.setFitWidth(280);
+        cardImg.setFitHeight(120);
+        cardImg.setPreserveRatio(true);
+        if (t.getImage() != null && !t.getImage().isEmpty()) {
+            loadImageRobustly(t.getImage(), cardImg);
+        } else {
+            cardImg.setManaged(false);
+        }
+
         Label desc = new Label(t.getDescription());
         desc.getStyleClass().add("ticket-description");
         desc.setWrapText(true);
@@ -151,7 +162,8 @@ public class TicketManagementController {
             buttons.getChildren().add(btnComplete);
         }
 
-        content.getChildren().addAll(header, title, loc, desc, buttons);
+        content.getChildren().addAll(header, title, loc, cardImg, desc, buttons);
+
 
         VBox footer = new VBox();
         footer.getStyleClass().add("ticket-footer");
@@ -226,7 +238,35 @@ public class TicketManagementController {
         navigate(event, "/ticket/Achievements.fxml");
     }
 
+    private void loadImageRobustly(String rawPath, javafx.scene.image.ImageView view) {
+        try {
+            String imgPath = rawPath;
+            if (imgPath.startsWith("/uploads/")) {
+                imgPath = "http://127.0.0.1:8000" + imgPath;
+            }
+            javafx.scene.image.Image img = new javafx.scene.image.Image(imgPath, true);
+            view.setImage(img);
+            
+            img.errorProperty().addListener((obs, oldVal, newVal) -> {
+                if (newVal) {
+                    try {
+                        String fb = "http://localhost/ecospot-web/public" + rawPath;
+                        javafx.scene.image.Image fbImg = new javafx.scene.image.Image(fb, true);
+                        view.setImage(fbImg);
+                        fbImg.errorProperty().addListener((o, old, nw) -> {
+                            if (nw) { view.setManaged(false); view.setVisible(false); }
+                        });
+                    } catch (Exception ex) { view.setManaged(false); view.setVisible(false); }
+                }
+            });
+        } catch (Exception e) {
+            view.setManaged(false);
+            view.setVisible(false);
+        }
+    }
+
     private void navigate(javafx.scene.input.MouseEvent event, String fxmlPath) {
+
 
         try {
             Parent root = FXMLLoader.load(getClass().getResource(fxmlPath));
