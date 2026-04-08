@@ -181,6 +181,17 @@ public class NewArticleController {
     }
 
     @FXML
+    private void goToBlog() {
+        try {
+            Parent root = FXMLLoader.load(getClass().getResource("/blog/BlogManagement.fxml"));
+            Stage stage = (Stage) titleField.getScene().getWindow();
+            stage.getScene().setRoot(root);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @FXML
     private void goToHome() {
         try {
             Parent root = FXMLLoader.load(getClass().getResource("/home/Home.fxml"));
