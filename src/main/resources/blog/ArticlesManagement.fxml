@@ -95,8 +95,6 @@
                                         <TableColumn fx:id="colActions" prefWidth="180.0" text="Actions" />
                                     </columns>
                                 </TableView>
-
-                                </TableView>
                             </children>
                         </VBox>
 
