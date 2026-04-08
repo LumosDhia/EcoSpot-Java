@@ -128,6 +128,19 @@ public class TicketManagementController {
         
         Button btnView = new Button("View");
         btnView.getStyleClass().add("ticket-btn-view");
+        btnView.setOnAction(e -> {
+            try {
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("/ticket/TicketDetail.fxml"));
+                Parent root = loader.load();
+                TicketDetailController controller = loader.getController();
+                controller.setTicket(t);
+                
+                Stage stage = (Stage) ((Node) e.getSource()).getScene().getWindow();
+                stage.getScene().setRoot(root);
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
+        });
         
         Button btnComplete = new Button("✔ I completed this");
         btnComplete.getStyleClass().add("ticket-btn-complete");
