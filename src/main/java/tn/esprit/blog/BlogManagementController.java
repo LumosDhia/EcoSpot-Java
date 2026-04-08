@@ -10,6 +10,8 @@ import javafx.scene.control.TextField;
 import javafx.scene.layout.FlowPane;
 import tn.esprit.services.BlogService;
 
+import javafx.concurrent.Task;
+import javafx.application.Platform;
 import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -79,17 +81,28 @@ public class BlogManagementController {
 
     private void displayBlogs(List<Blog> blogs) {
         articlesGrid.getChildren().clear();
-        for (Blog b : blogs) {
-            try {
-                FXMLLoader loader = new FXMLLoader(getClass().getResource("/blog/BlogCard.fxml"));
-                Node card = loader.load();
-                BlogCardController controller = loader.getController();
-                controller.setData(b);
-                articlesGrid.getChildren().add(card);
-            } catch (IOException e) {
-                e.printStackTrace();
+        
+        // Use a Task to avoid freezing the UI thread while loading multiple FXML files
+        Task<Void> loadTask = new Task<>() {
+            @Override
+            protected Void call() throws Exception {
+                for (Blog b : blogs) {
+                    FXMLLoader loader = new FXMLLoader(getClass().getResource("/blog/BlogCard.fxml"));
+                    Node card = loader.load();
+                    BlogCardController controller = loader.getController();
+                    controller.setData(b);
+                    
+                    // Update UI in chunks on the FX Thread
+                    Platform.runLater(() -> articlesGrid.getChildren().add(card));
+                    
+                    // Small sleep to ensure the UI stays responsive between card additions
+                    Thread.sleep(5); 
+                }
+                return null;
             }
-        }
+        };
+
+        new Thread(loadTask).start();
     }
 
     private void addMockData() {
