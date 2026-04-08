@@ -395,3 +395,65 @@
     -fx-text-fill: #52b788;
     -fx-font-size: 12px;
 }
+
+/* ================================
+   ADMIN ARTICLES STYLES
+   ================================ */
+
+.btn-new-article {
+    -fx-background-color: #e9f5ee;
+    -fx-text-fill: #2d6a4f;
+    -fx-border-color: #2d6a4f;
+    -fx-border-radius: 15;
+    -fx-background-radius: 15;
+    -fx-font-weight: bold;
+    -fx-padding: 6 15;
+    -fx-cursor: hand;
+}
+
+.btn-new-article:hover {
+    -fx-background-color: #d1eadb;
+}
+
+.page-btn {
+    -fx-background-color: transparent;
+    -fx-text-fill: #fdae6b;
+    -fx-cursor: hand;
+    -fx-padding: 5 10;
+}
+
+.page-btn:hover {
+    -fx-text-fill: #f1933e;
+}
+
+.page-btn-active {
+    -fx-background-color: #f1933e;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-cursor: hand;
+    -fx-padding: 5 10;
+}
+
+/* Table styling approx */
+.table-view {
+    -fx-background-color: transparent;
+    -fx-border-width: 0;
+}
+.table-view .column-header-background {
+    -fx-background-color: #f4f4f4;
+    -fx-border-color: #ddd;
+    -fx-border-width: 0 0 1 0;
+}
+.table-view .column-header {
+    -fx-background-color: transparent;
+}
+.table-view .column-header .label {
+    -fx-text-fill: #333;
+    -fx-font-weight: bold;
+}
+.table-row-cell:odd {
+    -fx-background-color: transparent;
+}
+.table-row-cell:even {
+    -fx-background-color: #fcfcfc;
+}
