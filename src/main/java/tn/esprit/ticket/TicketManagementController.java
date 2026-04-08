@@ -1,30 +1,55 @@
 package tn.esprit.ticket;
 
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.Node;
 import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
-import javafx.scene.Node;
+import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Stage;
-import javafx.event.ActionEvent;
+import tn.esprit.services.TicketService;
+
 import java.io.IOException;
 
 public class TicketManagementController {
 
     @FXML private TableView<Ticket> ticketTable;
     @FXML private TableColumn<Ticket, Integer> colId;
-    @FXML private TableColumn<Ticket, Integer> colEvent;
-    @FXML private TableColumn<Ticket, String> colType;
-    @FXML private TableColumn<Ticket, Double> colPrice;
-    @FXML private TableColumn<Ticket, Void> colActions;
+    @FXML private TableColumn<Ticket, String> colTitle;
+    @FXML private TableColumn<Ticket, String> colLocation;
+    @FXML private TableColumn<Ticket, TicketStatus> colStatus;
+    @FXML private TableColumn<Ticket, TicketPriority> colPriority;
+
+    private final TicketService ticketService = new TicketService();
 
     @FXML
     public void initialize() {
-        System.out.println("Ticket Management Initialized");
-        // Here you would normally load data from a service
-        // ticketTable.setItems(ticketService.getAllTickets());
+        System.out.println("Ticket Management Initialized - Loading Records...");
+
+        // Set up Cell Value Factories
+        colId.setCellValueFactory(new PropertyValueFactory<>("id"));
+        colTitle.setCellValueFactory(new PropertyValueFactory<>("title"));
+        colLocation.setCellValueFactory(new PropertyValueFactory<>("location"));
+        colStatus.setCellValueFactory(new PropertyValueFactory<>("status"));
+        colPriority.setCellValueFactory(new PropertyValueFactory<>("priority"));
+
+        // Load data from database
+        loadTicketData();
+    }
+
+    private void loadTicketData() {
+        try {
+            ObservableList<Ticket> tickets = FXCollections.observableArrayList(ticketService.getAll());
+            ticketTable.setItems(tickets);
+            System.out.println("Loaded " + tickets.size() + " tickets.");
+        } catch (Exception e) {
+            System.err.println("Error fetching tickets: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 
     @FXML
@@ -35,12 +60,6 @@ public class TicketManagementController {
     @FXML
     private void goToHome(ActionEvent event) {
         navigate(event, "/home/Home.fxml");
-    }
-
-    @FXML
-    private void handleCreateTicket(ActionEvent event) {
-        System.out.println("Opening Create Ticket Dialog...");
-        // Implement creation logic
     }
 
     private void navigate(javafx.scene.input.MouseEvent event, String fxmlPath) {

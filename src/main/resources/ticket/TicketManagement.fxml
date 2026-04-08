@@ -61,10 +61,11 @@
                     <children>
                         <TableView fx:id="ticketTable" prefHeight="450.0" VBox.vgrow="ALWAYS">
                             <columns>
-                                <TableColumn fx:id="colId" prefWidth="80.0" text="Ticket ID" />
-                                <TableColumn fx:id="colEvent" prefWidth="250.0" text="Event ID" />
-                                <TableColumn fx:id="colType" prefWidth="150.0" text="Tier / Type" />
-                                <TableColumn fx:id="colPrice" prefWidth="120.0" text="Price ($)" />
+                                <TableColumn fx:id="colId" prefWidth="60.0" text="ID" />
+                                <TableColumn fx:id="colTitle" prefWidth="250.0" text="Title" />
+                                <TableColumn fx:id="colLocation" prefWidth="150.0" text="Location" />
+                                <TableColumn fx:id="colStatus" prefWidth="120.0" text="Status" />
+                                <TableColumn fx:id="colPriority" prefWidth="120.0" text="Priority" />
                             </columns>
                             <columnResizePolicy>
                                 <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
