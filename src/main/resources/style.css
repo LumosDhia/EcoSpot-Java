@@ -41,43 +41,51 @@
 
 .nav-link-btn {
     -fx-background-color: transparent;
-    -fx-text-fill: #333;
-    -fx-font-size: 14px;
+    -fx-text-fill: #888888;
+    -fx-font-size: 15px;
     -fx-cursor: hand;
     -fx-padding: 6 14;
-    -fx-background-radius: 6;
 }
 
 .nav-link-btn:hover {
-    -fx-background-color: #f0f7f4;
     -fx-text-fill: #1b4332;
 }
 
-.nav-link-btn-active {
-    -fx-background-color: #e9f5ee;
-    -fx-text-fill: #1b4332;
-    -fx-font-size: 14px;
+.nav-link-active {
+    -fx-text-fill: #2d6a4f;
     -fx-font-weight: bold;
+    -fx-background-color: transparent;
+    -fx-font-size: 15px;
+}
+
+.nav-ticket-bubble {
+    -fx-background-color: #f0fdf4;
+    -fx-border-color: #d1fae5;
+    -fx-border-radius: 25;
+    -fx-background-radius: 25;
+    -fx-text-fill: #065f46;
+    -fx-font-weight: bold;
+    -fx-padding: 10 25;
     -fx-cursor: hand;
-    -fx-padding: 6 14;
-    -fx-background-radius: 6;
-    -fx-border-color: #2d6a4f;
-    -fx-border-radius: 6;
-    -fx-border-width: 1.5;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.05), 5, 0, 0, 0);
+}
+
+.nav-ticket-bubble:hover {
+    -fx-background-color: #d1fae5;
 }
 
 .nav-btn-blog {
-    -fx-background-color: #1b4332;
+    -fx-background-color: #2d6a4f;
     -fx-text-fill: white;
-    -fx-font-size: 14px;
+    -fx-font-size: 15px;
     -fx-font-weight: bold;
     -fx-cursor: hand;
-    -fx-padding: 8 20;
-    -fx-background-radius: 6;
+    -fx-padding: 10 25;
+    -fx-background-radius: 4;
 }
 
 .nav-btn-blog:hover {
-    -fx-background-color: #2d6a4f;
+    -fx-background-color: #1b4332;
 }
 
 /* ================================
