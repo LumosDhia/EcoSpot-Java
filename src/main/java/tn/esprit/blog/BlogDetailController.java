@@ -26,8 +26,6 @@ public class BlogDetailController {
     @FXML private Label titleLabel;
     @FXML private Label dateLabel;
     @FXML private Label readTimeLabel;
-    @FXML private Label viewsLabel;
-    @FXML private Label likesLabel;
     @FXML private Label authorLabel;
     @FXML private Text contentText;
     
@@ -60,8 +58,6 @@ public class BlogDetailController {
         
         categoryLabel.setText(blog.getCategory() != null ? blog.getCategory().getName() : "General");
         readTimeLabel.setText("📖 " + blog.getReadingTime() + " min read");
-        viewsLabel.setText("👁 " + blog.getViews() + " views");
-        likesLabel.setText("👍 " + blog.getLikesCount());
         authorLabel.setText("👤 Writer: " + (blog.getAuthor() != null ? blog.getAuthor() : "Admin User"));
         
         contentText.setText(blog.getContent());

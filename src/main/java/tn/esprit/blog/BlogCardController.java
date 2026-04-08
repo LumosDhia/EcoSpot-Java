@@ -20,8 +20,6 @@ public class BlogCardController {
     @FXML private Label categoryLabel;
     @FXML private Label dateLabel;
     @FXML private Label titleLabel;
-    @FXML private Label viewsLabel;
-    @FXML private Label likesLabel;
     @FXML private Label readTimeLabel;
     @FXML private Label authorLabel;
     @FXML private Text excerptText;
@@ -43,8 +41,6 @@ public class BlogCardController {
         }
         
         titleLabel.setText(blog.getTitle());
-        viewsLabel.setText("👁 " + blog.getViews());
-        likesLabel.setText("👍 " + blog.getLikesCount());
         readTimeLabel.setText("📖 " + blog.getReadingTime() + "m");
         authorLabel.setText("👤 " + (blog.getAuthor() != null ? blog.getAuthor() : "Anonymous"));
         

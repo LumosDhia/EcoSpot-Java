@@ -101,8 +101,6 @@
                                        <children>
                                           <Label fx:id="dateLabel" text="🕒 18 days ago" />
                                           <Label fx:id="readTimeLabel" text="📖 1 min read" />
-                                          <Label fx:id="viewsLabel" text="👁 964 views" />
-                                          <Label fx:id="likesLabel" text="👍 3" />
                                           <Label fx:id="authorLabel" text="👤 Writer: Admin User" />
                                        </children>
                                     </HBox>

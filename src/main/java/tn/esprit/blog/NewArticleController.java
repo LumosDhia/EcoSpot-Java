@@ -101,21 +101,56 @@ public class NewArticleController {
         String title = titleField.getText();
         String content = contentEditor.getHtmlText();
         
-        if (title.isEmpty()) {
-            Alert alert = new Alert(Alert.AlertType.WARNING, "Please enter an article title.");
-            alert.show();
+        // --- Validation Logic (Controle de Saisir) ---
+        
+        // 1. Title Validation
+        if (title == null || title.trim().isEmpty()) {
+            showAlert("Validation Error", "Title is required.");
             return;
         }
+        if (title.length() < 5 || title.length() > 100) {
+            showAlert("Validation Error", "Title must be between 5 and 100 characters.");
+            return;
+        }
+        if (!title.matches(".*[a-zA-Z].*[a-zA-Z].*[a-zA-Z].*[a-zA-Z].*[a-zA-Z].*")) {
+            showAlert("Validation Error", "Title must contain at least 5 letters.");
+            return;
+        }
+        if (!title.substring(0, 1).matches("[a-zA-Z]")) {
+            showAlert("Validation Error", "Title must start with a letter.");
+            return;
+        }
+
+        // 2. Content Validation
+        // Clean HTML tags to count actual text length for meaningful validation
+        String plainText = content.replaceAll("<[^>]*>", "").trim();
+        if (plainText.isEmpty()) {
+            showAlert("Validation Error", "Content is required.");
+            return;
+        }
+        if (plainText.length() < 20) {
+            showAlert("Validation Error", "The article content must be more detailed (at least 20 characters).");
+            return;
+        }
+        if (!plainText.matches(".*[a-zA-Z].*[a-zA-Z].*[a-zA-Z].*[a-zA-Z].*[a-zA-Z].*")) {
+            showAlert("Validation Error", "The article content must contain at least 5 letters.");
+            return;
+        }
+
+        // 3. Category Validation
+        RadioButton selectedCat = (RadioButton) categoryGroup.getSelectedToggle();
+        if (selectedCat == null) {
+            showAlert("Validation Error", "Please select a category.");
+            return;
+        }
+
+        // --- End Validation ---
 
         Blog blog = (editArticle != null) ? editArticle : new Blog();
         blog.setTitle(title);
         blog.setContent(content);
         blog.setImage(selectedImagePath);
-        
-        RadioButton selectedCat = (RadioButton) categoryGroup.getSelectedToggle();
-        if (selectedCat != null) {
-            blog.setCategory((Category) selectedCat.getUserData());
-        }
+        blog.setCategory((Category) selectedCat.getUserData());
 
         if (editArticle != null) {
             blogService.update(blog);
@@ -123,8 +158,15 @@ public class NewArticleController {
             blogService.add2(blog);
         }
         
-        // Go back to Articles
         goToArticles();
+    }
+
+    private void showAlert(String title, String message) {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
     }
 
     @FXML

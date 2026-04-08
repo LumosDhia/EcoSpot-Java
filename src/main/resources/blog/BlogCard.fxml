@@ -35,8 +35,6 @@
             </Label>
             <HBox spacing="10" styleClass="article-stats-container">
                <children>
-                  <Label fx:id="viewsLabel" styleClass="stat-label" text="👁 962" />
-                  <Label fx:id="likesLabel" styleClass="stat-label" text="👍 3" />
                   <Label fx:id="readTimeLabel" styleClass="stat-label" text="📖 1m" />
                </children>
             </HBox>
