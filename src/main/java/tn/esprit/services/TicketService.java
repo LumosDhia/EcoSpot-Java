@@ -47,8 +47,8 @@ public class TicketService implements GlobalInterface<Ticket> {
 
     @Override
     public void add(Ticket ticket) {
-        String req = "INSERT INTO `ticket` (title, description, location, image, status, priority, domain, latitude, longitude, user_id, assigned_ngo_id, is_spam) " +
-                     "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        String req = "INSERT INTO `ticket` (title, description, location, image, status, priority, domain, latitude, longitude, user_id, assigned_ngo_id, is_spam, created_at, updated_at, created_by_id, updated_by_id) " +
+                     "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         try (PreparedStatement ps = cnx.prepareStatement(req)) {
             ps.setString(1, ticket.getTitle());
             ps.setString(2, ticket.getDescription());
@@ -59,13 +59,24 @@ public class TicketService implements GlobalInterface<Ticket> {
             ps.setString(7, ticket.getDomain() != null ? ticket.getDomain().name() : null);
             ps.setDouble(8, ticket.getLatitude());
             ps.setDouble(9, ticket.getLongitude());
-            ps.setInt(10, ticket.getUserId());
-            if (ticket.getAssignedNgoId() != null) ps.setInt(11, ticket.getAssignedNgoId());
-            else ps.setNull(11, Types.INTEGER);
+            // Defensive handling for binary user_id / assigned_ngo_id
+            if (ticket.getUserId() > 0) ps.setInt(10, ticket.getUserId());
+            else ps.setNull(10, Types.BINARY);
+            
+            if (ticket.getAssignedNgoId() != null && ticket.getAssignedNgoId() > 0) ps.setInt(11, ticket.getAssignedNgoId());
+            else ps.setNull(11, Types.BINARY);
+            
             ps.setBoolean(12, ticket.isSpam());
+            ps.setTimestamp(13, java.sql.Timestamp.valueOf(java.time.LocalDateTime.now()));
+            ps.setTimestamp(14, java.sql.Timestamp.valueOf(java.time.LocalDateTime.now()));
+            
+            byte[] dummyUuid = new byte[16]; // Default empty binary(16)
+            ps.setBytes(15, dummyUuid); // created_by_id
+            ps.setBytes(16, dummyUuid); // updated_by_id
             ps.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
+            throw new RuntimeException("SQL Error adding ticket: " + e.getMessage(), e);
         }
     }
 
