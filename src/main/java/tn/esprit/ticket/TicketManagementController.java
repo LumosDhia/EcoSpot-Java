@@ -7,162 +7,126 @@ import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import tn.esprit.services.TicketService;
 
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class TicketManagementController {
 
-    @FXML private TextField titleField;
-    @FXML private TextArea descriptionArea;
-    @FXML private TextField locationField;
-    @FXML private ComboBox<TicketStatus> statusComboBox;
-    @FXML private ComboBox<TicketPriority> priorityComboBox;
-    @FXML private ComboBox<ActionDomain> domainComboBox;
-    
-    @FXML private TableView<Ticket> ticketTable;
-    @FXML private TableColumn<Ticket, Integer> idCol;
-    @FXML private TableColumn<Ticket, String> titleCol;
-    @FXML private TableColumn<Ticket, TicketStatus> statusCol;
-    @FXML private TableColumn<Ticket, TicketPriority> priorityCol;
-    @FXML private TableColumn<Ticket, ActionDomain> domainCol;
-    @FXML private TableColumn<Ticket, String> locationCol;
-    @FXML private TableColumn<Ticket, Void> actionsCol;
-    @FXML private TextField searchField;
+    // Moderation TAB
+    @FXML private TextArea adminNotesArea;
+    @FXML private TableView<Ticket> pendingTable;
+    @FXML private TableColumn<Ticket, Integer> pIdCol;
+    @FXML private TableColumn<Ticket, String> pTitleCol;
+    @FXML private TableColumn<Ticket, Integer> pUserCol;
+    @FXML private TableColumn<Ticket, TicketPriority> pPriorityCol;
+    @FXML private TableColumn<Ticket, String> pLocationCol;
+
+    // Completion TAB
+    @FXML private Label proofMessageLabel;
+    @FXML private TableView<Ticket> completionTable;
+    @FXML private TableColumn<Ticket, Integer> cIdCol;
+    @FXML private TableColumn<Ticket, String> cTitleCol;
+    @FXML private TableColumn<Ticket, Integer> cWorkerCol;
+    @FXML private TableColumn<Ticket, LocalDateTime> cDateCol;
 
     private TicketService ticketService;
-    private ObservableList<Ticket> ticketList = FXCollections.observableArrayList();
-    private Ticket selectedTicket = null;
+    private ObservableList<Ticket> allTickets = FXCollections.observableArrayList();
+    private Ticket selectedPending = null;
+    private Ticket selectedCompletion = null;
 
     @FXML
     public void initialize() {
         ticketService = new TicketService();
-        
-        statusComboBox.setItems(FXCollections.observableArrayList(TicketStatus.values()));
-        priorityComboBox.setItems(FXCollections.observableArrayList(TicketPriority.values()));
-        domainComboBox.setItems(FXCollections.observableArrayList(ActionDomain.values()));
-        
-        setupTable();
-        loadTickets();
+        setupTables();
+        loadData();
     }
 
-    private void setupTable() {
-        idCol.setCellValueFactory(new PropertyValueFactory<>("id"));
-        titleCol.setCellValueFactory(new PropertyValueFactory<>("title"));
-        statusCol.setCellValueFactory(new PropertyValueFactory<>("status"));
-        priorityCol.setCellValueFactory(new PropertyValueFactory<>("priority"));
-        domainCol.setCellValueFactory(new PropertyValueFactory<>("domain"));
-        locationCol.setCellValueFactory(new PropertyValueFactory<>("location"));
-        
-        // Actions Column
-        actionsCol.setCellFactory(param -> new TableCell<>() {
-            private final Button deleteBtn = new Button("Delete");
-            {
-                deleteBtn.setStyle("-fx-background-color: #bc4749; -fx-text-fill: white; -fx-background-radius: 5;");
-                deleteBtn.setCursor(javafx.scene.Cursor.HAND);
-                deleteBtn.setOnAction(event -> {
-                    Ticket t = getTableView().getItems().get(getIndex());
-                    ticketService.delete(t);
-                    loadTickets();
-                });
-            }
+    private void setupTables() {
+        // Pending Table
+        pIdCol.setCellValueFactory(new PropertyValueFactory<>("id"));
+        pTitleCol.setCellValueFactory(new PropertyValueFactory<>("title"));
+        pUserCol.setCellValueFactory(new PropertyValueFactory<>("userId"));
+        pPriorityCol.setCellValueFactory(new PropertyValueFactory<>("priority"));
+        pLocationCol.setCellValueFactory(new PropertyValueFactory<>("location"));
 
-            @Override
-            protected void updateItem(Void item, boolean empty) {
-                super.updateItem(item, empty);
-                if (empty) setGraphic(null);
-                else setGraphic(deleteBtn);
-            }
+        pendingTable.getSelectionModel().selectedItemProperty().addListener((obs, oldV, newV) -> {
+            selectedPending = newV;
+            if (newV != null) adminNotesArea.setText(newV.getAdminNotes());
         });
 
-        // Selection listener
-        ticketTable.getSelectionModel().selectedItemProperty().addListener((obs, oldSelection, newSelection) -> {
-            if (newSelection != null) {
-                selectedTicket = newSelection;
-                titleField.setText(selectedTicket.getTitle());
-                descriptionArea.setText(selectedTicket.getDescription());
-                locationField.setText(selectedTicket.getLocation());
-                statusComboBox.setValue(selectedTicket.getStatus());
-                priorityComboBox.setValue(selectedTicket.getPriority());
-                domainComboBox.setValue(selectedTicket.getDomain());
-            }
-        });
+        // Completion Table
+        cIdCol.setCellValueFactory(new PropertyValueFactory<>("id"));
+        cTitleCol.setCellValueFactory(new PropertyValueFactory<>("title"));
+        cWorkerCol.setCellValueFactory(new PropertyValueFactory<>("completedById"));
+        cDateCol.setCellValueFactory(new PropertyValueFactory<>("createdAt"));
 
-        // Search Filter
-        searchField.textProperty().addListener((observable, oldValue, newValue) -> {
-            filterTickets(newValue);
+        completionTable.getSelectionModel().selectedItemProperty().addListener((obs, oldV, newV) -> {
+            selectedCompletion = newV;
+            if (newV != null) proofMessageLabel.setText(newV.getCompletionMessage());
         });
     }
 
-    private void filterTickets(String query) {
-        if (query == null || query.isEmpty()) {
-            ticketTable.setItems(ticketList);
-            return;
-        }
-        
-        String lowerQuery = query.toLowerCase();
-        ObservableList<Ticket> filtered = ticketList.filtered(t -> 
-            t.getTitle().toLowerCase().contains(lowerQuery) || 
-            t.getLocation().toLowerCase().contains(lowerQuery) ||
-            t.getStatus().name().toLowerCase().contains(lowerQuery)
-        );
-        ticketTable.setItems(filtered);
-    }
-
-    private void loadTickets() {
+    private void loadData() {
         List<Ticket> tickets = ticketService.getAll();
-        ticketList.setAll(tickets);
-        ticketTable.setItems(ticketList);
+        allTickets.setAll(tickets);
+
+        // Filter for Pending Table (PENDING or SENT_BACK)
+        ObservableList<Ticket> pending = FXCollections.observableArrayList(
+            tickets.stream().filter(t -> t.getStatus() == TicketStatus.PENDING || t.getStatus() == TicketStatus.SENT_BACK).collect(Collectors.toList())
+        );
+        pendingTable.setItems(pending);
+
+        // Filter for Completion Table (Workers submitted proof but not achieved yet)
+        ObservableList<Ticket> completions = FXCollections.observableArrayList(
+            tickets.stream().filter(t -> t.getCompletedById() != null && t.getAchievedAt() == null).collect(Collectors.toList())
+        );
+        completionTable.setItems(completions);
     }
 
     @FXML
-    private void handleSave() {
-        String title = titleField.getText();
-        String description = descriptionArea.getText();
-        String location = locationField.getText();
-        TicketStatus status = statusComboBox.getValue();
-        TicketPriority priority = priorityComboBox.getValue();
-        ActionDomain domain = domainComboBox.getValue();
+    private void handlePublish() {
+        if (selectedPending == null) return;
+        selectedPending.setStatus(TicketStatus.PUBLISHED);
+        selectedPending.setAdminNotes(null);
+        ticketService.update(selectedPending);
+        showAlert("Success", "Ticket published successfully!");
+        loadData();
+    }
 
-        if (title.isEmpty() || status == null || priority == null) {
-            showAlert("Validation Error", "Please fill in all mandatory fields (Title, Status, Priority).");
+    @FXML
+    private void handleSendBack() {
+        if (selectedPending == null) return;
+        String notes = adminNotesArea.getText();
+        if (notes == null || notes.isEmpty()) {
+            showAlert("Required", "Please provide notes for the user.");
             return;
         }
-
-        if (selectedTicket == null) {
-            Ticket t = new Ticket();
-            t.setTitle(title);
-            t.setDescription(description);
-            t.setLocation(location);
-            t.setStatus(status);
-            t.setPriority(priority);
-            t.setDomain(domain);
-            t.setUserId(1); // Default user for now
-            ticketService.add(t);
-            showAlert("Success", "Report submitted successfully!");
-        } else {
-            selectedTicket.setTitle(title);
-            selectedTicket.setDescription(description);
-            selectedTicket.setLocation(location);
-            selectedTicket.setStatus(status);
-            selectedTicket.setPriority(priority);
-            selectedTicket.setDomain(domain);
-            ticketService.update(selectedTicket);
-            showAlert("Success", "Report updated successfully!");
-        }
-
-        handleClear();
-        loadTickets();
+        selectedPending.setStatus(TicketStatus.SENT_BACK);
+        selectedPending.setAdminNotes(notes);
+        ticketService.update(selectedPending);
+        showAlert("Success", "Ticket sent back for fixes.");
+        loadData();
     }
 
     @FXML
-    private void handleClear() {
-        titleField.clear();
-        descriptionArea.clear();
-        locationField.clear();
-        statusComboBox.setValue(null);
-        priorityComboBox.setValue(null);
-        domainComboBox.setValue(null);
-        selectedTicket = null;
-        ticketTable.getSelectionModel().clearSelection();
+    private void handleRefuse() {
+        if (selectedPending == null) return;
+        selectedPending.setStatus(TicketStatus.REFUSED);
+        selectedPending.setAdminNotes(adminNotesArea.getText());
+        ticketService.update(selectedPending);
+        showAlert("Refused", "Ticket has been refused.");
+        loadData();
+    }
+
+    @FXML
+    private void handleMarkAchieved() {
+        if (selectedCompletion == null) return;
+        selectedCompletion.setStatus(TicketStatus.COMPLETED);
+        selectedCompletion.setAchievedAt(LocalDateTime.now());
+        ticketService.update(selectedCompletion);
+        showAlert("🏆 Achievement Unlocked", "Validation complete! User/NGO rewarded.");
+        loadData();
     }
 
     @FXML
