@@ -18,6 +18,7 @@ public class Ticket {
     private boolean isSpam;
     private LocalDateTime createdAt;
 
+    private String adminNotes;
     private Integer completedById;
     private String completionMessage;
     private String completionImage;
@@ -30,6 +31,8 @@ public class Ticket {
     }
 
     // New getters/setters
+    public String getAdminNotes() { return adminNotes; }
+    public void setAdminNotes(String adminNotes) { this.adminNotes = adminNotes; }
     public Integer getCompletedById() { return completedById; }
     public void setCompletedById(Integer completedById) { this.completedById = completedById; }
     public String getCompletionMessage() { return completionMessage; }
