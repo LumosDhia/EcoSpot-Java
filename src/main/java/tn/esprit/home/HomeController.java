@@ -109,6 +109,17 @@ public class HomeController {
         // blog navigation logic if exists
     }
 
+    @FXML
+    private void goToTickets(javafx.event.Event event) {
+        try {
+            Parent root = FXMLLoader.load(getClass().getResource("/ticket/TicketManagement.fxml"));
+            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+            stage.getScene().setRoot(root);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     private void navigate(ActionEvent event, String fxmlPath) {
         try {
             Parent root = FXMLLoader.load(getClass().getResource(fxmlPath));
