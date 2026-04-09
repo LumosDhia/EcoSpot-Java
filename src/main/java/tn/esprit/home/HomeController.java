@@ -40,4 +40,15 @@ public class HomeController {
             e.printStackTrace();
         }
     }
+
+    @FXML
+    private void goToLogin() {
+        try {
+            Parent root = FXMLLoader.load(getClass().getResource("/user/Login.fxml"));
+            Stage stage = (Stage) blogBtn.getScene().getWindow();
+            stage.getScene().setRoot(root);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 }

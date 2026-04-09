@@ -395,3 +395,106 @@
     -fx-text-fill: #52b788;
     -fx-font-size: 12px;
 }
+/* ================================
+   LOGIN PAGE
+   ================================ */
+.login-container {
+    -fx-background-color: #f0f7f4;
+}
+
+.login-card {
+    -fx-background-color: white;
+    -fx-background-radius: 10;
+    -fx-padding: 40;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 20, 0, 0, 10);
+    -fx-min-width: 450;
+    -fx-max-width: 450;
+}
+
+.login-title {
+    -fx-text-fill: #1b4332;
+    -fx-font-size: 24px;
+    -fx-font-weight: bold;
+}
+
+.login-toggle-container {
+    -fx-background-color: #f0f0f0;
+    -fx-background-radius: 30;
+    -fx-padding: 5;
+}
+
+.login-toggle-btn {
+    -fx-background-color: transparent;
+    -fx-text-fill: #888;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-padding: 8 20;
+    -fx-background-radius: 25;
+    -fx-cursor: hand;
+}
+
+.login-toggle-btn-active {
+    -fx-background-color: #fca311;
+    -fx-text-fill: white;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-padding: 8 20;
+    -fx-background-radius: 25;
+}
+
+.field-label {
+    -fx-text-fill: #666;
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+}
+
+.login-input {
+    -fx-background-color: white;
+    -fx-border-color: #ddd;
+    -fx-border-radius: 4;
+    -fx-padding: 10;
+    -fx-font-size: 14px;
+}
+
+.login-input:focused {
+    -fx-border-color: #1b4332;
+}
+
+.forgot-link {
+    -fx-text-fill: #fca311;
+    -fx-font-size: 13px;
+    -fx-cursor: hand;
+}
+
+.forgot-link:hover {
+    -fx-underline: true;
+}
+
+.btn-signin {
+    -fx-background-color: #2d6a4f;
+    -fx-text-fill: white;
+    -fx-font-size: 15px;
+    -fx-font-weight: bold;
+    -fx-padding: 12;
+    -fx-background-radius: 4;
+    -fx-cursor: hand;
+}
+
+.btn-signin:hover {
+    -fx-background-color: #1b4332;
+}
+
+.btn-register-outline {
+    -fx-background-color: transparent;
+    -fx-text-fill: #fca311;
+    -fx-border-color: #fca311;
+    -fx-border-width: 0.5;
+    -fx-border-radius: 4;
+    -fx-padding: 10;
+    -fx-font-weight: bold;
+    -fx-cursor: hand;
+}
+
+.btn-register-outline:hover {
+    -fx-background-color: #fff9f0;
+}
