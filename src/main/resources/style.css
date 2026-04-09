@@ -94,21 +94,53 @@
 /* ================================
    HERO SECTION
 ================================ */
-.hero-banner {
+.hero-tickets {
     -fx-background-image: url("https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=1920");
     -fx-background-repeat: no-repeat;
     -fx-background-size: cover;
-    -fx-background-position: center center;
+    -fx-background-position: center;
 }
 
-.hero-overlay {
-    -fx-background-color: rgba(0,0,0,0.4);
-    -fx-min-height: 300;
+.hero-tickets-overlay {
+    -fx-background-color: rgba(0,0,0,0.5);
+    -fx-padding: 80 40;
 }
 
-.hero-title {
+.badge-medium {
+    -fx-background-color: #eff6ff;
+    -fx-text-fill: #3b82f6;
+    -fx-background-radius: 15;
+    -fx-padding: 4 12;
+    -fx-font-weight: bold;
+    -fx-font-size: 11px;
+}
+
+.badge-low {
+    -fx-background-color: #ecfdf5;
+    -fx-text-fill: #10b981;
+    -fx-background-radius: 15;
+    -fx-padding: 4 12;
+    -fx-font-weight: bold;
+    -fx-font-size: 11px;
+}
+
+.btn-view-outline {
+    -fx-background-color: white;
+    -fx-border-color: #f97316;
+    -fx-border-radius: 4;
+    -fx-text-fill: #f97316;
+    -fx-padding: 6 12;
+    -fx-cursor: hand;
+}
+
+.btn-complete-solid {
+    -fx-background-color: #059669;
     -fx-text-fill: white;
-    -fx-font-size: 48px;
+    -fx-background-radius: 4;
+    -fx-padding: 6 15;
+    -fx-font-weight: bold;
+    -fx-cursor: hand;
+}
     -fx-font-weight: bold;
 }
 

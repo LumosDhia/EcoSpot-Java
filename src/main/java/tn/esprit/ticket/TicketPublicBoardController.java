@@ -8,6 +8,7 @@ import javafx.scene.layout.*;
 import tn.esprit.services.TicketService;
 import tn.esprit.util.SessionManager;
 
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -38,64 +39,76 @@ public class TicketPublicBoardController {
     private VBox createTicketCard(Ticket t) {
         VBox card = new VBox(0);
         card.setPrefWidth(350);
-        card.setStyle("-fx-background-color: white; -fx-border-color: #eee; -fx-border-radius: 5; -fx-background-radius: 5;");
+        card.setStyle("-fx-background-color: white; -fx-border-color: #e5e7eb; -fx-border-radius: 8; -fx-background-radius: 8; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.05), 10, 0, 0, 0);");
         
-        // Header (Priority and Domain)
+        // Header
         HBox header = new HBox(10);
         header.setPadding(new Insets(15));
         header.setAlignment(Pos.CENTER_LEFT);
-        header.setStyle("-fx-border-color: #f0f7f4; -fx-border-width: 0 0 1 0;");
+        header.setStyle("-fx-border-color: #f3f4f6; -fx-border-width: 0 0 1 0;");
         
         Label priorityLabel = new Label("⬤ " + t.getPriority().name());
-        priorityLabel.setStyle("-fx-background-color: #e9f5ee; -fx-text-fill: #2d6a4f; -fx-padding: 5 10; -fx-background-radius: 15; -fx-font-size: 11px; -fx-font-weight: bold;");
+        if (t.getPriority() == TicketPriority.MEDIUM) {
+            priorityLabel.getStyleClass().add("badge-medium");
+        } else {
+            priorityLabel.getStyleClass().add("badge-low");
+        }
         
         Region spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);
         
-        Label domainLabel = new Label("🗑 Domain: " + (t.getDomain() != null ? t.getDomain().name() : "Other"));
-        domainLabel.setStyle("-fx-text-fill: #666; -fx-font-size: 12px;");
+        Label domainLabel = new Label("🗑 Domain: " + (t.getDomain() != null ? t.getDomain().name() : "Waste"));
+        domainLabel.setStyle("-fx-text-fill: #6b7280; -fx-font-size: 11px; -fx-font-weight: bold;");
         
         header.getChildren().addAll(priorityLabel, spacer, domainLabel);
 
         // Content
-        VBox content = new VBox(8);
+        VBox content = new VBox(10);
         content.setPadding(new Insets(20));
         
         Label title = new Label(t.getTitle());
-        title.setStyle("-fx-font-size: 20px; -fx-font-weight: bold;");
+        title.setStyle("-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #111827;");
         
         Label loc = new Label("📍 " + t.getLocation());
-        loc.setStyle("-fx-text-fill: #888; -fx-font-size: 13px;");
+        loc.setStyle("-fx-text-fill: #9ca3af; -fx-font-size: 12px;");
         
         Label desc = new Label(t.getDescription());
-        desc.setStyle("-fx-text-fill: #555; -fx-font-size: 14px;");
+        desc.setStyle("-fx-text-fill: #4b5563; -fx-font-size: 14px;");
         desc.setWrapText(true);
-        desc.setMinHeight(60);
+        desc.setMinHeight(50);
         
         content.getChildren().addAll(title, loc, desc);
 
-        // Buttons
+        // Actions
         HBox actions = new HBox(10);
-        actions.setPadding(new Insets(0, 20, 20, 20));
+        actions.setPadding(new Insets(0, 20, 15, 20));
         
         Button viewBtn = new Button("View");
-        viewBtn.setStyle("-fx-background-color: transparent; -fx-border-color: #fca311; -fx-border-radius: 5; -fx-text-fill: #fca311; -fx-cursor: hand;");
+        viewBtn.getStyleClass().add("btn-view-outline");
         
-        Button completeBtn = new Button("✔️ I completed this");
-        completeBtn.setStyle("-fx-background-color: #2d6a4f; -fx-text-fill: white; -fx-background-radius: 5; -fx-cursor: hand;");
-        completeBtn.setPadding(new Insets(8, 15, 8, 15));
+        Button completeBtn = new Button("✔ I completed this");
+        completeBtn.getStyleClass().add("btn-complete-solid");
         
-        // CRITICAL: Check authentication
         if (!SessionManager.isLoggedIn()) {
             completeBtn.setVisible(false);
             completeBtn.setManaged(false);
         }
-
         completeBtn.setOnAction(e -> handleCompletionRequest(t));
 
         actions.getChildren().addAll(viewBtn, completeBtn);
 
-        card.getChildren().addAll(header, content, actions);
+        // Footer
+        VBox footer = new VBox();
+        footer.setPadding(new Insets(10, 20, 10, 20));
+        footer.setStyle("-fx-border-color: #f3f4f6; -fx-border-width: 1 0 0 0;");
+        
+        String dateStr = t.getCreatedAt() != null ? t.getCreatedAt().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")) : "02/03/2026";
+        Label dateLabel = new Label("Published " + dateStr);
+        dateLabel.setStyle("-fx-text-fill: #9ca3af; -fx-font-size: 11px;");
+        
+        footer.getChildren().add(dateLabel);
+
+        card.getChildren().addAll(header, content, actions, footer);
         return card;
     }
 
@@ -122,7 +135,7 @@ public class TicketPublicBoardController {
 
     @FXML
     private void goToBlog(javafx.event.ActionEvent event) {
-        // Mocking for now
+        // Blog logic
     }
 
     @FXML
