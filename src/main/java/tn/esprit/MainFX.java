@@ -20,7 +20,7 @@ public class MainFX extends Application {
 
         try {
             Parent root = FXMLLoader.load(getClass().getResource("/home/Home.fxml"));
-            Scene scene = new Scene(root);
+            Scene scene = new Scene(root, 1000, 800);
             primaryStage.setTitle("EcoSpot Desktop App");
             
             // Set App Icon

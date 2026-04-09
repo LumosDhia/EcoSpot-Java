@@ -64,7 +64,7 @@ public class BlogCardController {
                 detailController.setArticle(blog);
                 
                 Stage stage = (Stage) readMoreBtn.getScene().getWindow();
-                stage.setScene(new Scene(root));
+                stage.getScene().setRoot(root);
             } catch (IOException e) {
                 e.printStackTrace();
             }

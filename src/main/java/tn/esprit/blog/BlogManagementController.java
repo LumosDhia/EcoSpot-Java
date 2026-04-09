@@ -136,7 +136,7 @@ public class BlogManagementController {
         try {
             Parent root = FXMLLoader.load(getClass().getResource("/home/Home.fxml"));
             Stage stage = (Stage) searchField.getScene().getWindow();
-            stage.setScene(new Scene(root));
+            stage.getScene().setRoot(root);
         } catch (IOException e) {
             e.printStackTrace();
         }
