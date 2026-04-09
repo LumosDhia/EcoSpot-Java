@@ -13,6 +13,21 @@ public class TicketService implements GlobalInterface<Ticket> {
 
     public TicketService() {
         cnx = MyConnection.getInstance().getCnx();
+        ensureTableExists();
+    }
+
+    private void ensureTableExists() {
+        String req = "CREATE TABLE IF NOT EXISTS `ticket` (" +
+                "`id` INT AUTO_INCREMENT PRIMARY KEY," +
+                "`event_id` INT," +
+                "`price` DOUBLE," +
+                "`type` VARCHAR(50)" +
+                ")";
+        try (Statement st = cnx.createStatement()) {
+            st.execute(req);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
