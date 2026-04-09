@@ -83,8 +83,12 @@
 /* ================================
    HERO SECTION
 ================================ */
-.hero-section {
-    -fx-background-color: #1f3a2a;
+.hero-image {
+    -fx-opacity: 0.7;
+}
+
+.hero-section-overlay {
+    -fx-background-color: rgba(0,0,0,0.5);
     -fx-min-height: 260;
 }
 
