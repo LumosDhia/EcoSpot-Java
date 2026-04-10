@@ -8,6 +8,7 @@ import javafx.scene.Node;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.FlowPane;
+import javafx.scene.layout.HBox;
 import tn.esprit.services.BlogService;
 
 import javafx.concurrent.Task;
