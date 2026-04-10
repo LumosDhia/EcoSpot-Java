@@ -1,24 +1,21 @@
-# 🎫 Ticket Management Roadmap
+# 🎫 Environmental Reports (Tickets) Roadmap
 
-This roadmap outlines the features and development phases for the Ticket module within the EcoSpot project.
+This roadmap outlines the features for the Environmental Report (Ticket) module, aligned with the **EcoSpot Web** platform.
 
-## ✅ Phase 1: Core Functionality (Current)
-- [x] **Database Integration**: MySQL table creation and connectivity.
-- [x] **Base Service Layer**: Generic interface implementation for CRUD operations.
-- [x] **UI Redesign**: Premium desktop interface with matching Eco-theme.
-- [x] **Basic CRUD**: Create, read, update, and delete tickets.
-- [x] **Search & Filter**: Real-time filtering by Event ID, Price, and Type.
-- [x] **Navigation**: Seamless integration with the Home Dashboard.
+## ✅ Phase 1: Core Functionality (Aligned with Web)
+- [x] **Entity Refactor**: Tickets now represent environmental reports (Title, Description, Status, Priority, Domain).
+- [x] **Enums Sync**: implemented `TicketStatus`, `TicketPriority`, and `ActionDomain` to match Symfony backend.
+- [x] **Database Schema**: MySQL table updated with new report tracking fields.
+- [x] **Advanced CRUD**: Manage environmental issues specifically.
+- [x] **Status & Priority Tracking**: Real-time status updates (Pending -> In Progress -> Completed).
 
-## 🚀 Phase 2: Advanced Features (Planned)
-- [ ] **QR Code Generation**: Generate unique QR codes for each ticket.
-- [ ] **PDF Export**: Print tickets as PDF documents for offline use.
-- [ ] **Email Integration**: Send digital tickets directly to user emails.
-- [ ] **Input Validation**: Enhanced checks for price ranges and event IDs.
-- [ ] **Stock Management**: Track ticket availability per event.
+## 🚀 Phase 2: Web Sync & AI
+- [ ] **AI Integration**: Implement AI analysis for ticket classification (matched to `AiTicketTaskService`).
+- [ ] **NGO Assignment**: Feature to assign specifically to NGO accounts.
+- [ ] **Geo-Location**: Mapping integration using Latitude/Longitude coordinates.
+- [ ] **Spam Detection**: Mark reports as spam based on AI scores.
 
-## 📊 Phase 3: Analytics & UX
-- [ ] **Sales Statistics**: Charts and graphs for ticket sales tracking.
-- [ ] **Interactive Sorting**: Column-based sorting in the ticket table.
-- [ ] **Bulk Actions**: Delete or export multiple tickets at once.
-- [ ] **Mobile Sync**: Preparation for cross-platform data synchronization.
+## 📈 Phase 3: Reporting & Proof
+- [ ] **Completion Proof**: Submitting images and messages as proof of resolution.
+- [ ] **Consignes (Instructions)**: Adding granular instructions for each action.
+- [ ] **Analytics Dashboard**: Monitoring environmental impact and resolution rates.
