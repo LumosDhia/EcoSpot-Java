@@ -59,7 +59,18 @@ public class BlogDetailController {
         try {
             Parent root = FXMLLoader.load(getClass().getResource("/blog/BlogManagement.fxml"));
             Stage stage = (Stage) heroTitle.getScene().getWindow();
-            stage.setScene(new Scene(root));
+            stage.getScene().setRoot(root);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @FXML
+    private void goToHome() {
+        try {
+            Parent root = FXMLLoader.load(getClass().getResource("/home/Home.fxml"));
+            Stage stage = (Stage) heroTitle.getScene().getWindow();
+            stage.getScene().setRoot(root);
         } catch (IOException e) {
             e.printStackTrace();
         }

@@ -13,7 +13,7 @@
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
 
-<BorderPane prefHeight="700.0" prefWidth="1000.0" style="-fx-background-color: #f8fbf9;" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="tn.esprit.blog.BlogManagementController">
+<BorderPane style="-fx-background-color: #f8fbf9;" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="tn.esprit.blog.BlogManagementController">
     <stylesheets>
         <URL value="@../style.css" />
     </stylesheets>
@@ -24,10 +24,8 @@
             <HBox alignment="CENTER_LEFT" spacing="20.0" styleClass="top-bar">
                 <padding><Insets bottom="8.0" left="20.0" right="20.0" top="8.0" /></padding>
                 <children>
-                    <Label styleClass="top-bar-brand" text="🌿 EcoSpot" />
+                    <Label onMouseClicked="#goToHome" style="-fx-cursor: hand;" styleClass="top-bar-brand" text="🌿 EcoSpot" />
                     <Region HBox.hgrow="ALWAYS" />
-                    <Label styleClass="top-bar-link" text="🌐 EN ▾" />
-                    <Label styleClass="top-bar-link" text="🏠" />
                 </children>
             </HBox>
 
@@ -35,7 +33,7 @@
             <HBox alignment="CENTER_LEFT" spacing="10.0" styleClass="main-nav">
                 <padding><Insets bottom="12.0" left="20.0" right="20.0" top="12.0" /></padding>
                 <children>
-                    <Label styleClass="brand-name" text="EcoSpot" />
+                    <Label onMouseClicked="#goToHome" style="-fx-cursor: hand;" styleClass="brand-name" text="EcoSpot" />
                     <Region HBox.hgrow="ALWAYS" />
                     <Button fx:id="homeBtn" onAction="#goToHome" styleClass="nav-link-btn" text="Home" />
                     <Button styleClass="nav-link-btn" text="Events" />

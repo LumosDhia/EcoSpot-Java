@@ -44,7 +44,7 @@ public class BlogService implements GlobalInterface<Blog> {
         // Note: Using 'article' table name based on Symfony standard mapping
         String req = "SELECT a.*, c.name as category_name FROM article a " +
                      "LEFT JOIN category c ON a.category_id = c.id " +
-                     "WHERE a.title LIKE ? OR a.content LIKE ?";
+                     "WHERE (a.title LIKE ? OR a.content LIKE ?) AND (a.image IS NOT NULL AND a.image != '')";
         
         try (PreparedStatement ps = cnx.prepareStatement(req)) {
             ps.setString(1, "%" + query + "%");
