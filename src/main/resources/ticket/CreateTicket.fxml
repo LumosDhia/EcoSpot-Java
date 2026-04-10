@@ -47,7 +47,7 @@
                         <!-- Back to dashboard -->
                         <HBox alignment="CENTER_LEFT" spacing="10.0" maxWidth="800.0">
                             <children>
-                                <Button onAction="#goToDashboard" style="-fx-background-color: transparent; -fx-text-fill: #2b8b54; -fx-font-weight: bold; -fx-cursor: hand;" text="← Back to Dashboard" />
+                                <Button onAction="#goBack" style="-fx-background-color: transparent; -fx-text-fill: #2b8b54; -fx-font-weight: bold; -fx-cursor: hand;" text="← Back to Dashboard" />
                             </children>
                         </HBox>
 
@@ -100,7 +100,6 @@
                                             <children>
                                                 <Label style="-fx-font-weight: bold; -fx-text-fill: #1f2937; -fx-font-size: 14px;" text="Location" />
                                                 <TextField fx:id="locationInput" promptText="City, Neighborhood or exact address" style="-fx-padding: 10; -fx-background-color: white; -fx-border-color: #d1d5db; -fx-border-radius: 4; -fx-font-size: 14px;" />
-                                                <Label style="-fx-text-fill: #6b7280; -fx-font-size: 12px;" text="Required for accurate weather forecast generation." />
                                             </children>
                                         </VBox>
 
@@ -123,7 +122,7 @@
                                         <!-- ACTION BUTTONS (As requested by user) -->
                                         <HBox spacing="15.0" alignment="CENTER_RIGHT" style="-fx-padding: 20 0 0 0; -fx-border-color: #e5e7eb transparent transparent transparent;">
                                             <children>
-                                                <Button onAction="#goToDashboard" style="-fx-background-color: transparent; -fx-border-color: #d1d5db; -fx-border-radius: 4; -fx-text-fill: #4b5563; -fx-font-weight: bold; -fx-font-size: 14px; -fx-padding: 10 20; -fx-cursor: hand;" text="Cancel" />
+                                                <Button onAction="#goBack" style="-fx-background-color: transparent; -fx-border-color: #d1d5db; -fx-border-radius: 4; -fx-text-fill: #4b5563; -fx-font-weight: bold; -fx-font-size: 14px; -fx-padding: 10 20; -fx-cursor: hand;" text="Cancel" />
                                                 <Button onAction="#handleSubmit" style="-fx-background-color: #2b8b54; -fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 14px; -fx-padding: 10 30; -fx-background-radius: 4; -fx-cursor: hand;" text="Send Ticket ➔" />
                                             </children>
                                         </HBox>

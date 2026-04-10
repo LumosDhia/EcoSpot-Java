@@ -3,10 +3,12 @@ package tn.esprit.services;
 import tn.esprit.interfaces.GlobalInterface;
 import tn.esprit.ticket.*;
 import tn.esprit.util.MyConnection;
+import tn.esprit.util.SessionManager;
 
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.StringJoiner;
 
 public class TicketService implements GlobalInterface<Ticket> {
     private Connection cnx;
@@ -47,32 +49,73 @@ public class TicketService implements GlobalInterface<Ticket> {
 
     @Override
     public void add(Ticket ticket) {
-        String req = "INSERT INTO `ticket` (title, description, location, image, status, priority, domain, latitude, longitude, user_id, assigned_ngo_id, is_spam, created_at, updated_at, created_by_id, updated_by_id) " +
-                     "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        boolean hasCreatedById = hasColumn("ticket", "created_by_id");
+        boolean hasUpdatedById = hasColumn("ticket", "updated_by_id");
+        byte[] currentAppUserId = (hasCreatedById || hasUpdatedById) ? resolveCurrentAppUserId() : null;
+        boolean userIdIsBinary = isBinaryColumn("ticket", "user_id");
+
+        StringJoiner columns = new StringJoiner(", ");
+        StringJoiner values = new StringJoiner(", ");
+        columns.add("title"); values.add("?");
+        columns.add("description"); values.add("?");
+        columns.add("location"); values.add("?");
+        columns.add("image"); values.add("?");
+        columns.add("status"); values.add("?");
+        columns.add("priority"); values.add("?");
+        columns.add("domain"); values.add("?");
+        columns.add("latitude"); values.add("?");
+        columns.add("longitude"); values.add("?");
+        columns.add("user_id"); values.add("?");
+        columns.add("assigned_ngo_id"); values.add("?");
+        columns.add("admin_notes"); values.add("?");
+        columns.add("completed_by_id"); values.add("?");
+        columns.add("completion_message"); values.add("?");
+        columns.add("completion_image"); values.add("?");
+        columns.add("is_spam"); values.add("?");
+        columns.add("created_at"); values.add("?");
+        columns.add("achieved_at"); values.add("?");
+
+        if (hasCreatedById) {
+            columns.add("created_by_id");
+            values.add("?");
+        }
+        if (hasUpdatedById) {
+            columns.add("updated_by_id");
+            values.add("?");
+        }
+
+        String req = "INSERT INTO `ticket` (" + columns + ") VALUES (" + values + ")";
         try (PreparedStatement ps = cnx.prepareStatement(req)) {
-            ps.setString(1, ticket.getTitle());
-            ps.setString(2, ticket.getDescription());
-            ps.setString(3, ticket.getLocation());
-            ps.setString(4, ticket.getImage());
-            ps.setString(5, ticket.getStatus().name());
-            ps.setString(6, ticket.getPriority().name());
-            ps.setString(7, ticket.getDomain() != null ? ticket.getDomain().name() : null);
-            ps.setDouble(8, ticket.getLatitude());
-            ps.setDouble(9, ticket.getLongitude());
-            // Defensive handling for binary user_id / assigned_ngo_id
-            if (ticket.getUserId() > 0) ps.setInt(10, ticket.getUserId());
-            else ps.setNull(10, Types.BINARY);
-            
-            if (ticket.getAssignedNgoId() != null && ticket.getAssignedNgoId() > 0) ps.setInt(11, ticket.getAssignedNgoId());
-            else ps.setNull(11, Types.BINARY);
-            
-            ps.setBoolean(12, ticket.isSpam());
-            ps.setTimestamp(13, java.sql.Timestamp.valueOf(java.time.LocalDateTime.now()));
-            ps.setTimestamp(14, java.sql.Timestamp.valueOf(java.time.LocalDateTime.now()));
-            
-            byte[] dummyUuid = new byte[16]; // Default empty binary(16)
-            ps.setBytes(15, dummyUuid); // created_by_id
-            ps.setBytes(16, dummyUuid); // updated_by_id
+            int idx = 1;
+            ps.setString(idx++, ticket.getTitle());
+            ps.setString(idx++, ticket.getDescription());
+            ps.setString(idx++, ticket.getLocation());
+            ps.setString(idx++, ticket.getImage());
+            ps.setString(idx++, ticket.getStatus().name());
+            ps.setString(idx++, ticket.getPriority().name());
+            ps.setString(idx++, ticket.getDomain() != null ? ticket.getDomain().name() : null);
+            ps.setDouble(idx++, ticket.getLatitude());
+            ps.setDouble(idx++, ticket.getLongitude());
+            bindUserId(ps, idx++, ticket.getUserId(), userIdIsBinary);
+            if (ticket.getAssignedNgoId() != null && ticket.getAssignedNgoId() > 0) ps.setInt(idx++, ticket.getAssignedNgoId());
+            else ps.setNull(idx++, Types.INTEGER);
+            ps.setString(idx++, ticket.getAdminNotes());
+            if (ticket.getCompletedById() != null) ps.setInt(idx++, ticket.getCompletedById());
+            else ps.setNull(idx++, Types.INTEGER);
+            ps.setString(idx++, ticket.getCompletionMessage());
+            ps.setString(idx++, ticket.getCompletionImage());
+            ps.setBoolean(idx++, ticket.isSpam());
+            ps.setTimestamp(idx++, java.sql.Timestamp.valueOf(java.time.LocalDateTime.now()));
+            if (ticket.getAchievedAt() != null) ps.setTimestamp(idx++, Timestamp.valueOf(ticket.getAchievedAt()));
+            else ps.setNull(idx++, Types.TIMESTAMP);
+            if (hasCreatedById) {
+                if (currentAppUserId != null) ps.setBytes(idx++, currentAppUserId);
+                else ps.setNull(idx++, Types.BINARY);
+            }
+            if (hasUpdatedById) {
+                if (currentAppUserId != null) ps.setBytes(idx++, currentAppUserId);
+                else ps.setNull(idx++, Types.BINARY);
+            }
             ps.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -136,54 +179,204 @@ public class TicketService implements GlobalInterface<Ticket> {
         String req = "SELECT * FROM `ticket` ORDER BY created_at DESC";
         try (Statement st = cnx.createStatement(); ResultSet rs = st.executeQuery(req)) {
             while (rs.next()) {
-                Ticket t = new Ticket();
-                t.setId(rs.getInt("id"));
-                t.setTitle(rs.getString("title"));
-                t.setDescription(rs.getString("description"));
-                t.setLocation(rs.getString("location"));
-                t.setImage(rs.getString("image"));
-                t.setStatus(TicketStatus.valueOf(rs.getString("status")));
-                t.setPriority(TicketPriority.valueOf(rs.getString("priority")));
-                String domain = rs.getString("domain");
-                if (domain != null) t.setDomain(ActionDomain.valueOf(domain));
-                t.setLatitude(rs.getDouble("latitude"));
-                t.setLongitude(rs.getDouble("longitude"));
-                t.setUserId(0); // Default if conversion fails
-                try {
-                    Object uid = rs.getObject("user_id");
-                    if (uid instanceof Number) t.setUserId(((Number) uid).intValue());
-                } catch (Exception e) { /* Ignore binary IDs for now */ }
-                
-                int ngoId = 0;
-                try {
-                    Object nid = rs.getObject("assigned_ngo_id");
-                    if (nid instanceof Number) {
-                        t.setAssignedNgoId(((Number) nid).intValue());
-                    }
-                } catch (Exception e) { /* Ignore */ }
-                
-                t.setAdminNotes(rs.getString("admin_notes"));
-                
-                try {
-                    Object cid = rs.getObject("completed_by_id");
-                    if (cid instanceof Number) {
-                        t.setCompletedById(((Number) cid).intValue());
-                    }
-                } catch (Exception e) { /* Ignore */ }
-                
-                t.setCompletionMessage(rs.getString("completion_message"));
-                t.setCompletionImage(rs.getString("completion_image"));
-                t.setSpam(rs.getBoolean("is_spam"));
-                t.setCreatedAt(rs.getTimestamp("created_at").toLocalDateTime());
-                
-                Timestamp ach = rs.getTimestamp("achieved_at");
-                if (ach != null) t.setAchievedAt(ach.toLocalDateTime());
-                
-                tickets.add(t);
+                tickets.add(mapTicket(rs));
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
         return tickets;
+    }
+
+    public List<Ticket> getByUserId(int userId) {
+        List<Ticket> tickets = new ArrayList<>();
+        boolean userIdIsBinary = isBinaryColumn("ticket", "user_id");
+        String req = userIdIsBinary
+                ? "SELECT * FROM `ticket` WHERE user_id = ? ORDER BY created_at DESC"
+                : "SELECT * FROM `ticket` WHERE user_id = ? ORDER BY created_at DESC";
+        try (PreparedStatement ps = cnx.prepareStatement(req)) {
+            if (userIdIsBinary) {
+                byte[] current = resolveCurrentAppUserIdStrict();
+                if (current == null) {
+                    return tickets;
+                }
+                ps.setBytes(1, current);
+            } else {
+                ps.setInt(1, userId);
+            }
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    tickets.add(mapTicket(rs));
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return tickets;
+    }
+
+    public Ticket getById(int id) {
+        String req = "SELECT * FROM `ticket` WHERE id = ? LIMIT 1";
+        try (PreparedStatement ps = cnx.prepareStatement(req)) {
+            ps.setInt(1, id);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return mapTicket(rs);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    private Ticket mapTicket(ResultSet rs) throws SQLException {
+        Ticket t = new Ticket();
+        t.setId(rs.getInt("id"));
+        t.setTitle(rs.getString("title"));
+        t.setDescription(rs.getString("description"));
+        t.setLocation(rs.getString("location"));
+        t.setImage(rs.getString("image"));
+        t.setStatus(TicketStatus.valueOf(rs.getString("status")));
+        t.setPriority(TicketPriority.valueOf(rs.getString("priority")));
+        String domain = rs.getString("domain");
+        if (domain != null) t.setDomain(ActionDomain.valueOf(domain));
+        t.setLatitude(rs.getDouble("latitude"));
+        t.setLongitude(rs.getDouble("longitude"));
+        t.setUserId(0);
+        Object uid = rs.getObject("user_id");
+        if (uid instanceof Number) t.setUserId(((Number) uid).intValue());
+
+        Object nid = rs.getObject("assigned_ngo_id");
+        if (nid instanceof Number) t.setAssignedNgoId(((Number) nid).intValue());
+
+        t.setAdminNotes(rs.getString("admin_notes"));
+        Object cid = rs.getObject("completed_by_id");
+        if (cid instanceof Number) t.setCompletedById(((Number) cid).intValue());
+        t.setCompletionMessage(rs.getString("completion_message"));
+        t.setCompletionImage(rs.getString("completion_image"));
+        t.setSpam(rs.getBoolean("is_spam"));
+        t.setCreatedAt(rs.getTimestamp("created_at").toLocalDateTime());
+        Timestamp ach = rs.getTimestamp("achieved_at");
+        if (ach != null) t.setAchievedAt(ach.toLocalDateTime());
+        return t;
+    }
+
+    private boolean hasColumn(String tableName, String columnName) {
+        String req = "SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = ? AND COLUMN_NAME = ? LIMIT 1";
+        try (PreparedStatement ps = cnx.prepareStatement(req)) {
+            ps.setString(1, tableName);
+            ps.setString(2, columnName);
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next();
+            }
+        } catch (SQLException e) {
+            return false;
+        }
+    }
+
+    private boolean isBinaryColumn(String tableName, String columnName) {
+        String req = "SELECT DATA_TYPE FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = ? AND COLUMN_NAME = ? LIMIT 1";
+        try (PreparedStatement ps = cnx.prepareStatement(req)) {
+            ps.setString(1, tableName);
+            ps.setString(2, columnName);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    String dataType = rs.getString("DATA_TYPE");
+                    return "binary".equalsIgnoreCase(dataType)
+                            || "varbinary".equalsIgnoreCase(dataType);
+                }
+            }
+        } catch (SQLException ignored) {
+        }
+        return false;
+    }
+
+    private void bindUserId(PreparedStatement ps, int parameterIndex, int fallbackUserId, boolean binaryUserId) throws SQLException {
+        if (!binaryUserId) {
+            if (fallbackUserId > 0) {
+                ps.setInt(parameterIndex, fallbackUserId);
+            } else {
+                ps.setNull(parameterIndex, Types.INTEGER);
+            }
+            return;
+        }
+
+        byte[] appUserId = resolveCurrentAppUserIdStrict();
+        if (appUserId != null) {
+            ps.setBytes(parameterIndex, appUserId);
+        } else {
+            ps.setNull(parameterIndex, Types.BINARY);
+        }
+    }
+
+    private byte[] resolveCurrentAppUserId() {
+        if (SessionManager.isLoggedIn() && SessionManager.getCurrentUser() != null) {
+            String email = SessionManager.getCurrentUser().getEmail();
+            if (email != null && !email.isBlank()) {
+                byte[] byEmail = findAppUserIdByEmail(email);
+                if (byEmail != null) return byEmail;
+
+                String mapped = mapDemoEmail(email);
+                if (mapped != null) {
+                    byte[] byMapped = findAppUserIdByEmail(mapped);
+                    if (byMapped != null) return byMapped;
+                }
+            }
+        }
+        return findAnyAppUserId();
+    }
+
+    private byte[] resolveCurrentAppUserIdStrict() {
+        if (SessionManager.isLoggedIn() && SessionManager.getCurrentUser() != null) {
+            String email = SessionManager.getCurrentUser().getEmail();
+            if (email != null && !email.isBlank()) {
+                byte[] byEmail = findAppUserIdByEmail(email);
+                if (byEmail != null) return byEmail;
+
+                String mapped = mapDemoEmail(email);
+                if (mapped != null) {
+                    byte[] byMapped = findAppUserIdByEmail(mapped);
+                    if (byMapped != null) return byMapped;
+                }
+            }
+        }
+        return null;
+    }
+
+    private byte[] findAppUserIdByEmail(String email) {
+        String req = "SELECT id FROM app_user WHERE email = ? LIMIT 1";
+        try (PreparedStatement ps = cnx.prepareStatement(req)) {
+            ps.setString(1, email);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) return rs.getBytes("id");
+            }
+        } catch (SQLException ignored) {
+        }
+        return null;
+    }
+
+    private byte[] findAnyAppUserId() {
+        String req = "SELECT id FROM app_user LIMIT 1";
+        try (PreparedStatement ps = cnx.prepareStatement(req);
+             ResultSet rs = ps.executeQuery()) {
+            if (rs.next()) return rs.getBytes("id");
+        } catch (SQLException ignored) {
+        }
+        return null;
+    }
+
+    private String mapDemoEmail(String email) {
+        if (email == null || !email.endsWith("@mail.com")) return null;
+        String localPart = email.substring(0, email.indexOf('@'));
+        String candidate = localPart + "@ecospot.local";
+        String req = "SELECT email FROM app_user WHERE email = ? LIMIT 1";
+        try (PreparedStatement ps = cnx.prepareStatement(req)) {
+            ps.setString(1, candidate);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) return rs.getString("email");
+            }
+        } catch (SQLException ignored) {
+        }
+        return null;
     }
 }

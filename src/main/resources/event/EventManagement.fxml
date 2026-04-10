@@ -69,7 +69,7 @@
                 <!-- Title and Add Button -->
                 <HBox alignment="CENTER_LEFT" spacing="20.0">
                     <children>
-                        <Button onAction="#goToDashboard" styleClass="nav-link-btn" text="← Back" />
+                        <Button onAction="#goBack" styleClass="nav-link-btn" text="← Back" />
                         <Label styleClass="section-title" text="Discover Events" />
                         <Region HBox.hgrow="ALWAYS" />
                         <HBox spacing="10.0">

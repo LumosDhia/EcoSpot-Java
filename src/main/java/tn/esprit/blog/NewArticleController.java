@@ -39,6 +39,7 @@ public class NewArticleController {
 
     @FXML
     public void initialize() {
+        tn.esprit.util.NavigationHistory.track(titleField, "/blog/NewArticle.fxml");
         publicationChoice.getItems().addAll("Save as draft", "Publish immediately");
         publicationChoice.setValue("Save as draft");
         
@@ -235,7 +236,9 @@ public class NewArticleController {
 
     @FXML
     private void goBackToArticles(javafx.event.ActionEvent event) {
-        goToArticles();
+        if (!tn.esprit.util.NavigationHistory.goBack(event)) {
+            goToArticles();
+        }
     }
 
     @FXML

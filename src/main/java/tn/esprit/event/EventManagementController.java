@@ -102,6 +102,7 @@ public class EventManagementController {
 
         if (searchField != null) {
             searchField.textProperty().addListener((obs, oldVal, newVal) -> filterAndDisplay());
+            tn.esprit.util.NavigationHistory.track(searchField, "/event/EventManagement.fxml");
         }
     }
 
@@ -163,6 +164,13 @@ public class EventManagementController {
             stage.getScene().setRoot(root);
         } catch (IOException e) {
             e.printStackTrace();
+        }
+    }
+
+    @FXML
+    private void goBack(ActionEvent event) {
+        if (!tn.esprit.util.NavigationHistory.goBack(event)) {
+            goToDashboard(event);
         }
     }
 

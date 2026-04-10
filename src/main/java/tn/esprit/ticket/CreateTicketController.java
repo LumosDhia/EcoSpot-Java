@@ -28,6 +28,7 @@ public class CreateTicketController {
 
     private File selectedFile;
     private final TicketService ticketService = new TicketService();
+    private Ticket editingTicket;
 
     @FXML
     public void initialize() {
@@ -39,6 +40,7 @@ public class CreateTicketController {
         }
         
         setupInputControls();
+        tn.esprit.util.NavigationHistory.track(titleInput, "/ticket/CreateTicket.fxml");
     }
 
     private void setupInputControls() {
@@ -109,13 +111,14 @@ public class CreateTicketController {
             return;
         }
 
-        Ticket t = new Ticket();
+        Ticket t = editingTicket != null ? editingTicket : new Ticket();
         t.setTitle(title);
         t.setDescription(desc);
         t.setLocation(loc);
         t.setStatus(TicketStatus.PENDING);
-        t.setPriority(TicketPriority.MEDIUM);
-        t.setDomain(ActionDomain.OTHER); // Defaulting to OTHER
+        if (t.getPriority() == null) t.setPriority(TicketPriority.MEDIUM);
+        if (t.getDomain() == null) t.setDomain(ActionDomain.OTHER);
+        t.setAdminNotes(null); // reset revision notes on resubmission
         
         if (SessionManager.isLoggedIn()) {
             t.setUserId(SessionManager.getCurrentUser().getId());
@@ -124,16 +127,39 @@ public class CreateTicketController {
         }
 
         if (selectedFile != null) {
-            // Ideally copy to uploads folder, but for now just save absolute path or mock relative path
-            // For typical dev, we just store standard path:
             t.setImage(selectedFile.toURI().toString());
         }
-
-        ticketService.add(t);
-        System.out.println("Ticket created: " + title);
+        try {
+            if (editingTicket != null) {
+                ticketService.update(t);
+                System.out.println("Ticket resubmitted for review: " + title);
+            } else {
+                ticketService.add(t);
+                System.out.println("Ticket created: " + title);
+            }
+        } catch (RuntimeException ex) {
+            showError(ex.getMessage());
+            return;
+        }
 
         // Redirect back to My Tickets after creation
         goToMyTickets(event);
+    }
+
+    public void setTicketForEdit(Ticket ticket) {
+        if (ticket == null || ticket.getStatus() != TicketStatus.SENT_BACK) {
+            return;
+        }
+        this.editingTicket = ticketService.getById(ticket.getId());
+        if (this.editingTicket == null) {
+            this.editingTicket = ticket;
+        }
+        titleInput.setText(this.editingTicket.getTitle());
+        descriptionInput.setText(this.editingTicket.getDescription());
+        locationInput.setText(this.editingTicket.getLocation());
+        if (this.editingTicket.getImage() != null && !this.editingTicket.getImage().isBlank()) {
+            fileNameLabel.setText("Current image kept");
+        }
     }
 
     private void showError(String msg) {
@@ -145,6 +171,13 @@ public class CreateTicketController {
     @FXML
     void goToDashboard(ActionEvent event) {
         navigate(event, "/user/Dashboard.fxml");
+    }
+
+    @FXML
+    void goBack(ActionEvent event) {
+        if (!tn.esprit.util.NavigationHistory.goBack(event)) {
+            goToDashboard(event);
+        }
     }
 
     private void goToMyTickets(ActionEvent event) {

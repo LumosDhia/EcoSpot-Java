@@ -58,6 +58,7 @@ public class CommentsManagementController {
     public void initialize() {
         tn.esprit.user.User user = tn.esprit.util.SessionManager.getCurrentUser();
         isAdmin = user != null && "ADMIN".equalsIgnoreCase(user.getRole());
+        tn.esprit.util.NavigationHistory.track(homeBtn, "/blog/CommentsManagement.fxml");
         configureLayoutByRole();
         setupAdminTable();
         setupNgoTables();
@@ -284,6 +285,13 @@ public class CommentsManagementController {
             stage.getScene().setRoot(root);
         } catch (IOException e) {
             e.printStackTrace();
+        }
+    }
+
+    @FXML
+    private void goBack(javafx.event.ActionEvent event) {
+        if (!tn.esprit.util.NavigationHistory.goBack(event)) {
+            goToDashboard(event);
         }
     }
 

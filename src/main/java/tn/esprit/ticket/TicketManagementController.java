@@ -67,7 +67,10 @@ public class TicketManagementController {
             ticketsFlowPane.getChildren().clear();
             
             for (Ticket t : ticketService.getAll()) {
-                if (t.getStatus() != TicketStatus.COMPLETED) {
+                if (t.getStatus() == TicketStatus.PUBLISHED
+                        || t.getStatus() == TicketStatus.ASSIGNED
+                        || t.getStatus() == TicketStatus.IN_PROGRESS
+                        || t.getStatus() == TicketStatus.COMPLETED) {
                     Node card = createTicketCard(t);
                     ticketsFlowPane.getChildren().add(card);
                 }
@@ -134,11 +137,16 @@ public class TicketManagementController {
         
         Button btnComplete = new Button("✔ I completed this");
         btnComplete.getStyleClass().add("ticket-btn-complete");
-        btnComplete.setOnAction(e -> markCompleted(t));
+        btnComplete.setOnAction(e -> openCompletionForm(e, t));
         
         buttons.getChildren().add(btnView);
-        if (tn.esprit.util.SessionManager.isLoggedIn()) {
+        if (tn.esprit.util.SessionManager.isLoggedIn() &&
+                (t.getStatus() == TicketStatus.PUBLISHED || t.getStatus() == TicketStatus.ASSIGNED)) {
             buttons.getChildren().add(btnComplete);
+        } else if (tn.esprit.util.SessionManager.isLoggedIn() && t.getStatus() == TicketStatus.IN_PROGRESS) {
+            Label submitted = new Label("Completion submitted for review");
+            submitted.setStyle("-fx-text-fill: #b45309; -fx-font-size: 12px; -fx-font-weight: bold;");
+            buttons.getChildren().add(submitted);
         }
 
         content.getChildren().addAll(title, loc, cardImg, desc, buttons);
@@ -156,12 +164,17 @@ public class TicketManagementController {
         return card;
     }
 
-    private void markCompleted(Ticket t) {
-        System.out.println("Marking ticket completed: " + t.getId());
-        t.setStatus(TicketStatus.COMPLETED);
-        t.setAchievedAt(java.time.LocalDateTime.now());
-        ticketService.update(t);
-        loadTicketData();
+    private void openCompletionForm(ActionEvent event, Ticket t) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/ticket/CompleteTicket.fxml"));
+            Parent root = loader.load();
+            CompleteTicketController controller = loader.getController();
+            controller.setTicket(t);
+            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+            stage.getScene().setRoot(root);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     @FXML

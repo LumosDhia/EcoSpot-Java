@@ -54,6 +54,7 @@ public class ArticlesManagementController {
     public void initialize() {
         User currentUser = tn.esprit.util.SessionManager.getCurrentUser();
         ngoMode = currentUser != null && "NGO".equalsIgnoreCase(currentUser.getRole());
+        tn.esprit.util.NavigationHistory.track(homeBtn, "/blog/ArticlesManagement.fxml");
         setupTables();
         loadData();
     }
@@ -311,6 +312,13 @@ public class ArticlesManagementController {
             stage.getScene().setRoot(root);
         } catch (IOException e) {
             e.printStackTrace();
+        }
+    }
+
+    @FXML
+    private void goBack(ActionEvent event) {
+        if (!tn.esprit.util.NavigationHistory.goBack(event)) {
+            goToDashboard(event);
         }
     }
 

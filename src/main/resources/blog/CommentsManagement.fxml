@@ -52,7 +52,7 @@
                     <children>
                         <HBox fx:id="adminHeaderBox" alignment="CENTER_LEFT" style="-fx-background-color: white; -fx-padding: 15 20; -fx-background-radius: 8; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.05), 8, 0, 0, 2);">
                             <children>
-                                <Button onAction="#goToDashboard" styleClass="nav-link-btn" text="← Back" />
+                                <Button onAction="#goBack" styleClass="nav-link-btn" text="← Back" />
                                 <Label fx:id="breadcrumbPrefixLabel" style="-fx-text-fill: #888; -fx-font-size: 14;" text="Admin › " />
                                 <Label fx:id="breadcrumbTitleLabel" style="-fx-text-fill: #333; -fx-font-size: 14; -fx-font-weight: bold;" text="Comments" />
                                 <Region HBox.hgrow="ALWAYS" />

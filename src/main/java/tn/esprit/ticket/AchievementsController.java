@@ -35,6 +35,7 @@ public class AchievementsController {
     @FXML
     public void initialize() {
         System.out.println("Achievements Screen Initialized");
+        tn.esprit.util.NavigationHistory.track(achievementsFlowPane, "/ticket/Achievements.fxml");
         
         // Session Management
         if (tn.esprit.util.SessionManager.isLoggedIn()) {
@@ -157,6 +158,13 @@ public class AchievementsController {
     @FXML
     private void goToDashboard(ActionEvent event) {
         navigate(event, "/user/Dashboard.fxml");
+    }
+
+    @FXML
+    private void goBack(ActionEvent event) {
+        if (!tn.esprit.util.NavigationHistory.goBack(event)) {
+            goToDashboard(event);
+        }
     }
 
     private void loadImageRobustly(String rawPath, javafx.scene.image.ImageView view) {

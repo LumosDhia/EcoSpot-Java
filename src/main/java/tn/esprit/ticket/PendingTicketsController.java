@@ -36,6 +36,7 @@ public class PendingTicketsController {
         if (SessionManager.isLoggedIn()) {
             userNameLabel.setText(SessionManager.getCurrentUser().getUsername());
         }
+        tn.esprit.util.NavigationHistory.track(ticketsListContainer, "/ticket/PendingTickets.fxml");
         loadPendingTickets();
     }
 
@@ -43,7 +44,7 @@ public class PendingTicketsController {
         ticketsListContainer.getChildren().clear();
 
         List<Ticket> pending = ticketService.getAll().stream()
-                .filter(t -> t.getStatus() == TicketStatus.PENDING)
+                .filter(t -> t.getStatus() == TicketStatus.PENDING || t.getStatus() == TicketStatus.IN_PROGRESS)
                 .collect(Collectors.toList());
 
         if (pending.isEmpty()) {
@@ -131,7 +132,37 @@ public class PendingTicketsController {
             }
         });
 
-        actions.getChildren().addAll(btnPublish, btnRefuse, spacer, revisionNoteInput, btnRevise);
+        if (t.getStatus() == TicketStatus.IN_PROGRESS) {
+            Label completionInfo = new Label("Completion proof submitted by user.");
+            completionInfo.setStyle("-fx-text-fill: #92400e; -fx-font-size: 13px; -fx-font-weight: bold;");
+
+            if (t.getCompletionMessage() != null && !t.getCompletionMessage().isBlank()) {
+                Label completionMessage = new Label("Message: " + t.getCompletionMessage());
+                completionMessage.setStyle("-fx-text-fill: #374151; -fx-font-size: 13px;");
+                completionMessage.setWrapText(true);
+                body.getChildren().add(completionMessage);
+            }
+
+            Button btnAcceptCompletion = new Button("✔ Accept completion");
+            btnAcceptCompletion.setStyle("-fx-background-color: #10b981; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand; -fx-padding: 8 20; -fx-background-radius: 4;");
+            btnAcceptCompletion.setOnAction(e -> {
+                t.setAchievedAt(java.time.LocalDateTime.now());
+                handleAction(t, TicketStatus.COMPLETED, null);
+            });
+
+            Button btnRejectCompletion = new Button("↺ Keep in tickets");
+            btnRejectCompletion.setStyle("-fx-background-color: #f59e0b; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand; -fx-padding: 8 20; -fx-background-radius: 4;");
+            btnRejectCompletion.setOnAction(e -> {
+                t.setAchievedAt(null);
+                t.setCompletionMessage(null);
+                t.setCompletionImage(null);
+                handleAction(t, TicketStatus.PUBLISHED, "Completion proof rejected by admin.");
+            });
+
+            actions.getChildren().addAll(completionInfo, spacer, btnRejectCompletion, btnAcceptCompletion);
+        } else {
+            actions.getChildren().addAll(btnPublish, btnRefuse, spacer, revisionNoteInput, btnRevise);
+        }
 
         row.getChildren().addAll(topInfo, body, actions);
         return row;
@@ -187,6 +218,13 @@ public class PendingTicketsController {
             stage.getScene().setRoot(root);
         } catch (IOException e) {
             e.printStackTrace();
+        }
+    }
+
+    @FXML
+    void goBack(ActionEvent event) {
+        if (!tn.esprit.util.NavigationHistory.goBack(event)) {
+            goToDashboard(event);
         }
     }
 }

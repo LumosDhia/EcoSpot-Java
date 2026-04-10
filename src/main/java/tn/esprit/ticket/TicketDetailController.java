@@ -57,11 +57,10 @@ public class TicketDetailController {
             authLinks.setManaged(true);
             userLinks.setVisible(false);
             userLinks.setManaged(false);
-            
-            // Hide completion box for guests
-            completionBox.setVisible(false);
-            completionBox.setManaged(false);
         }
+        // Completion submission must happen only from TicketManagement panel.
+        completionBox.setVisible(false);
+        completionBox.setManaged(false);
     }
 
     public void setTicket(Ticket t) {
@@ -131,16 +130,6 @@ public class TicketDetailController {
             ticketImageView.setVisible(false);
         }
 
-    }
-
-    @FXML
-    void handleComplete(ActionEvent event) {
-        if (currentTicket != null) {
-            currentTicket.setStatus(TicketStatus.COMPLETED);
-            currentTicket.setAchievedAt(java.time.LocalDateTime.now());
-            ticketService.update(currentTicket);
-            goToTickets(event);
-        }
     }
 
     @FXML

@@ -37,6 +37,7 @@ public class DashboardController {
     @FXML private FlowPane userCardsGrid;
 
     public void setUser(User user) {
+        tn.esprit.util.NavigationHistory.track(adminCardsGrid, "/user/Dashboard.fxml");
         String role = user.getRole();
         String username = user.getUsername();
 

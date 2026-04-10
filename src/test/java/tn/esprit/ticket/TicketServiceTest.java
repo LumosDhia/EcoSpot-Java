@@ -2,7 +2,14 @@ package tn.esprit.ticket;
 
 import org.junit.jupiter.api.*;
 import tn.esprit.services.TicketService;
+import tn.esprit.user.User;
+import tn.esprit.util.MyConnection;
+import tn.esprit.util.SessionManager;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -16,6 +23,9 @@ public class TicketServiceTest {
     @BeforeAll
     public static void setup() {
         ticketService = new TicketService();
+        String appUserEmail = getAnyAppUserEmail();
+        assertNotNull(appUserEmail, "Need at least one app_user row for TicketServiceTest.");
+        SessionManager.login(new User(1, "TicketServiceTester", appUserEmail, "", "USER"));
     }
 
     @Test
@@ -133,5 +143,18 @@ public class TicketServiceTest {
             ticketService.delete(dummy);
             System.out.println("Cleaned up unit test ticket id: " + testTicketId);
         }
+        SessionManager.logout();
+    }
+
+    private static String getAnyAppUserEmail() {
+        Connection cnx = MyConnection.getInstance().getCnx();
+        if (cnx == null) return null;
+        String req = "SELECT email FROM app_user LIMIT 1";
+        try (PreparedStatement ps = cnx.prepareStatement(req);
+             ResultSet rs = ps.executeQuery()) {
+            if (rs.next()) return rs.getString("email");
+        } catch (SQLException ignored) {
+        }
+        return null;
     }
 }
