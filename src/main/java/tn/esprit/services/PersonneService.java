@@ -81,4 +81,24 @@ public class PersonneService implements GlobalInterface<Personne> {
 
         return personnes;
     }
+
+    public Personne getByCin(String cin) {
+        String req = "SELECT * FROM `Personne` WHERE cin = ?";
+        try (PreparedStatement ps = cnx.prepareStatement(req)) {
+            ps.setString(1, cin);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                Personne p = new Personne();
+                p.setId(rs.getInt(1));
+                p.setAge(rs.getInt("age"));
+                p.setNom(rs.getString("nom"));
+                p.setPrenom(rs.getString("prenom"));
+                p.setCin(rs.getString("cin"));
+                return p;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
 }
