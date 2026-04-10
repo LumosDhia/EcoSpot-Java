@@ -25,6 +25,9 @@ import java.time.format.DateTimeFormatter;
 public class TicketManagementController {
 
     @FXML private FlowPane ticketsFlowPane;
+    @FXML private HBox authLinks;
+    @FXML private HBox userLinks;
+    @FXML private Button dashboardTopBtn;
 
     private final TicketService ticketService = new TicketService();
     private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
@@ -32,6 +35,29 @@ public class TicketManagementController {
     @FXML
     public void initialize() {
         System.out.println("Ticket Management Initialized - Loading Cards...");
+        
+        // Session Management
+        if (tn.esprit.util.SessionManager.isLoggedIn()) {
+            authLinks.setVisible(false);
+            authLinks.setManaged(false);
+            userLinks.setVisible(true);
+            userLinks.setManaged(true);
+            
+            tn.esprit.user.User user = tn.esprit.util.SessionManager.getCurrentUser();
+            if (user.getRole().equalsIgnoreCase("ADMIN")) {
+                dashboardTopBtn.setText("📊 Admin Dashboard");
+            } else if (user.getRole().equalsIgnoreCase("NGO")) {
+                dashboardTopBtn.setText("📊 NGO Dashboard");
+            } else {
+                dashboardTopBtn.setText("📊 My Dashboard");
+            }
+        } else {
+            authLinks.setVisible(true);
+            authLinks.setManaged(true);
+            userLinks.setVisible(false);
+            userLinks.setManaged(false);
+        }
+
         loadTicketData();
     }
 
@@ -57,13 +83,11 @@ public class TicketManagementController {
         VBox card = new VBox();
         card.getStyleClass().add("ticket-card");
 
-        // Top content (padding 20)
         VBox content = new VBox();
         content.getStyleClass().add("ticket-card-content");
         content.setSpacing(10);
         VBox.setVgrow(content, Priority.ALWAYS);
 
-        // Header: Badge & Domain
         HBox header = new HBox();
         header.setAlignment(Pos.CENTER_LEFT);
         
@@ -85,24 +109,19 @@ public class TicketManagementController {
         
         header.getChildren().addAll(badge, spacer, domain);
 
-        // Title
         Label title = new Label(t.getTitle());
         title.getStyleClass().add("ticket-title");
         title.setWrapText(true);
 
-        // Location
         Label loc = new Label("📍 " + t.getLocation());
         loc.getStyleClass().add("ticket-location");
         loc.setWrapText(true);
 
-        // Description
         Label desc = new Label(t.getDescription());
         desc.getStyleClass().add("ticket-description");
         desc.setWrapText(true);
-        // Limit description lines visually if needed, but wrap is fine for now
         desc.setMaxHeight(60); 
 
-        // Buttons
         HBox buttons = new HBox(10);
         buttons.setAlignment(Pos.CENTER_LEFT);
         buttons.setPadding(new Insets(10, 0, 0, 0));
@@ -118,7 +137,6 @@ public class TicketManagementController {
 
         content.getChildren().addAll(header, title, loc, desc, buttons);
 
-        // Footer
         VBox footer = new VBox();
         footer.getStyleClass().add("ticket-footer");
         String dateStr = t.getCreatedAt() != null ? t.getCreatedAt().format(formatter) : "Unknown Date";
@@ -136,8 +154,45 @@ public class TicketManagementController {
         t.setStatus(TicketStatus.COMPLETED);
         t.setAchievedAt(java.time.LocalDateTime.now());
         ticketService.update(t);
-        // Reload UI
         loadTicketData();
+    }
+
+    @FXML
+    private void goToDashboard(ActionEvent event) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/user/Dashboard.fxml"));
+            Parent root = loader.load();
+            tn.esprit.user.DashboardController controller = loader.getController();
+            if (controller != null) {
+                controller.setUser(tn.esprit.util.SessionManager.getCurrentUser());
+            }
+            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+            stage.getScene().setRoot(root);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @FXML
+    void handleLogout(ActionEvent event) {
+        tn.esprit.util.SessionManager.logout();
+        try {
+            Parent root = FXMLLoader.load(getClass().getResource("/home/Home.fxml"));
+            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+            stage.getScene().setRoot(root);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @FXML
+    private void goToLogin(ActionEvent event) {
+        navigate(event, "/user/Login.fxml");
+    }
+
+    @FXML
+    private void goToRegister(ActionEvent event) {
+        navigate(event, "/user/Register.fxml");
     }
 
     @FXML

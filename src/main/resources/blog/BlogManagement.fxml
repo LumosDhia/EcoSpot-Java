@@ -25,6 +25,23 @@
                 <padding><Insets bottom="8.0" left="20.0" right="20.0" top="8.0" /></padding>
                 <children>
                     <Label onMouseClicked="#goToHome" style="-fx-cursor: hand;" styleClass="top-bar-brand" text="🌿 EcoSpot" />
+                    
+                    <!-- Guest Links -->
+                    <HBox fx:id="authLinks" alignment="CENTER_LEFT" spacing="20.0">
+                        <children>
+                            <Button onAction="#goToLogin" styleClass="top-bar-link" text="🔑 Login" />
+                            <Button onAction="#goToRegister" styleClass="top-bar-link" text="👤 Register" />
+                        </children>
+                    </HBox>
+
+                    <!-- Logged-in Links -->
+                    <HBox fx:id="userLinks" alignment="CENTER_LEFT" managed="false" spacing="20.0" visible="false">
+                        <children>
+                            <Button fx:id="dashboardTopBtn" onAction="#goToDashboard" styleClass="top-bar-link" text="📊 Dashboard" />
+                            <Button onAction="#handleLogout" styleClass="top-bar-link" text="🚪 Logout" />
+                        </children>
+                    </HBox>
+
                     <Region HBox.hgrow="ALWAYS" />
                 </children>
             </HBox>

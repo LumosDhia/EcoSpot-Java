@@ -27,12 +27,37 @@ public class BlogManagementController {
     @FXML private ChoiceBox<String> sortChoice;
     @FXML private FlowPane articlesGrid;
     @FXML private Button homeBtn;
+    @FXML private HBox authLinks;
+    @FXML private HBox userLinks;
+    @FXML private Button dashboardTopBtn;
 
     private BlogService blogService = new BlogService();
     private List<Blog> allBlogs;
 
     @FXML
     public void initialize() {
+        // Session Management
+        if (tn.esprit.util.SessionManager.isLoggedIn()) {
+            authLinks.setVisible(false);
+            authLinks.setManaged(false);
+            userLinks.setVisible(true);
+            userLinks.setManaged(true);
+            
+            tn.esprit.user.User user = tn.esprit.util.SessionManager.getCurrentUser();
+            if (user.getRole().equalsIgnoreCase("ADMIN")) {
+                dashboardTopBtn.setText("📊 Admin Dashboard");
+            } else if (user.getRole().equalsIgnoreCase("NGO")) {
+                dashboardTopBtn.setText("📊 NGO Dashboard");
+            } else {
+                dashboardTopBtn.setText("📊 My Dashboard");
+            }
+        } else {
+            authLinks.setVisible(true);
+            authLinks.setManaged(true);
+            userLinks.setVisible(false);
+            userLinks.setManaged(false);
+        }
+
         // Init sort choices
         sortChoice.setItems(FXCollections.observableArrayList("Newest", "Oldest", "Most Viewed"));
         sortChoice.setValue("Newest");
@@ -132,10 +157,58 @@ public class BlogManagementController {
     }
 
     @FXML
+    private void goToDashboard(javafx.event.ActionEvent event) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/user/Dashboard.fxml"));
+            Parent root = loader.load();
+            tn.esprit.user.DashboardController controller = loader.getController();
+            if (controller != null) {
+                controller.setUser(tn.esprit.util.SessionManager.getCurrentUser());
+            }
+            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+            stage.getScene().setRoot(root);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @FXML
+    void handleLogout(javafx.event.ActionEvent event) {
+        tn.esprit.util.SessionManager.logout();
+        try {
+            Parent root = FXMLLoader.load(getClass().getResource("/home/Home.fxml"));
+            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+            stage.getScene().setRoot(root);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @FXML
+    private void goToLogin(javafx.event.ActionEvent event) {
+        navigate(event, "/user/Login.fxml");
+    }
+
+    @FXML
+    private void goToRegister(javafx.event.ActionEvent event) {
+        navigate(event, "/user/Register.fxml");
+    }
+
+    @FXML
     private void goToHome() {
         try {
             Parent root = FXMLLoader.load(getClass().getResource("/home/Home.fxml"));
             Stage stage = (Stage) searchField.getScene().getWindow();
+            stage.getScene().setRoot(root);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void navigate(javafx.event.ActionEvent event, String fxmlPath) {
+        try {
+            Parent root = FXMLLoader.load(getClass().getResource(fxmlPath));
+            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
             stage.getScene().setRoot(root);
         } catch (IOException e) {
             e.printStackTrace();
