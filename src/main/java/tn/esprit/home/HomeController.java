@@ -93,15 +93,8 @@ public class HomeController {
     }
 
     @FXML
-    private void goToHome() {
-        // Already home, or reload
-        try {
-            Parent root = FXMLLoader.load(getClass().getResource("/home/Home.fxml"));
-            Stage stage = (Stage) blogBtn.getScene().getWindow();
-            stage.getScene().setRoot(root);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+    private void goToHome(javafx.event.Event event) {
+        navigate(event, "/home/Home.fxml");
     }
 
     @FXML
