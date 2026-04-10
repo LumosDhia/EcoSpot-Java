@@ -111,3 +111,42 @@
     -fx-text-fill: #9ca3af;
     -fx-font-size: 11px;
 }
+/* ================================
+   ACHIEVEMENT CARD STYLES
+   ================================ */
+
+.achievement-card {
+    -fx-background-color: white;
+    -fx-border-color: #e5e7eb;
+    -fx-border-radius: 4;
+    -fx-background-radius: 4;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.05), 10, 0, 0, 4);
+    -fx-min-width: 320;
+    -fx-max-width: 320;
+    -fx-min-height: 180;
+}
+
+.achievement-card:hover {
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 15, 0, 0, 8);
+    -fx-translate-y: -2;
+}
+
+.achievement-header {
+    -fx-background-color: #2b8b54;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-padding: 8 15;
+    -fx-background-radius: 4 4 0 0;
+    -fx-border-radius: 4 4 0 0;
+    -fx-font-size: 13px;
+}
+
+.achievement-content {
+    -fx-padding: 15;
+}
+
+.achievement-completed-by {
+    -fx-text-fill: #6b7280;
+    -fx-font-size: 13px;
+    -fx-padding: 15 0 0 0;
+}

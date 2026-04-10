@@ -126,6 +126,11 @@ public class HomeController {
         }
     }
 
+    @FXML
+    private void goToAchievements(ActionEvent event) {
+        navigate(event, "/ticket/Achievements.fxml");
+    }
+
     private void navigate(ActionEvent event, String fxmlPath) {
         try {
             Parent root = FXMLLoader.load(getClass().getResource(fxmlPath));

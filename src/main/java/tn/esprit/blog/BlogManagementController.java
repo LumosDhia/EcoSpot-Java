@@ -206,7 +206,13 @@ public class BlogManagementController {
         }
     }
 
+    @FXML
+    private void goToAchievements(javafx.event.ActionEvent event) {
+        navigate(event, "/ticket/Achievements.fxml");
+    }
+
     private void navigate(javafx.event.ActionEvent event, String fxmlPath) {
+
         try {
             Parent root = FXMLLoader.load(getClass().getResource(fxmlPath));
             Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();

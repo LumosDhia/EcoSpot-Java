@@ -221,7 +221,13 @@ public class TicketManagementController {
         navigate(event, "/home/Home.fxml");
     }
 
+    @FXML
+    private void goToAchievements(ActionEvent event) {
+        navigate(event, "/ticket/Achievements.fxml");
+    }
+
     private void navigate(javafx.scene.input.MouseEvent event, String fxmlPath) {
+
         try {
             Parent root = FXMLLoader.load(getClass().getResource(fxmlPath));
             Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();

@@ -52,7 +52,7 @@
                     <Button styleClass="nav-link-btn" text="Home" />
                     <Button styleClass="nav-link-btn" text="Events" />
                     <Button onAction="#goToTickets" styleClass="nav-link-btn" text="🎟 Tickets" />
-                    <Button styleClass="nav-link-btn" text="Achievements" />
+                    <Button onAction="#goToAchievements" styleClass="nav-link-btn" text="Achievements" />
                     <Button fx:id="blogBtn" onAction="#goToBlog" styleClass="nav-btn-blog" text="Blog" />
                 </children>
             </HBox>
