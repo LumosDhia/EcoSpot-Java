@@ -137,6 +137,39 @@ public class HomeController {
     }
 
     @FXML
+    private void goToBlogFromIcon() {
+        try {
+            Parent root = FXMLLoader.load(getClass().getResource("/blog/BlogManagement.fxml"));
+            Stage stage = (Stage) (blogBtn != null ? blogBtn.getScene().getWindow() : dashboardTopBtn.getScene().getWindow());
+            stage.getScene().setRoot(root);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @FXML
+    private void goToEventsFromIcon() {
+        try {
+            Parent root = FXMLLoader.load(getClass().getResource("/event/EventManagement.fxml"));
+            Stage stage = (Stage) (blogBtn != null ? blogBtn.getScene().getWindow() : dashboardTopBtn.getScene().getWindow());
+            stage.getScene().setRoot(root);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @FXML
+    private void goToAchievementsFromIcon() {
+        try {
+            Parent root = FXMLLoader.load(getClass().getResource("/ticket/Achievements.fxml"));
+            Stage stage = (Stage) (blogBtn != null ? blogBtn.getScene().getWindow() : dashboardTopBtn.getScene().getWindow());
+            stage.getScene().setRoot(root);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @FXML
     private void goToEvents(ActionEvent event) {
         navigate(event, "/event/EventManagement.fxml");
     }

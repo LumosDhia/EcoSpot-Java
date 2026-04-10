@@ -266,6 +266,16 @@ public class EventFormController {
         switchScene("/event/EventManagement.fxml");
     }
 
+    @FXML
+    private void goToTickets() {
+        switchScene("/ticket/TicketManagement.fxml");
+    }
+
+    @FXML
+    private void goToAchievements() {
+        switchScene("/ticket/Achievements.fxml");
+    }
+
     private void switchScene(String fxmlPath) {
         try {
             Parent root = FXMLLoader.load(getClass().getResource(fxmlPath));

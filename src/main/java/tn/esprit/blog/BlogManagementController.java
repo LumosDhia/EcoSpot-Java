@@ -182,6 +182,16 @@ public class BlogManagementController {
     }
 
     @FXML
+    private void goToEvents(javafx.event.ActionEvent event) {
+        navigate(event, "/event/EventManagement.fxml");
+    }
+
+    @FXML
+    private void goToTickets(javafx.event.ActionEvent event) {
+        navigate(event, "/ticket/TicketManagement.fxml");
+    }
+
+    @FXML
     private void goToArticles(javafx.event.ActionEvent event) {
         navigate(event, "/blog/ArticlesManagement.fxml");
     }

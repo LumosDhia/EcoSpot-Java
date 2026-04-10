@@ -39,6 +39,11 @@ public class RegisterController {
     }
 
     @FXML
+    void goToHome(ActionEvent event) {
+        navigate(event, "/home/Home.fxml");
+    }
+
+    @FXML
     void goToLogin(ActionEvent event) {
         navigate(event, "/user/Login.fxml");
     }
@@ -73,6 +78,26 @@ public class RegisterController {
         errorLabel.setText(message);
         errorLabel.setVisible(true);
         errorLabel.setManaged(true);
+    }
+
+    @FXML
+    void goToEvents(ActionEvent event) {
+        navigate(event, "/event/EventManagement.fxml");
+    }
+
+    @FXML
+    void goToTickets(ActionEvent event) {
+        navigate(event, "/ticket/TicketManagement.fxml");
+    }
+
+    @FXML
+    void goToAchievements(ActionEvent event) {
+        navigate(event, "/ticket/Achievements.fxml");
+    }
+
+    @FXML
+    void goToBlog(ActionEvent event) {
+        navigate(event, "/blog/BlogManagement.fxml");
     }
 
     private void navigate(ActionEvent event, String fxmlPath) {

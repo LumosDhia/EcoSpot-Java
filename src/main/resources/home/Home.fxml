@@ -105,14 +105,14 @@
                             <Label styleClass="section-title" text="Explore Our Platform" />
                             <HBox alignment="CENTER" spacing="20.0">
                                 <children>
-                                    <VBox alignment="CENTER" spacing="12.0" styleClass="explore-card" HBox.hgrow="ALWAYS">
+                                    <VBox alignment="CENTER" onMouseClicked="#goToBlogFromIcon" spacing="12.0" style="-fx-cursor: hand;" styleClass="explore-card" HBox.hgrow="ALWAYS">
                                         <children>
                                             <Label style="-fx-font-size: 36px;" text="📰" />
                                             <Label styleClass="card-title" text="Blog" />
                                             <Label styleClass="card-text" text="Read the latest ecological news and articles." textAlignment="CENTER" wrapText="true" />
                                         </children>
                                     </VBox>
-                                    <VBox alignment="CENTER" spacing="12.0" styleClass="explore-card" HBox.hgrow="ALWAYS">
+                                    <VBox alignment="CENTER" onMouseClicked="#goToEventsFromIcon" spacing="12.0" style="-fx-cursor: hand;" styleClass="explore-card" HBox.hgrow="ALWAYS">
                                         <children>
                                             <Label style="-fx-font-size: 36px;" text="📅" />
                                             <Label styleClass="card-title" text="Events" />
@@ -126,7 +126,7 @@
                                             <Label styleClass="card-text" text="Get your passes for upcoming workshops." textAlignment="CENTER" wrapText="true" />
                                         </children>
                                     </VBox>
-                                    <VBox alignment="CENTER" spacing="12.0" styleClass="explore-card" HBox.hgrow="ALWAYS">
+                                    <VBox alignment="CENTER" onMouseClicked="#goToAchievementsFromIcon" spacing="12.0" style="-fx-cursor: hand;" styleClass="explore-card" HBox.hgrow="ALWAYS">
                                         <children>
                                             <Label style="-fx-font-size: 36px;" text="🏆" />
                                             <Label styleClass="card-title" text="Achievements" />

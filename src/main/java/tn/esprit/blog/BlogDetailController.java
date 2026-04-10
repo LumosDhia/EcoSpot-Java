@@ -226,6 +226,21 @@ public class BlogDetailController {
             e.printStackTrace();
         }
     }
+
+    @FXML
+    private void goToEvents(javafx.event.ActionEvent event) {
+        navigate(event, "/event/EventManagement.fxml");
+    }
+
+    @FXML
+    private void goToTickets(javafx.event.ActionEvent event) {
+        navigate(event, "/ticket/TicketManagement.fxml");
+    }
+
+    @FXML
+    private void goToAchievements(javafx.event.ActionEvent event) {
+        navigate(event, "/ticket/Achievements.fxml");
+    }
     @FXML
     private void handleMinimize() {
         tn.esprit.util.WindowUtils.minimize(heroTitle);
@@ -243,8 +258,12 @@ public class BlogDetailController {
 
     @FXML
     private void goToLogin(javafx.event.ActionEvent event) {
+        navigate(event, "/user/Login.fxml");
+    }
+
+    private void navigate(javafx.event.ActionEvent event, String fxmlPath) {
         try {
-            Parent root = FXMLLoader.load(getClass().getResource("/user/Login.fxml"));
+            Parent root = FXMLLoader.load(getClass().getResource(fxmlPath));
             Stage stage = (Stage) ((javafx.scene.Node) event.getSource()).getScene().getWindow();
             stage.getScene().setRoot(root);
         } catch (IOException e) {

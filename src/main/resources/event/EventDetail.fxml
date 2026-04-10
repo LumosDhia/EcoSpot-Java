@@ -30,8 +30,8 @@
                     <Region HBox.hgrow="ALWAYS" />
                     <Button onAction="#goToHome" styleClass="nav-link-btn" text="Home" />
                     <Button onAction="#goToEvents" styleClass="nav-link-btn-active" text="Events" />
-                    <Button styleClass="nav-link-btn" text="🎟 Tickets" />
-                    <Button styleClass="nav-link-btn" text="Achievements" />
+                    <Button onAction="#goToTickets" styleClass="nav-link-btn" text="🎟 Tickets" />
+                    <Button onAction="#goToAchievements" styleClass="nav-link-btn" text="Achievements" />
                     <Button onAction="#goToBlog" styleClass="nav-btn-blog" text="Blog" />
                 </children>
             </HBox>
@@ -90,7 +90,7 @@
                                     <children>
                                         
                                         <Region HBox.hgrow="ALWAYS" />
-                                        <Button prefHeight="45.0" prefWidth="150.0" styleClass="btn-hero-primary" text="Join Event" />
+                                        <Button onAction="#handleJoinEvent" prefHeight="45.0" prefWidth="150.0" styleClass="btn-hero-primary" text="Join Event" />
                                     </children>
                                 </HBox>
                             </children>

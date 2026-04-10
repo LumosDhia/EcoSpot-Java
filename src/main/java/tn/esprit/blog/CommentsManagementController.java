@@ -273,6 +273,21 @@ public class CommentsManagementController {
     }
 
     @FXML
+    private void goToEvents(javafx.event.ActionEvent event) {
+        navigate(event, "/event/EventManagement.fxml");
+    }
+
+    @FXML
+    private void goToTickets(javafx.event.ActionEvent event) {
+        navigate(event, "/ticket/TicketManagement.fxml");
+    }
+
+    @FXML
+    private void goToAchievements(javafx.event.ActionEvent event) {
+        navigate(event, "/ticket/Achievements.fxml");
+    }
+
+    @FXML
     private void goToDashboard(javafx.event.ActionEvent event) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/user/Dashboard.fxml"));

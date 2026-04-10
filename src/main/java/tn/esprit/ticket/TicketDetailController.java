@@ -187,6 +187,11 @@ public class TicketDetailController {
         navigate(event, "/ticket/Achievements.fxml");
     }
 
+    @FXML
+    private void goToEvents(ActionEvent event) {
+        navigate(event, "/event/EventManagement.fxml");
+    }
+
     private void navigate(ActionEvent event, String fxmlPath) {
 
         try {

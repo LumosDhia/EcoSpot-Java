@@ -386,6 +386,21 @@ public class ArticlesManagementController {
         navigate(event, "/blog/NewArticle.fxml");
     }
 
+    @FXML
+    private void goToEvents(ActionEvent event) {
+        navigate(event, "/event/EventManagement.fxml");
+    }
+
+    @FXML
+    private void goToTickets(ActionEvent event) {
+        navigate(event, "/ticket/TicketManagement.fxml");
+    }
+
+    @FXML
+    private void goToAchievements(ActionEvent event) {
+        navigate(event, "/ticket/Achievements.fxml");
+    }
+
     private void navigate(ActionEvent event, String fxmlPath) {
         try {
             Parent root = FXMLLoader.load(getClass().getResource(fxmlPath));

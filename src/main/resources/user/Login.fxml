@@ -26,7 +26,7 @@
                 <children>
                     <Label onMouseClicked="#goToHome" style="-fx-cursor: hand;" styleClass="top-bar-brand" text="🌿 EcoSpot" />
                     <Button styleClass="top-bar-link" text="🔑 Login" />
-                    <Button styleClass="top-bar-link" text="👤 Register" />
+                    <Button onAction="#goToRegister" styleClass="top-bar-link" text="👤 Register" />
                     <Region HBox.hgrow="ALWAYS" />
                     <Button styleClass="top-bar-link" text="🌐 EN ▾" />
                     <Button styleClass="top-bar-link" text="🏠" onAction="#goToHome" />
@@ -40,10 +40,10 @@
                     <Label onMouseClicked="#goToHome" style="-fx-cursor: hand;" styleClass="brand-name" text="EcoSpot" />
                     <Region HBox.hgrow="ALWAYS" />
                     <Button styleClass="nav-link-btn" text="Home" onAction="#goToHome" />
-                    <Button styleClass="nav-link-btn" text="Events" />
-                    <Button styleClass="nav-link-btn-active" text="🎟 Tickets" />
-                    <Button styleClass="nav-link-btn" text="Achievements" />
-                    <Button styleClass="nav-btn-blog" text="Blog" />
+                    <Button onAction="#goToEvents" styleClass="nav-link-btn" text="Events" />
+                    <Button onAction="#goToTickets" styleClass="nav-link-btn-active" text="🎟 Tickets" />
+                    <Button onAction="#goToAchievements" styleClass="nav-link-btn" text="Achievements" />
+                    <Button onAction="#goToBlog" styleClass="nav-btn-blog" text="Blog" />
                 </children>
             </HBox>
         </VBox>

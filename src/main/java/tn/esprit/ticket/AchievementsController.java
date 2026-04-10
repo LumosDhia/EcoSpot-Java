@@ -225,6 +225,11 @@ public class AchievementsController {
     private void goToTickets(ActionEvent event) {
         navigate(event, "/ticket/TicketManagement.fxml");
     }
+
+    @FXML
+    private void goToEvents(ActionEvent event) {
+        navigate(event, "/event/EventManagement.fxml");
+    }
     
     @FXML
     private void goToBlog(ActionEvent event) {

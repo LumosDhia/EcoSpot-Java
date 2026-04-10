@@ -37,9 +37,9 @@
                     <Label onMouseClicked="#goToHome" style="-fx-cursor: hand;" styleClass="brand-name" text="EcoSpot" />
                     <Region HBox.hgrow="ALWAYS" />
                     <Button onAction="#goToHome" styleClass="nav-link-btn" text="Home" />
-                    <Button styleClass="nav-link-btn" text="Events" />
-                    <Button styleClass="nav-link-btn" text="🎟 Tickets" />
-                    <Button styleClass="nav-link-btn" text="Achievements" />
+                    <Button onAction="#goToEvents" styleClass="nav-link-btn" text="Events" />
+                    <Button onAction="#goToTickets" styleClass="nav-link-btn" text="🎟 Tickets" />
+                    <Button onAction="#goToAchievements" styleClass="nav-link-btn" text="Achievements" />
                     <Button onAction="#goToBlog" styleClass="nav-btn-blog" text="Blog" />
 
                 </children>

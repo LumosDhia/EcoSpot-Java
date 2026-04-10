@@ -231,6 +231,21 @@ public class TicketManagementController {
         navigate(event, "/ticket/Achievements.fxml");
     }
 
+    @FXML
+    private void goToEvents(ActionEvent event) {
+        navigate(event, "/event/EventManagement.fxml");
+    }
+
+    @FXML
+    private void goToTickets(ActionEvent event) {
+        navigate(event, "/ticket/TicketManagement.fxml");
+    }
+
+    @FXML
+    private void goToBlog(ActionEvent event) {
+        navigate(event, "/blog/BlogManagement.fxml");
+    }
+
     private void loadImageRobustly(String rawPath, javafx.scene.image.ImageView view) {
         try {
             String imgPath = rawPath;

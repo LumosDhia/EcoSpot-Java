@@ -6,6 +6,7 @@ import javafx.scene.Parent;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.control.Alert;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import javafx.scene.layout.*;
@@ -129,6 +130,25 @@ public class EventDetailController {
     @FXML
     private void goToEvents() {
         switchScene("/event/EventManagement.fxml");
+    }
+
+    @FXML
+    private void goToTickets() {
+        switchScene("/ticket/TicketManagement.fxml");
+    }
+
+    @FXML
+    private void goToAchievements() {
+        switchScene("/ticket/Achievements.fxml");
+    }
+
+    @FXML
+    private void handleJoinEvent() {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Join event");
+        alert.setHeaderText(event != null ? event.getName() : "Event");
+        alert.setContentText("Thanks for your interest! Event participation flow will be available soon.");
+        alert.showAndWait();
     }
 
     private void switchScene(String fxmlPath) {
