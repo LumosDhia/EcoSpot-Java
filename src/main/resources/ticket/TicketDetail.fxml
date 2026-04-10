@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.net.URL?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+
+<BorderPane prefHeight="800.0" prefWidth="1000.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="tn.esprit.ticket.TicketDetailController">
+    <stylesheets>
+        <URL value="@../style.css" />
+        <URL value="@../ticket-style.css" />
+    </stylesheets>
+
+    <top>
+        <VBox>
+            <!-- ===== TOP DARK BAR ===== -->
+            <HBox alignment="CENTER_LEFT" spacing="20.0" styleClass="top-bar">
+                <padding><Insets bottom="8.0" left="20.0" right="20.0" top="8.0" /></padding>
+                <children>
+                    <Label onMouseClicked="#goToHome" style="-fx-cursor: hand;" styleClass="top-bar-brand" text="🌿 EcoSpot" />
+                    
+                    <!-- Guest Links -->
+                    <HBox fx:id="authLinks" alignment="CENTER_LEFT" spacing="20.0">
+                        <children>
+                            <Button onAction="#goToLogin" styleClass="top-bar-link" text="🔑 Login" />
+                            <Button onAction="#goToRegister" styleClass="top-bar-link" text="👤 Register" />
+                        </children>
+                    </HBox>
+
+                    <!-- Logged-in Links -->
+                    <HBox fx:id="userLinks" alignment="CENTER_LEFT" managed="false" spacing="20.0" visible="false">
+                        <children>
+                            <Button fx:id="dashboardTopBtn" onAction="#goToDashboard" styleClass="top-bar-link" text="📊 Dashboard" />
+                            <Button onAction="#handleLogout" styleClass="top-bar-link" text="🚪 Logout" />
+                        </children>
+                    </HBox>
+
+                    <Region HBox.hgrow="ALWAYS" />
+                </children>
+            </HBox>
+
+            <!-- ===== WHITE SECONDARY NAV ===== -->
+            <HBox alignment="CENTER_LEFT" spacing="10.0" styleClass="main-nav">
+                <padding><Insets bottom="12.0" left="20.0" right="20.0" top="12.0" /></padding>
+                <children>
+                    <Label onMouseClicked="#goToHome" style="-fx-cursor: hand;" styleClass="brand-name" text="EcoSpot" />
+                    <Region HBox.hgrow="ALWAYS" />
+                    <Button onAction="#goToHome" styleClass="nav-link-btn" text="Home" />
+                    <Button styleClass="nav-link-btn" text="Events" />
+                    <Button onAction="#goToTickets" styleClass="nav-link-btn-active" text="🎟 Tickets" />
+                    <Button onAction="#goToAchievements" styleClass="nav-link-btn" text="Achievements" />
+                    <Button onAction="#goToBlog" styleClass="nav-btn-blog" text="Blog" />
+                </children>
+            </HBox>
+        </VBox>
+    </top>
+
+    <center>
+        <ScrollPane fitToWidth="true" style="-fx-background-color: #f0f7f4; -fx-background: #f0f7f4;">
+            <content>
+                <VBox spacing="30.0" style="-fx-background-color: white; -fx-background-radius: 8;">
+                    <padding><Insets bottom="50.0" left="50.0" right="50.0" top="40.0" /></padding>
+                    <VBox.margin><Insets bottom="40.0" left="60.0" right="60.0" top="40.0" /></VBox.margin>
+                    <children>
+                        <!-- Back Button -->
+                        <Button onAction="#goToTickets" styleClass="nav-link-btn" text="← Back to all tickets" />
+
+                        <!-- Status & Priority Row -->
+                        <HBox spacing="15.0" alignment="CENTER_LEFT">
+                            <children>
+                                <Label fx:id="statusBadge" style="-fx-background-color: #dcfce7; -fx-text-fill: #166534; -fx-font-weight: bold; -fx-padding: 5 15; -fx-background-radius: 4;" text="Published" />
+                                <Label fx:id="priorityBadge" managed="false" visible="false" styleClass="ticket-badge-medium" text="MEDIUM" />
+                            </children>
+                        </HBox>
+
+                        <!-- Title -->
+                        <Label fx:id="titleLabel" styleClass="hero-title" style="-fx-text-fill: #1f2937; -fx-font-size: 32px;" text="Ticket Title" />
+
+                        <!-- Domain & Location -->
+                        <HBox spacing="20.0" alignment="CENTER_LEFT">
+                            <children>
+                                <Label fx:id="domainLabel" managed="false" visible="false" styleClass="ticket-domain" text="🏢 Domain: Waste" />
+                                <Label fx:id="locationLabel" styleClass="ticket-location" style="-fx-font-size: 14px;" text="📍 Location Name" />
+                            </children>
+                        </HBox>
+
+                        
+                        <!-- Created Date -->
+                        <Label fx:id="dateLabel" style="-fx-text-fill: #9ca3af; -fx-font-size: 14px;" text="Created 02/03/2026 19:15" />
+
+                        <!-- Description -->
+                        <Label fx:id="descriptionLabel" styleClass="ticket-description" style="-fx-font-size: 16px;" text="Full ticket description goes here..." wrapText="true" />
+
+                        <!-- Ticket Image -->
+                        <VBox alignment="CENTER" spacing="10.0">
+                            <children>
+                                <ImageView fx:id="ticketImageView" fitWidth="600.0" preserveRatio="true" />
+                            </children>
+                        </VBox>
+
+                        <Region prefHeight="20.0" />
+
+                        <!-- Action Row -->
+                        <HBox fx:id="completionBox" spacing="20.0" alignment="CENTER_LEFT" style="-fx-border-color: #e5e7eb transparent transparent transparent; -fx-padding: 30 0 0 0;">
+                            <children>
+                                <Button onAction="#handleComplete" styleClass="ticket-btn-complete" style="-fx-font-size: 14px; -fx-padding: 10 25;" text="I completed this" />
+                                <Label style="-fx-text-fill: #6b7280;" text="Submit proof that you completed this task." />
+                            </children>
+                        </HBox>
+                    </children>
+                </VBox>
+            </content>
+        </ScrollPane>
+    </center>
+</BorderPane>

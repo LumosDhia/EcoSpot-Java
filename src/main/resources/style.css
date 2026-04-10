@@ -534,3 +534,310 @@
 .btn-grad:hover {
     -fx-background-color: linear-gradient(to right, #1b4332, #2d6a4f);
 }
+
+/* ================================
+   LOGIN PAGE
+   ================================ */
+.login-container {
+    -fx-background-color: #f0f7f4;
+}
+
+.login-card {
+    -fx-background-color: white;
+    -fx-background-radius: 10;
+    -fx-padding: 40;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 20, 0, 0, 10);
+    -fx-min-width: 450;
+    -fx-max-width: 450;
+}
+
+.login-title {
+    -fx-text-fill: #1b4332;
+    -fx-font-size: 24px;
+    -fx-font-weight: bold;
+}
+
+.login-toggle-container {
+    -fx-background-color: #f0f0f0;
+    -fx-background-radius: 30;
+    -fx-padding: 5;
+}
+
+.login-toggle-btn {
+    -fx-background-color: transparent;
+    -fx-text-fill: #888;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-padding: 8 20;
+    -fx-background-radius: 25;
+    -fx-cursor: hand;
+}
+
+.login-toggle-btn-active {
+    -fx-background-color: #fca311;
+    -fx-text-fill: white;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-padding: 8 20;
+    -fx-background-radius: 25;
+}
+
+.field-label {
+    -fx-text-fill: #666;
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+}
+
+.login-input {
+    -fx-background-color: white;
+    -fx-border-color: #ddd;
+    -fx-border-radius: 4;
+    -fx-padding: 10;
+    -fx-font-size: 14px;
+}
+
+.login-input:focused {
+    -fx-border-color: #1b4332;
+}
+
+.forgot-link {
+    -fx-text-fill: #fca311;
+    -fx-font-size: 13px;
+    -fx-cursor: hand;
+}
+
+.forgot-link:hover {
+    -fx-underline: true;
+}
+
+.btn-signin {
+    -fx-background-color: #2d6a4f;
+    -fx-text-fill: white;
+    -fx-font-size: 15px;
+    -fx-font-weight: bold;
+    -fx-padding: 12;
+    -fx-background-radius: 4;
+    -fx-cursor: hand;
+}
+
+.btn-signin:hover {
+    -fx-background-color: #1b4332;
+}
+
+.btn-register-outline {
+    -fx-background-color: transparent;
+    -fx-text-fill: #fca311;
+    -fx-border-color: #fca311;
+    -fx-border-width: 0.5;
+    -fx-border-radius: 4;
+    -fx-padding: 10;
+    -fx-font-weight: bold;
+    -fx-cursor: hand;
+}
+
+.btn-register-outline:hover {
+    -fx-background-color: #fff9f0;
+}
+
+/* ================================
+   REGISTRATION PAGE
+   ================================ */
+.register-card {
+    -fx-background-color: white;
+    -fx-background-radius: 10;
+    -fx-padding: 30 40;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 20, 0, 0, 10);
+    -fx-min-width: 550;
+    -fx-max-width: 550;
+}
+
+.search-input-group {
+    -fx-border-color: #ddd;
+    -fx-border-radius: 4;
+    -fx-background-color: white;
+}
+
+.btn-search-city {
+    -fx-background-color: transparent;
+    -fx-text-fill: #fca311;
+    -fx-font-weight: bold;
+    -fx-cursor: hand;
+    -fx-padding: 5 15;
+}
+
+.search-results-area {
+    -fx-background-color: #e9ecef;
+    -fx-padding: 10;
+    -fx-background-radius: 4;
+}
+
+.terms-checkbox {
+    -fx-text-fill: #666;
+    -fx-font-size: 13px;
+}
+
+/* ================================
+   ADMIN DASHBOARD SIDEBAR
+   ================================ */
+.admin-sidebar {
+    -fx-background-color: #264d3e;
+    -fx-min-width: 250;
+    -fx-pref-width: 250;
+    -fx-padding: 20 0;
+}
+
+.sidebar-logo-text {
+    -fx-text-fill: white;
+    -fx-font-size: 24px;
+    -fx-font-weight: bold;
+    -fx-padding: 0 20 5 20;
+}
+
+.sidebar-role-text {
+    -fx-text-fill: #95d5b2;
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+    -fx-padding: 0 20 30 20;
+}
+
+.sidebar-item {
+    -fx-background-color: transparent;
+    -fx-text-fill: #d8f3dc;
+    -fx-alignment: CENTER_LEFT;
+    -fx-padding: 12 20;
+    -fx-font-size: 14px;
+    -fx-cursor: hand;
+    -fx-pref-width: 250;
+    -fx-background-radius: 0;
+}
+
+.sidebar-item:hover {
+    -fx-background-color: #2d6a4f;
+    -fx-text-fill: white;
+}
+
+.sidebar-item-active {
+    -fx-background-color: #52b788;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-background-radius: 8;
+    /* Optional margin to make it look like a floating button */
+    -fx-margin: 5 10;
+}
+
+.sidebar-separator {
+    -fx-padding: 15 0;
+}
+
+/* ================================
+   ADMIN CONTENT AREA
+   ================================ */
+.admin-content-bg {
+    -fx-background-color: #f4f7f6;
+}
+
+.admin-top-bar {
+    -fx-background-color: white;
+    -fx-padding: 10 30;
+    -fx-border-color: #eee;
+    -fx-border-width: 0 0 1 0;
+}
+
+.breadcrumb-text {
+    -fx-text-fill: #777;
+    -fx-font-size: 13px;
+}
+
+.admin-profile-name {
+    -fx-text-fill: #333;
+    -fx-font-weight: bold;
+    -fx-font-size: 14px;
+}
+
+.admin-profile-role {
+    -fx-text-fill: #888;
+    -fx-font-size: 12px;
+}
+
+.admin-dashboard-title {
+    -fx-text-fill: #555;
+    -fx-font-size: 16px;
+    -fx-padding: 20 30;
+}
+
+/* ================================
+   DASHBOARD CARDS GRID
+   ================================ */
+.dashboard-grid {
+    -fx-padding: 0 30 30 30;
+}
+
+.stat-card {
+    -fx-background-color: white;
+    -fx-background-radius: 12;
+    -fx-padding: 30;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.05), 10, 0, 0, 5);
+    -fx-cursor: hand;
+    -fx-pref-width: 280;
+    -fx-min-width: 250;
+}
+
+.stat-card:hover {
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 15, 0, 0, 8);
+    -fx-translate-y: -2;
+}
+
+.card-icon-container {
+    -fx-background-color: #f0f7f4;
+    -fx-background-radius: 50;
+    -fx-min-width: 60;
+    -fx-min-height: 60;
+    -fx-alignment: CENTER;
+}
+
+.card-title-lg {
+    -fx-text-fill: #1b4332;
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+}
+
+.card-subtitle {
+    -fx-text-fill: #888;
+    -fx-font-size: 13px;
+}
+
+.stat-badge {
+    -fx-background-color: #2d6a4f;
+    -fx-text-fill: white;
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+    -fx-padding: 2 8;
+    -fx-background-radius: 10;
+}
+
+/* User Management Table */
+.user-table-header {
+    -fx-border-color: #edf2f7;
+    -fx-border-width: 0 0 2 0;
+    -fx-padding: 0 20 10 20;
+}
+
+.table-header-cell {
+    -fx-text-fill: #718096;
+    -fx-font-weight: bold;
+    -fx-font-size: 13px;
+}
+
+.btn-create-user {
+    -fx-background-color: #e6fffa;
+    -fx-text-fill: #2d6a4f;
+    -fx-font-weight: bold;
+    -fx-background-radius: 10;
+    -fx-padding: 8 16;
+    -fx-cursor: hand;
+    -fx-border-color: #b2f5ea;
+}
+
+.btn-create-user:hover {
+    -fx-background-color: #b2f5ea;
+}

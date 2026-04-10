@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.net.URL?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+
+<BorderPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="tn.esprit.user.LoginController">
+    <stylesheets>
+        <URL value="@../style.css" />
+    </stylesheets>
+
+    <top>
+        <VBox>
+            <!-- ===== TOP DARK BAR ===== -->
+            <HBox alignment="CENTER_LEFT" styleClass="top-bar" spacing="20.0">
+                <padding><Insets left="20.0" right="20.0" top="8.0" bottom="8.0" /></padding>
+                <children>
+                    <Label onMouseClicked="#goToHome" style="-fx-cursor: hand;" styleClass="top-bar-brand" text="🌿 EcoSpot" />
+                    <Button styleClass="top-bar-link" text="🔑 Login" />
+                    <Button styleClass="top-bar-link" text="👤 Register" />
+                    <Region HBox.hgrow="ALWAYS" />
+                    <Button styleClass="top-bar-link" text="🌐 EN ▾" />
+                    <Button styleClass="top-bar-link" text="🏠" onAction="#goToHome" />
+                </children>
+            </HBox>
+
+            <!-- ===== WHITE SECONDARY NAV ===== -->
+            <HBox alignment="CENTER_LEFT" styleClass="main-nav" spacing="15.0">
+                <padding><Insets left="20.0" right="20.0" top="12.0" bottom="12.0" /></padding>
+                <children>
+                    <Label onMouseClicked="#goToHome" style="-fx-cursor: hand;" styleClass="brand-name" text="EcoSpot" />
+                    <Region HBox.hgrow="ALWAYS" />
+                    <Button styleClass="nav-link-btn" text="Home" onAction="#goToHome" />
+                    <Button styleClass="nav-link-btn" text="Events" />
+                    <Button styleClass="nav-link-btn-active" text="🎟 Tickets" />
+                    <Button styleClass="nav-link-btn" text="Achievements" />
+                    <Button styleClass="nav-btn-blog" text="Blog" />
+                </children>
+            </HBox>
+        </VBox>
+    </top>
+
+    <center>
+        <StackPane styleClass="login-container">
+            <children>
+                <VBox alignment="CENTER" spacing="30.0">
+                    <padding><Insets top="50.0" bottom="50.0" /></padding>
+                    <children>
+                        <VBox styleClass="login-card" spacing="25.0" alignment="CENTER">
+                            <children>
+                                <Label text="Sign in" styleClass="login-title" />
+                                <Label fx:id="errorLabel" style="-fx-text-fill: #e74c3c; -fx-font-size: 13px;" visible="false" managed="false" />
+                                
+
+                                <VBox spacing="10.0" alignment="CENTER_LEFT">
+                                    <children>
+                                        <Label text="Email" styleClass="field-label" />
+                                        <TextField fx:id="emailField" promptText="Enter your email" styleClass="login-input" />
+                                    </children>
+                                </VBox>
+
+                                <VBox spacing="10.0" alignment="CENTER_LEFT">
+                                    <children>
+                                        <Label text="Password" styleClass="field-label" />
+                                        <PasswordField fx:id="passwordField" promptText="Enter your password" styleClass="login-input" />
+
+                                    </children>
+                                </VBox>
+
+                                <VBox spacing="15.0">
+                                    <children>
+                                        <Button fx:id="signInBtn" text="Sign in" styleClass="btn-signin" maxWidth="Infinity" onAction="#handleLogin" />
+                                        <Button text="Register" styleClass="btn-register-outline" maxWidth="Infinity" onAction="#goToRegister" />
+                                    </children>
+                                </VBox>
+
+                                <VBox spacing="10.0" alignment="CENTER">
+                                    <padding><Insets top="10.0" /></padding>
+                                    <children>
+                                        <Label text="Quick Demo Access" style="-fx-text-fill: #a0aec0; -fx-font-size: 11px; -fx-font-weight: bold; -fx-text-transform: uppercase;" />
+                                        <HBox spacing="10.0" alignment="CENTER">
+                                            <children>
+                                                <Button text="Admin" onAction="#handleQuickAdmin" style="-fx-background-color: #f7fafc; -fx-border-color: #cbd5e0; -fx-text-fill: #4a5568; -fx-font-size: 11px; -fx-cursor: hand; -fx-background-radius: 4; -fx-border-radius: 4;" />
+                                                <Button text="NGO" onAction="#handleQuickNGO" style="-fx-background-color: #f7fafc; -fx-border-color: #cbd5e0; -fx-text-fill: #4a5568; -fx-font-size: 11px; -fx-cursor: hand; -fx-background-radius: 4; -fx-border-radius: 4;" />
+                                                <Button text="User" onAction="#handleQuickUser" style="-fx-background-color: #f7fafc; -fx-border-color: #cbd5e0; -fx-text-fill: #4a5568; -fx-font-size: 11px; -fx-cursor: hand; -fx-background-radius: 4; -fx-border-radius: 4;" />
+                                            </children>
+                                        </HBox>
+                                    </children>
+                                </VBox>
+                            </children>
+                        </VBox>
+                    </children>
+                </VBox>
+            </children>
+        </StackPane>
+    </center>
+</BorderPane>

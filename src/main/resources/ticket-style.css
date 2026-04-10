@@ -1,0 +1,152 @@
+/* ================================
+   TICKET CARD STYLES
+   ================================ */
+
+.ticket-card {
+    -fx-background-color: white;
+    -fx-background-radius: 4;
+    -fx-border-color: #e5e7eb;
+    -fx-border-radius: 4;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.05), 10, 0, 0, 4);
+    -fx-min-width: 380;
+    -fx-max-width: 380;
+    -fx-min-height: 250;
+}
+
+.ticket-card:hover {
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 15, 0, 0, 8);
+    -fx-translate-y: -2;
+}
+
+.ticket-card-content {
+    -fx-padding: 20;
+}
+
+.ticket-badge-low {
+    -fx-background-color: #dcfce7;
+    -fx-text-fill: #166534;
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+    -fx-padding: 4 12;
+    -fx-background-radius: 20;
+}
+
+.ticket-badge-medium {
+    -fx-background-color: #e0f2fe;
+    -fx-text-fill: #0369a1;
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+    -fx-padding: 4 12;
+    -fx-background-radius: 20;
+}
+
+.ticket-badge-urgent, .ticket-badge-high {
+    -fx-background-color: #fee2e2;
+    -fx-text-fill: #b91c1c;
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+    -fx-padding: 4 12;
+    -fx-background-radius: 20;
+}
+
+.ticket-domain {
+    -fx-text-fill: #6b7280;
+    -fx-font-size: 12px;
+}
+
+.ticket-title {
+    -fx-text-fill: #1f2937;
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+}
+
+.ticket-location {
+    -fx-text-fill: #6b7280;
+    -fx-font-size: 12px;
+}
+
+.ticket-description {
+    -fx-text-fill: #6b7280;
+    -fx-font-size: 14px;
+    -fx-line-spacing: 2;
+}
+
+.ticket-btn-view {
+    -fx-background-color: transparent;
+    -fx-text-fill: #f59e0b;
+    -fx-border-color: #fcd34d;
+    -fx-border-width: 1;
+    -fx-border-radius: 4;
+    -fx-padding: 4 12;
+    -fx-font-size: 12px;
+    -fx-cursor: hand;
+}
+
+.ticket-btn-view:hover {
+    -fx-background-color: #fffbeb;
+}
+
+.ticket-btn-complete {
+    -fx-background-color: #2d6a4f;
+    -fx-text-fill: white;
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+    -fx-border-radius: 4;
+    -fx-background-radius: 4;
+    -fx-padding: 5 12;
+    -fx-cursor: hand;
+}
+
+.ticket-btn-complete:hover {
+    -fx-background-color: #1b4332;
+}
+
+.ticket-footer {
+    -fx-border-color: #e5e7eb transparent transparent transparent;
+    -fx-padding: 10 20;
+    -fx-background-color: white;
+}
+
+.ticket-footer-text {
+    -fx-text-fill: #9ca3af;
+    -fx-font-size: 11px;
+}
+/* ================================
+   ACHIEVEMENT CARD STYLES
+   ================================ */
+
+.achievement-card {
+    -fx-background-color: white;
+    -fx-border-color: #e5e7eb;
+    -fx-border-radius: 4;
+    -fx-background-radius: 4;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.05), 10, 0, 0, 4);
+    -fx-min-width: 380;
+    -fx-max-width: 380;
+    -fx-min-height: 180;
+}
+
+.achievement-card:hover {
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 15, 0, 0, 8);
+    -fx-translate-y: -2;
+}
+
+.achievement-header {
+    -fx-background-color: #2b8b54;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-padding: 8 15;
+    -fx-background-radius: 4 4 0 0;
+    -fx-border-radius: 4 4 0 0;
+    -fx-font-size: 13px;
+}
+
+.achievement-content {
+    -fx-padding: 15;
+}
+
+.achievement-completed-by {
+    -fx-text-fill: #6b7280;
+    -fx-font-size: 13px;
+    -fx-padding: 15 0 0 0;
+}

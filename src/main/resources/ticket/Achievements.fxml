@@ -11,7 +11,7 @@
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
 
-<BorderPane prefHeight="800.0" prefWidth="1000.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="tn.esprit.ticket.TicketManagementController">
+<BorderPane prefHeight="800.0" prefWidth="1000.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="tn.esprit.ticket.AchievementsController">
     <stylesheets>
         <URL value="@../style.css" />
         <URL value="@../ticket-style.css" />
@@ -53,9 +53,9 @@
                     <Region HBox.hgrow="ALWAYS" />
                     <Button onAction="#goToHome" styleClass="nav-link-btn" text="Home" />
                     <Button styleClass="nav-link-btn" text="Events" />
-                    <Button styleClass="nav-link-btn-active" text="🎟 Tickets" />
-                    <Button onAction="#goToAchievements" styleClass="nav-link-btn" text="Achievements" />
-                    <Button styleClass="nav-btn-blog" text="Blog" />
+                    <Button onAction="#goToTickets" styleClass="nav-link-btn" text="🎟 Tickets" />
+                    <Button styleClass="nav-link-btn-active" text="Achievements" />
+                    <Button onAction="#goToBlog" styleClass="nav-btn-blog" text="Blog" />
                 </children>
             </HBox>
         </VBox>
@@ -71,19 +71,19 @@
                             <VBox alignment="CENTER" maxWidth="Infinity" spacing="18.0" styleClass="hero-overlay" VBox.vgrow="ALWAYS">
                                 <padding><Insets bottom="100.0" left="40.0" right="40.0" top="100.0" /></padding>
                                 <children>
-                                    <Label styleClass="hero-title" text="Community tickets" />
-                                    <Label alignment="CENTER" maxWidth="700.0" styleClass="hero-subtitle" text="Environmental issues and suggestions reported by the community. Pick one and complete it." textAlignment="CENTER" wrapText="true" />
-                                    <Label style="-fx-text-fill: #fca311; -fx-font-weight: bold; -fx-padding: 20 0 0 0;" text="Home / Tickets" />
+                                    <Label styleClass="hero-title" text="Achievements" />
+                                    <Label alignment="CENTER" maxWidth="700.0" styleClass="hero-subtitle" text="Tickets completed by the community and approved by our team." textAlignment="CENTER" wrapText="true" />
+                                    <Label style="-fx-text-fill: #fca311; -fx-font-weight: bold; -fx-padding: 20 0 0 0;" text="Home / Achievements" />
                                 </children>
                             </VBox>
                         </children>
                     </VBox>
 
-                    <!-- Tickets Cards Container -->
+                    <!-- Achievements Cards Container -->
                     <VBox alignment="CENTER" spacing="30.0" style="-fx-background-color: #f0f7f4;">
                         <padding><Insets bottom="60.0" left="60.0" right="60.0" top="50.0" /></padding>
                         <children>
-                            <FlowPane fx:id="ticketsFlowPane" hgap="25.0" vgap="25.0" alignment="CENTER" />
+                            <FlowPane fx:id="achievementsFlowPane" hgap="25.0" vgap="25.0" alignment="CENTER" />
                         </children>
                     </VBox>
                 </VBox>
