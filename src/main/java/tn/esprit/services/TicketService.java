@@ -31,7 +31,17 @@ public class TicketService implements GlobalInterface<Ticket> {
     }
 
     @Override
-    public void add(Ticket ticket) {}
+    public void add(Ticket ticket) {
+        String req = "INSERT INTO `ticket` (event_id, price, type) VALUES (?, ?, ?)";
+        try (PreparedStatement ps = cnx.prepareStatement(req)) {
+            ps.setInt(1, ticket.getEventId());
+            ps.setDouble(2, ticket.getPrice());
+            ps.setString(3, ticket.getType());
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
 
     @Override
     public void add2(Ticket ticket) {}
