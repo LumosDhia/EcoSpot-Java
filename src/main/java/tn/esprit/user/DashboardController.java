@@ -103,6 +103,26 @@ public class DashboardController {
     }
 
     @FXML
+    void goToMyTickets(ActionEvent event) {
+        navigate(event, "/ticket/MyTickets.fxml");
+    }
+
+    @FXML
+    void goToMyTicketsGrid(MouseEvent event) {
+        try {
+            System.out.println("Card clicked: My Tickets");
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/ticket/MyTickets.fxml"));
+            Parent root = loader.load();
+            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+            stage.getScene().setRoot(root);
+            System.out.println("Card navigation successful.");
+        } catch (IOException e) {
+            System.err.println("Card navigation failed.");
+            e.printStackTrace();
+        }
+    }
+
+    @FXML
     void handleCardClick(MouseEvent event) {
         try {
             System.out.println("Card clicked: User Management");

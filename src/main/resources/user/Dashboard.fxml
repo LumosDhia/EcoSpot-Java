@@ -55,7 +55,7 @@
                         <!-- USER SIDEBAR LINKS -->
                         <VBox fx:id="userSidebarLinks" spacing="5.0" visible="false" managed="false">
                             <children>
-                                <Button styleClass="sidebar-item" text="📋 My tickets" />
+                                <Button onAction="#goToMyTickets" styleClass="sidebar-item" text="📋 My tickets" />
                                 <Button styleClass="sidebar-item" text="➕ New ticket" />
                                 <Button styleClass="sidebar-item" text="🌐 Community tickets" />
                                 <Button styleClass="sidebar-item" text="🏆 Achievements" />
@@ -237,7 +237,7 @@
                                 <!-- USER CARDS GRID -->
                                 <FlowPane fx:id="userCardsGrid" hgap="25.0" vgap="25.0" styleClass="dashboard-grid" visible="false" managed="false">
                                     <children>
-                                        <VBox styleClass="stat-card">
+                                        <VBox onMouseClicked="#goToMyTicketsGrid" styleClass="stat-card">
                                             <children>
                                                 <StackPane alignment="TOP_RIGHT">
                                                     <children>
