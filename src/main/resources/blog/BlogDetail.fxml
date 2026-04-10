@@ -55,16 +55,10 @@
             <content>
                 <VBox spacing="0.0">
                     <children>
-                        <!-- ===== HERO SECTION ===== -->
-                        <StackPane prefHeight="300.0" styleClass="blog-detail-hero">
+                        <!-- ===== HERO SECTION (full width) ===== -->
+                        <VBox alignment="CENTER" spacing="0.0" styleClass="detail-hero-banner">
                            <children>
-                              <ImageView fitHeight="300.0" fitWidth="1000.0" pickOnBounds="true" preserveRatio="false">
-                                 <image>
-                                    <Image url="https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=1200" />
-                                 </image>
-                                 <style>-fx-opacity: 0.4;</style>
-                              </ImageView>
-                              <VBox alignment="CENTER" spacing="15.0" style="-fx-background-color: rgba(0,0,0,0.5);">
+                              <VBox alignment="CENTER" spacing="15.0" styleClass="detail-hero-overlay">
                                  <children>
                                     <Label fx:id="heroTitle" alignment="CENTER" styleClass="detail-hero-title" text="Innovating the Recycling Process for a Circular Economy" textAlignment="CENTER" wrapText="true" />
                                     <Label fx:id="heroDate" styleClass="detail-hero-date" text="Published on 18 days ago" />
@@ -81,7 +75,7 @@
                                  <padding><Insets bottom="40.0" left="60.0" right="60.0" top="40.0" /></padding>
                               </VBox>
                            </children>
-                        </StackPane>
+                        </VBox>
 
                         <!-- ===== MAIN CONTENT ===== -->
                         <VBox alignment="CENTER" spacing="30.0">
