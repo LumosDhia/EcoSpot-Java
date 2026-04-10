@@ -42,6 +42,13 @@ public class NewArticleController {
         
         loadCategories();
         loadTags();
+
+        // Fix ScrollPane jumping when space is pressed in HTMLEditor
+        contentEditor.addEventHandler(javafx.scene.input.KeyEvent.KEY_PRESSED, event -> {
+            if (event.getCode() == javafx.scene.input.KeyCode.SPACE) {
+                event.consume();
+            }
+        });
     }
 
     public void setEditArticle(Blog blog) {
