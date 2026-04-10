@@ -1,0 +1,177 @@
+/* ================================
+   TOP BAR (dark green strip)
+================================ */
+.top-bar {
+    -fx-background-color: #1b4332;
+}
+
+.top-bar-brand {
+    -fx-text-fill: white;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+}
+
+.top-bar-link {
+    -fx-text-fill: #d8f3dc;
+    -fx-background-color: transparent;
+    -fx-font-size: 13px;
+    -fx-cursor: hand;
+    -fx-padding: 4 10;
+}
+
+.top-bar-link:hover {
+    -fx-text-fill: white;
+}
+
+/* ================================
+   MAIN WHITE NAV BAR
+================================ */
+.main-nav {
+    -fx-background-color: white;
+    -fx-border-color: transparent transparent #e0e0e0 transparent;
+    -fx-border-width: 0 0 1 0;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.06), 8, 0, 0, 2);
+}
+
+.brand-name {
+    -fx-text-fill: #1b4332;
+    -fx-font-size: 28px;
+    -fx-font-weight: bold;
+}
+
+.nav-link-btn {
+    -fx-background-color: transparent;
+    -fx-text-fill: #333;
+    -fx-font-size: 14px;
+    -fx-cursor: hand;
+    -fx-padding: 6 14;
+    -fx-background-radius: 6;
+}
+
+.nav-link-btn:hover {
+    -fx-background-color: #f0f7f4;
+    -fx-text-fill: #1b4332;
+}
+
+.nav-link-btn-active {
+    -fx-background-color: #e9f5ee;
+    -fx-text-fill: #1b4332;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-cursor: hand;
+    -fx-padding: 6 14;
+    -fx-background-radius: 6;
+    -fx-border-color: #2d6a4f;
+    -fx-border-radius: 6;
+    -fx-border-width: 1.5;
+}
+
+.nav-btn-blog {
+    -fx-background-color: #1b4332;
+    -fx-text-fill: white;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-cursor: hand;
+    -fx-padding: 8 20;
+    -fx-background-radius: 6;
+}
+
+.nav-btn-blog:hover {
+    -fx-background-color: #2d6a4f;
+}
+
+/* ================================
+   HERO SECTION
+================================ */
+.hero-section {
+    -fx-background-color: #1f3a2a;
+    -fx-min-height: 260;
+}
+
+.hero-title {
+    -fx-text-fill: white;
+    -fx-font-size: 48px;
+    -fx-font-weight: bold;
+}
+
+.hero-subtitle {
+    -fx-text-fill: #d8f3dc;
+    -fx-font-size: 18px;
+}
+
+.btn-hero-primary {
+    -fx-background-color: #2d6a4f;
+    -fx-text-fill: white;
+    -fx-font-size: 15px;
+    -fx-font-weight: bold;
+    -fx-padding: 12 30;
+    -fx-background-radius: 6;
+    -fx-cursor: hand;
+}
+
+.btn-hero-primary:hover {
+    -fx-background-color: #40916c;
+}
+
+.btn-hero-outline {
+    -fx-background-color: transparent;
+    -fx-text-fill: white;
+    -fx-font-size: 15px;
+    -fx-font-weight: bold;
+    -fx-padding: 12 30;
+    -fx-background-radius: 6;
+    -fx-border-color: white;
+    -fx-border-radius: 6;
+    -fx-border-width: 2;
+    -fx-cursor: hand;
+}
+
+.btn-hero-outline:hover {
+    -fx-background-color: rgba(255,255,255,0.1);
+}
+
+/* ================================
+   ABOUT SECTION
+================================ */
+.about-section {
+    -fx-background-color: white;
+}
+
+.about-title {
+    -fx-text-fill: #1b4332;
+    -fx-font-size: 28px;
+    -fx-font-weight: bold;
+}
+
+.about-text {
+    -fx-text-fill: #444;
+    -fx-font-size: 15px;
+    -fx-line-spacing: 4;
+}
+
+/* ================================
+   EXPLORE CARDS
+================================ */
+.section-title {
+    -fx-text-fill: #1b4332;
+    -fx-font-size: 30px;
+    -fx-font-weight: bold;
+}
+
+.explore-card {
+    -fx-background-color: white;
+    -fx-background-radius: 10;
+    -fx-padding: 25 20;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.08), 12, 0, 0, 4);
+}
+
+.card-title {
+    -fx-text-fill: #1b4332;
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+}
+
+.card-text {
+    -fx-text-fill: #666;
+    -fx-font-size: 13px;
+}
