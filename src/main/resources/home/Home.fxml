@@ -5,9 +5,12 @@
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 
 <BorderPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
@@ -52,22 +55,31 @@
         <ScrollPane fitToWidth="true" style="-fx-background-color: #f0f7f4; -fx-background: #f0f7f4;">
             <content>
                 <VBox spacing="0.0">
-                    <!-- ===== HERO SECTION (dark green bg, no image for now) ===== -->
-                    <VBox alignment="CENTER" spacing="18.0" styleClass="hero-section">
-                        <padding><Insets top="80.0" bottom="80.0" left="40.0" right="40.0" /></padding>
+                    <!-- ===== HERO SECTION (forest background) ===== -->
+                    <StackPane>
                         <children>
-                            <Label text="Welcome to EcoSpot" styleClass="hero-title" />
-                            <Label text="Your place for environmental news, events, and action."
-                                   styleClass="hero-subtitle" wrapText="true" maxWidth="600.0" textAlignment="CENTER" />
-                            <HBox alignment="CENTER" spacing="15.0">
-                                <padding><Insets top="10.0" /></padding>
+                            <ImageView fitHeight="300.0" fitWidth="1000.0" pickOnBounds="true" preserveRatio="false" styleClass="hero-image">
+                                <image>
+                                    <Image url="https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=1920" />
+                                </image>
+                                <StackPane.alignment>CENTER</StackPane.alignment>
+                            </ImageView>
+                            <VBox alignment="CENTER" spacing="18.0" styleClass="hero-section-overlay">
+                                <padding><Insets bottom="80.0" left="40.0" right="40.0" top="80.0" /></padding>
                                 <children>
-                                    <Button fx:id="heroBlogBtn" onAction="#goToBlog" styleClass="btn-hero-primary" text="Blog" />
-                                    <Button text="Events" styleClass="btn-hero-outline" />
+                                    <Label styleClass="hero-title" text="Welcome to EcoSpot" />
+                                    <Label maxWidth="600.0" styleClass="hero-subtitle" text="Your place for environmental news, events, and action." textAlignment="CENTER" wrapText="true" />
+                                    <HBox alignment="CENTER" spacing="15.0">
+                                        <padding><Insets top="10.0" /></padding>
+                                        <children>
+                                            <Button fx:id="heroBlogBtn" onAction="#goToBlog" styleClass="btn-hero-primary" text="Blog" />
+                                            <Button styleClass="btn-hero-outline" text="Events" />
+                                        </children>
+                                    </HBox>
                                 </children>
-                            </HBox>
+                            </VBox>
                         </children>
-                    </VBox>
+                    </StackPane>
 
                     <!-- ===== ABOUT SECTION ===== -->
                     <HBox alignment="CENTER" spacing="60.0" styleClass="about-section">
