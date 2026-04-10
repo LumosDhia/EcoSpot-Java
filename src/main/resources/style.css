@@ -260,3 +260,123 @@
     -fx-background-radius: 6;
     -fx-padding: 5 10;
 }
+/* ================================
+   BLOG DETAIL PAGE
+   ================================ */
+.blog-detail-hero {
+    -fx-background-color: #1b4332;
+}
+
+.detail-hero-title {
+    -fx-text-fill: white;
+    -fx-font-size: 32px;
+    -fx-font-weight: bold;
+}
+
+.detail-hero-date {
+    -fx-text-fill: #b7e4c7;
+    -fx-font-size: 14px;
+}
+
+.detail-main-img {
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.15), 15, 0, 0, 8);
+    -fx-background-radius: 10;
+}
+
+.detail-article-title {
+    -fx-text-fill: #1b4332;
+    -fx-font-size: 28px;
+    -fx-font-weight: bold;
+}
+
+.detail-tag {
+    -fx-text-fill: #2d6a4f;
+    -fx-background-color: #e9f5ee;
+    -fx-padding: 4 10;
+    -fx-background-radius: 15;
+    -fx-font-size: 12px;
+}
+
+.detail-meta-row {
+    -fx-text-fill: #888;
+    -fx-font-size: 13px;
+}
+
+.detail-content-text {
+    -fx-fill: #333;
+    -fx-font-size: 15px;
+}
+
+.btn-reaction-like {
+    -fx-background-color: white;
+    -fx-text-fill: #2d6a4f;
+    -fx-border-color: #2d6a4f;
+    -fx-border-radius: 5;
+}
+
+.btn-reaction-like:hover {
+    -fx-background-color: #e9f5ee;
+}
+
+.btn-reaction-dislike {
+    -fx-background-color: white;
+    -fx-text-fill: #bc4749;
+    -fx-border-color: #bc4749;
+    -fx-border-radius: 5;
+}
+
+.btn-reaction-dislike:hover {
+    -fx-background-color: #fcebeb;
+}
+
+.btn-back-blog {
+    -fx-background-color: transparent;
+    -fx-text-fill: #2d6a4f;
+    -fx-border-color: #2d6a4f;
+    -fx-border-radius: 5;
+    -fx-padding: 8 20;
+}
+
+.btn-back-blog:hover {
+    -fx-background-color: #2d6a4f;
+    -fx-text-fill: white;
+}
+
+/* ================================
+   FOOTER
+   ================================ */
+.eco-footer {
+    -fx-background-color: #1b4332;
+}
+
+.footer-brand {
+    -fx-text-fill: white;
+    -fx-font-size: 24px;
+    -fx-font-weight: bold;
+}
+
+.footer-desc {
+    -fx-text-fill: #95d5b2;
+    -fx-font-size: 13px;
+}
+
+.footer-heading {
+    -fx-text-fill: white;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+}
+
+.footer-link {
+    -fx-text-fill: #95d5b2;
+    -fx-font-size: 13px;
+    -fx-cursor: hand;
+}
+
+.footer-link:hover {
+    -fx-text-fill: white;
+}
+
+.footer-copyright {
+    -fx-text-fill: #52b788;
+    -fx-font-size: 12px;
+}

@@ -7,6 +7,11 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.text.Text;
 
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.stage.Stage;
+import java.io.IOException;
 import java.time.format.DateTimeFormatter;
 
 public class BlogCardController {
@@ -49,5 +54,20 @@ public class BlogCardController {
         } else {
             excerptText.setText(content);
         }
+
+        readMoreBtn.setOnAction(event -> {
+            try {
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("/blog/BlogDetail.fxml"));
+                Parent root = loader.load();
+                
+                BlogDetailController detailController = loader.getController();
+                detailController.setArticle(blog);
+                
+                Stage stage = (Stage) readMoreBtn.getScene().getWindow();
+                stage.setScene(new Scene(root));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
     }
 }
