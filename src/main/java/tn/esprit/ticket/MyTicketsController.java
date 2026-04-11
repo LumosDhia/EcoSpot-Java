@@ -96,43 +96,16 @@ public class MyTicketsController {
         content.getStyleClass().add("ticket-content");
         VBox.setVgrow(content, Priority.ALWAYS);
 
-        // Header Row (Status Left, Priority Right)
-        HBox header = new HBox();
-        header.setAlignment(Pos.CENTER_LEFT);
-        
-        Label statusBadge = new Label("🏆 " + t.getStatus().name());
-        if (t.getStatus() == TicketStatus.COMPLETED) {
-            statusBadge.setStyle("-fx-background-color: #2b8b54; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 3 10; -fx-background-radius: 12; -fx-font-size: 10px;");
-        } else if (t.getStatus() == TicketStatus.PENDING) {
-            statusBadge.setStyle("-fx-background-color: #fce4ec; -fx-text-fill: #c2185b; -fx-font-weight: bold; -fx-padding: 3 10; -fx-background-radius: 12; -fx-font-size: 10px;");
-            statusBadge.setText("⌛ " + t.getStatus().name());
-        } else {
-            statusBadge.setStyle("-fx-background-color: #e3f2fd; -fx-text-fill: #1976d2; -fx-font-weight: bold; -fx-padding: 3 10; -fx-background-radius: 12; -fx-font-size: 10px;");
-            statusBadge.setText("ℹ " + t.getStatus().name());
-        }
-
-        Region headerSpacer = new Region();
-        HBox.setHgrow(headerSpacer, Priority.ALWAYS);
-
-        Label priorityBadge = new Label();
-        priorityBadge.setText("❗ " + t.getPriority().name());
-        if (t.getPriority() == TicketPriority.URGENT || t.getPriority() == TicketPriority.HIGH) {
-            priorityBadge.setStyle("-fx-background-color: #ffeded; -fx-text-fill: #e53e3e; -fx-font-weight: bold; -fx-padding: 3 10; -fx-background-radius: 12; -fx-font-size: 10px; -fx-border-color: #fed7d7; -fx-border-radius: 12;");
-        } else {
-            priorityBadge.setStyle("-fx-background-color: #e1effe; -fx-text-fill: #1e40af; -fx-font-weight: bold; -fx-padding: 3 10; -fx-background-radius: 12; -fx-font-size: 10px;");
-        }
-
-        header.getChildren().addAll(statusBadge, headerSpacer, priorityBadge);
-
         // Title
         Label title = new Label(t.getTitle());
         title.setStyle("-fx-font-weight: bold; -fx-font-size: 16px; -fx-text-fill: #1a4a38;");
         title.setWrapText(true);
 
-        // Domain & Location
-        Label loc = new Label("🗑 " + t.getDomain().name() + "  ·  📍 " + t.getLocation());
+        // Location
+        Label loc = new Label("📍 " + t.getLocation());
         loc.setStyle("-fx-text-fill: #6b7280; -fx-font-size: 12px;");
         loc.setWrapText(true);
+
 
         // Description
         Label desc = new Label(t.getDescription());
@@ -140,7 +113,7 @@ public class MyTicketsController {
         desc.setWrapText(true);
         desc.setMaxHeight(60); 
 
-        content.getChildren().addAll(header, title, loc, desc);
+        content.getChildren().addAll(title, loc, desc);
 
         // Footer Row
         HBox footer = new HBox();

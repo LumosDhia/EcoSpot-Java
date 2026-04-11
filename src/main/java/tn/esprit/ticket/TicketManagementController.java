@@ -89,27 +89,6 @@ public class TicketManagementController {
         content.setSpacing(10);
         VBox.setVgrow(content, Priority.ALWAYS);
 
-        HBox header = new HBox();
-        header.setAlignment(Pos.CENTER_LEFT);
-        
-        Label badge = new Label("ⓘ " + t.getPriority().name());
-        if (t.getPriority() == TicketPriority.LOW) {
-            badge.getStyleClass().add("ticket-badge-low");
-        } else if (t.getPriority() == TicketPriority.MEDIUM) {
-            badge.getStyleClass().add("ticket-badge-medium");
-        } else {
-            badge.getStyleClass().add("ticket-badge-high");
-        }
-        
-        Region spacer = new Region();
-        HBox.setHgrow(spacer, Priority.ALWAYS);
-        
-        String domainText = t.getDomain() != null ? t.getDomain().name() : "Other";
-        Label domain = new Label("🏢 Domain: " + domainText);
-        domain.getStyleClass().add("ticket-domain");
-        
-        header.getChildren().addAll(badge, spacer, domain);
-
         Label title = new Label(t.getTitle());
         title.getStyleClass().add("ticket-title");
         title.setWrapText(true);
@@ -163,7 +142,7 @@ public class TicketManagementController {
             buttons.getChildren().add(btnComplete);
         }
 
-        content.getChildren().addAll(header, title, loc, cardImg, desc, buttons);
+        content.getChildren().addAll(title, loc, cardImg, desc, buttons);
 
 
         VBox footer = new VBox();

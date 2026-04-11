@@ -75,7 +75,7 @@
                         <HBox spacing="15.0" alignment="CENTER_LEFT">
                             <children>
                                 <Label fx:id="statusBadge" style="-fx-background-color: #dcfce7; -fx-text-fill: #166534; -fx-font-weight: bold; -fx-padding: 5 15; -fx-background-radius: 4;" text="Published" />
-                                <Label fx:id="priorityBadge" styleClass="ticket-badge-medium" text="MEDIUM" />
+                                <Label fx:id="priorityBadge" managed="false" visible="false" styleClass="ticket-badge-medium" text="MEDIUM" />
                             </children>
                         </HBox>
 
@@ -85,10 +85,11 @@
                         <!-- Domain & Location -->
                         <HBox spacing="20.0" alignment="CENTER_LEFT">
                             <children>
-                                <Label fx:id="domainLabel" styleClass="ticket-domain" text="🏢 Domain: Waste" />
+                                <Label fx:id="domainLabel" managed="false" visible="false" styleClass="ticket-domain" text="🏢 Domain: Waste" />
                                 <Label fx:id="locationLabel" styleClass="ticket-location" style="-fx-font-size: 14px;" text="📍 Location Name" />
                             </children>
                         </HBox>
+
                         
                         <!-- Created Date -->
                         <Label fx:id="dateLabel" style="-fx-text-fill: #9ca3af; -fx-font-size: 14px;" text="Created 02/03/2026 19:15" />
