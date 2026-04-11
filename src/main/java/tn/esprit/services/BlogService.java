@@ -3,7 +3,9 @@ package tn.esprit.services;
 import tn.esprit.blog.Blog;
 import tn.esprit.blog.Category;
 import tn.esprit.interfaces.GlobalInterface;
+import tn.esprit.user.User;
 import tn.esprit.util.MyConnection;
+import tn.esprit.util.SessionManager;
 
 import java.sql.*;
 import java.time.LocalDateTime;
@@ -40,10 +42,9 @@ public class BlogService implements GlobalInterface<Blog> {
             String slug = blog.getTitle().toLowerCase().replace(" ", "-").replaceAll("[^a-z0-9-]", "");
             ps.setString(5, slug + "-" + System.currentTimeMillis() % 1000); // Simple uniqueness
             
-            // Use Admin ID as default for now
-            String adminId = "019CA478D1D377B4AE80630614A4A0FD";
-            ps.setString(6, adminId);
-            ps.setString(7, adminId);
+            String appUserIdHex = resolveCurrentAppUserIdHex();
+            ps.setString(6, appUserIdHex);
+            ps.setString(7, appUserIdHex);
             
             if (blog.getCategory() != null) {
                 ps.setInt(8, blog.getCategory().getId());
@@ -66,6 +67,25 @@ public class BlogService implements GlobalInterface<Blog> {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+    }
+
+    public String resolveCurrentOwnerEmail() {
+        User currentUser = SessionManager.getCurrentUser();
+        if (currentUser == null) {
+            return null;
+        }
+
+        String matchedEmail = findAppUserEmailByEmail(currentUser.getEmail());
+        if (matchedEmail != null) {
+            return matchedEmail;
+        }
+
+        String mappedDemoEmail = mapDemoEmailToAppUserEmail(currentUser.getEmail());
+        if (mappedDemoEmail != null) {
+            return mappedDemoEmail;
+        }
+
+        return null;
     }
 
     private void saveTags(int articleId, List<Tag> tags) {
@@ -148,7 +168,7 @@ public class BlogService implements GlobalInterface<Blog> {
 
     public List<Blog> search(String query) {
         List<Blog> blogs = new ArrayList<>();
-        String req = "SELECT a.*, c.name as category_name, u.firstname, u.roles " +
+        String req = "SELECT a.*, c.name as category_name, u.firstname, u.roles, u.email as author_email " +
                      "FROM article a " +
                      "LEFT JOIN category c ON a.category_id = c.id " +
                      "LEFT JOIN app_user u ON a.created_by_id = u.id " +
@@ -167,6 +187,7 @@ public class BlogService implements GlobalInterface<Blog> {
                 
                 String authorName = rs.getString("firstname");
                 String roles = rs.getString("roles");
+                b.setCreatedByEmail(rs.getString("author_email"));
                 if (authorName != null) {
                     if (roles != null && roles.contains("ROLE_ADMIN")) {
                         b.setAuthor("Admin [" + authorName + "]");
@@ -225,5 +246,90 @@ public class BlogService implements GlobalInterface<Blog> {
             e.printStackTrace();
         }
         return tags;
+    }
+
+    private String resolveCurrentAppUserIdHex() {
+        User currentUser = SessionManager.getCurrentUser();
+        if (currentUser != null && currentUser.getEmail() != null) {
+            String byEmail = findAppUserIdHexByEmail(currentUser.getEmail());
+            if (byEmail != null) {
+                return byEmail;
+            }
+        }
+
+        if (currentUser != null && currentUser.getRole() != null) {
+            String byRole = findAppUserIdHexByRole(currentUser.getRole());
+            if (byRole != null) {
+                return byRole;
+            }
+        }
+
+        return "019CA478D1D377B4AE80630614A4A0FD";
+    }
+
+    private String findAppUserIdHexByEmail(String email) {
+        String req = "SELECT HEX(id) AS id_hex FROM app_user WHERE email = ? LIMIT 1";
+        try (PreparedStatement ps = cnx.prepareStatement(req)) {
+            ps.setString(1, email);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return rs.getString("id_hex");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    private String findAppUserIdHexByRole(String role) {
+        String req = "SELECT HEX(id) AS id_hex FROM app_user WHERE roles LIKE ? LIMIT 1";
+        try (PreparedStatement ps = cnx.prepareStatement(req)) {
+            ps.setString(1, "%ROLE_" + role.toUpperCase() + "%");
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return rs.getString("id_hex");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    private String findAppUserEmailByEmail(String email) {
+        String req = "SELECT email FROM app_user WHERE email = ? LIMIT 1";
+        try (PreparedStatement ps = cnx.prepareStatement(req)) {
+            ps.setString(1, email);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return rs.getString("email");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    private String findAppUserEmailByRole(String role) {
+        String req = "SELECT email FROM app_user WHERE roles LIKE ? LIMIT 1";
+        try (PreparedStatement ps = cnx.prepareStatement(req)) {
+            ps.setString(1, "%ROLE_" + role.toUpperCase() + "%");
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return rs.getString("email");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    private String mapDemoEmailToAppUserEmail(String email) {
+        if (email == null || !email.endsWith("@mail.com")) {
+            return null;
+        }
+
+        String localPart = email.substring(0, email.indexOf('@'));
+        String candidate = localPart + "@ecospot.local";
+        return findAppUserEmailByEmail(candidate);
     }
 }

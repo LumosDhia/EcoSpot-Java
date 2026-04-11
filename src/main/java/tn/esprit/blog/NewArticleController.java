@@ -234,6 +234,11 @@ public class NewArticleController {
     }
 
     @FXML
+    private void goBackToArticles(javafx.event.ActionEvent event) {
+        goToArticles();
+    }
+
+    @FXML
     private void goToBlog() {
         try {
             Parent root = FXMLLoader.load(getClass().getResource("/blog/BlogManagement.fxml"));
@@ -253,5 +258,35 @@ public class NewArticleController {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    @FXML
+    private void goToDashboard(javafx.event.ActionEvent event) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/user/Dashboard.fxml"));
+            Parent root = loader.load();
+            tn.esprit.user.DashboardController controller = loader.getController();
+            if (controller != null) {
+                controller.setUser(tn.esprit.util.SessionManager.getCurrentUser());
+            }
+            Stage stage = (Stage) ((javafx.scene.Node) event.getSource()).getScene().getWindow();
+            stage.getScene().setRoot(root);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+    @FXML
+    private void handleMinimize() {
+        tn.esprit.util.WindowUtils.minimize(titleField);
+    }
+
+    @FXML
+    private void handleMaximize() {
+        tn.esprit.util.WindowUtils.toggleFullScreen(titleField);
+    }
+
+    @FXML
+    private void handleClose() {
+        tn.esprit.util.WindowUtils.close(titleField);
     }
 }

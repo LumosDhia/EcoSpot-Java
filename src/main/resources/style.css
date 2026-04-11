@@ -12,7 +12,7 @@
 }
 
 .top-bar-link {
-    -fx-text-fill: #d8f3dc;
+    -fx-text-fill: white;
     -fx-background-color: transparent;
     -fx-font-size: 13px;
     -fx-cursor: hand;
@@ -20,7 +20,7 @@
 }
 
 .top-bar-link:hover {
-    -fx-text-fill: white;
+    -fx-text-fill: #40916c;
 }
 
 /* ================================
@@ -67,7 +67,7 @@
 }
 
 .nav-btn-blog {
-    -fx-background-color: #1b4332;
+    -fx-background-color: #2d6a4f;
     -fx-text-fill: white;
     -fx-font-size: 14px;
     -fx-font-weight: bold;
@@ -77,7 +77,11 @@
 }
 
 .nav-btn-blog:hover {
-    -fx-background-color: #2d6a4f;
+    -fx-background-color: #40916c;
+}
+
+.nav-btn-blog:pressed {
+    -fx-background-color: #1b4332;
 }
 
 /* ================================
@@ -244,6 +248,10 @@
 }
 
 .read-more-btn:hover {
+    -fx-background-color: #40916c;
+}
+
+.read-more-btn:pressed {
     -fx-background-color: #1b4332;
 }
 
@@ -361,7 +369,7 @@
    FOOTER
    ================================ */
 .eco-footer {
-    -fx-background-color: #1b4332;
+    -fx-background-color: white;
 }
 
 .footer-brand {
@@ -395,7 +403,6 @@
     -fx-text-fill: #52b788;
     -fx-font-size: 12px;
 }
-<<<<<<< HEAD
 
 /* ================================
    ADMIN ARTICLES STYLES
@@ -479,8 +486,12 @@
     -fx-text-fill: white;
 }
 .btn-primary:hover {
-    -fx-background-color: #1b4332;
+    -fx-background-color: #40916c;
     -fx-effect: dropshadow(three-pass-box, rgba(45,106,79,0.3), 10, 0, 0, 3);
+}
+
+.btn-primary:pressed {
+    -fx-background-color: #1b4332;
 }
 
 /* Secondary Amber/Orange Button */
@@ -622,6 +633,10 @@
 }
 
 .btn-signin:hover {
+    -fx-background-color: #40916c;
+}
+
+.btn-signin:pressed {
     -fx-background-color: #1b4332;
 }
 
@@ -796,6 +811,22 @@
     -fx-alignment: CENTER;
 }
 
+.dashboard-icon-container {
+    -fx-background-color: #eaf3ef;
+    -fx-background-radius: 999;
+    -fx-min-width: 56;
+    -fx-min-height: 56;
+    -fx-max-width: 56;
+    -fx-max-height: 56;
+    -fx-alignment: CENTER;
+}
+
+.dashboard-icon {
+    -fx-font-family: "Segoe Fluent Icons";
+    -fx-font-size: 26px;
+    -fx-text-fill: #2d6a4f;
+}
+
 .card-title-lg {
     -fx-text-fill: #1b4332;
     -fx-font-size: 18px;
@@ -851,9 +882,9 @@
     -fx-alignment: CENTER_RIGHT;
 }
 
-.win-btn {
+\.win-btn {
     -fx-background-color: transparent;
-    -fx-text-fill: white;
+    -fx-text-fill: #333333;
     -fx-font-size: 16px;
     -fx-font-weight: bold;
     -fx-padding: 5 10;
@@ -861,11 +892,12 @@
     -fx-background-radius: 4;
 }
 
-.win-btn:hover {
-    -fx-background-color: rgba(255, 255, 255, 0.1);
+\.win-btn:hover {
+    -fx-background-color: rgba(0, 0, 0, 0.1);
 }
 
 .win-btn-close:hover {
     -fx-background-color: #ff4d4d;
     -fx-text-fill: white;
 }
+

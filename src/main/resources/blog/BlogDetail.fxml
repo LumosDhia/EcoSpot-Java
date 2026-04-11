@@ -102,17 +102,29 @@
                                      <Label fx:id="commentsCountLabel" styleClass="section-title" text="Comments (0)" />
                                      <VBox fx:id="commentsContainer" spacing="15.0" />
                                      <Separator />
-                                     <VBox spacing="15.0">
+                                     <!-- Only for Logged In Users -->
+                                     <VBox fx:id="commentInputSection" spacing="15.0">
                                         <children>
                                            <Label styleClass="section-title" text="Leave a comment" />
                                            <TextField fx:id="commentAuthorField" prefHeight="40.0" promptText="Your name..." styleClass="modern-input" />
                                            <TextArea fx:id="commentArea" prefHeight="100.0" promptText="Write your comment here..." styleClass="modern-input" wrapText="true" />
+                                           <Label fx:id="commentErrorLabel" style="-fx-text-fill: #e63946; -fx-font-size: 12px;" visible="false" />
+                                           <Label fx:id="commentSuccessLabel" style="-fx-text-fill: #2d6a4f; -fx-font-size: 12px;" visible="false" />
                                            <HBox alignment="CENTER_RIGHT">
                                               <children>
                                                  <Button onAction="#handlePostComment" prefHeight="40.0" prefWidth="150.0" styleClass="btn-primary" text="Post Comment" />
                                               </children>
                                            </HBox>
                                         </children>
+                                     </VBox>
+
+                                     <!-- For Guests -->
+                                     <VBox fx:id="guestPromptSection" alignment="CENTER" managed="false" spacing="15.0" visible="false">
+                                         <children>
+                                             <Label style="-fx-font-size: 16px; -fx-text-fill: #666;" text="Want to join the discussion?" />
+                                             <Button onAction="#goToLogin" styleClass="btn-primary" text="🔑 Log in to comment" />
+                                         </children>
+                                         <padding><Insets bottom="20.0" top="20.0" /></padding>
                                      </VBox>
                                   </children>
                                </VBox>

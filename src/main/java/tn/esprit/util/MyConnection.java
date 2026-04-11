@@ -9,7 +9,7 @@ public class MyConnection {
     // DB properties
     final String URL = "jdbc:mysql://localhost:3306/projetdev";
     final String USR = "root";
-    final String PWD = "";
+    final String PWD = "root";
 
     // Attributes
     // 2. static instance

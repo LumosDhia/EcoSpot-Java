@@ -41,6 +41,7 @@
                     <Label onMouseClicked="#goToHome" style="-fx-cursor: hand;" styleClass="brand-name" text="EcoSpot" />
                     <Region HBox.hgrow="ALWAYS" />
                     <Button onAction="#goToHome" styleClass="nav-link-btn" text="Home" />
+                    <Button onAction="#goToDashboard" styleClass="nav-link-btn" text="Dashboard" />
                     <Button styleClass="nav-link-btn" text="Events" />
                     <Button styleClass="nav-link-btn" text="🎟 Tickets" />
                     <Button styleClass="nav-link-btn" text="Achievements" />
@@ -105,7 +106,7 @@
                                             </children>
                                         </VBox>
                                         <Button onAction="#saveArticle" maxWidth="Infinity" styleClass="btn, btn-primary" text="💾 Save Article" />
-                                        <Label onMouseClicked="#goToArticles" alignment="CENTER" maxWidth="Infinity" style="-fx-text-fill: #888; -fx-font-size: 13; -fx-cursor: hand;" text="Cancel and go back" />
+                                        <Button onAction="#goBackToArticles" maxWidth="Infinity" styleClass="btn-outline" text="← Back to My articles" />
                                     </children>
                                 </VBox>
 

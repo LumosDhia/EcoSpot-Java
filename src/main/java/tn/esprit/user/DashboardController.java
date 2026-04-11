@@ -1,15 +1,21 @@
 package tn.esprit.user;
 
+import javafx.animation.KeyFrame;
+import javafx.animation.KeyValue;
+import javafx.animation.Timeline;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.control.Label;
+import javafx.scene.effect.DropShadow;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 
 import java.io.IOException;
 
@@ -50,6 +56,7 @@ public class DashboardController {
             adminSidebarLinks.setManaged(true);
             adminCardsGrid.setVisible(true);
             adminCardsGrid.setManaged(true);
+            enableCardHoverAnimation(adminCardsGrid);
         } else if (role.equalsIgnoreCase("NGO")) {
             sidebarRoleLabel.setText("NGO");
             userSubRoleLabel.setText("Verified Citizen");
@@ -61,6 +68,7 @@ public class DashboardController {
             ngoSidebarLinks.setManaged(true);
             ngoCardsGrid.setVisible(true);
             ngoCardsGrid.setManaged(true);
+            enableCardHoverAnimation(ngoCardsGrid);
         } else {
             sidebarRoleLabel.setText("DASHBOARD");
             userSubRoleLabel.setText("Verified Citizen");
@@ -72,6 +80,38 @@ public class DashboardController {
             userSidebarLinks.setManaged(true);
             userCardsGrid.setVisible(true);
             userCardsGrid.setManaged(true);
+            enableCardHoverAnimation(userCardsGrid);
+        }
+    }
+
+    private void enableCardHoverAnimation(FlowPane grid) {
+        for (Node node : grid.getChildren()) {
+            if (!(node instanceof VBox)) continue;
+            VBox card = (VBox) node;
+            card.addEventHandler(MouseEvent.MOUSE_ENTERED, event -> animateCard(card, true));
+            card.addEventHandler(MouseEvent.MOUSE_EXITED, event -> animateCard(card, false));
+        }
+    }
+
+    private void animateCard(VBox card, boolean hover) {
+        double rotate = hover ? -2.0 : 0.0;
+        double translateY = hover ? -6.0 : 0.0;
+        double scale = hover ? 1.02 : 1.0;
+
+        Timeline timeline = new Timeline(
+            new KeyFrame(Duration.millis(150),
+                new KeyValue(card.rotateProperty(), rotate),
+                new KeyValue(card.translateYProperty(), translateY),
+                new KeyValue(card.scaleXProperty(), scale),
+                new KeyValue(card.scaleYProperty(), scale)
+            )
+        );
+        timeline.play();
+
+        if (hover) {
+            card.setEffect(new DropShadow(18, Color.rgb(45, 106, 79, 0.22)));
+        } else {
+            card.setEffect(new DropShadow(10, Color.rgb(0, 0, 0, 0.05)));
         }
     }
 
@@ -142,6 +182,23 @@ public class DashboardController {
     }
 
     @FXML
+    void goToAchievements(ActionEvent event) {
+        navigate(event, "/ticket/Achievements.fxml");
+    }
+
+    @FXML
+    void goToAchievementsGrid(MouseEvent event) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/ticket/Achievements.fxml"));
+            Parent root = loader.load();
+            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+            stage.getScene().setRoot(root);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @FXML
     void goToMyTicketsGrid(MouseEvent event) {
         try {
             System.out.println("Card clicked: My Tickets");
@@ -206,8 +263,49 @@ public class DashboardController {
     }
 
     @FXML
+    void goToEventManagementGrid(MouseEvent event) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/event/EventManagement.fxml"));
+            Parent root = loader.load();
+            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+            stage.getScene().setRoot(root);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @FXML
     void goToSponsorManagement(ActionEvent event) {
         navigate(event, "/event/SponsorManagement.fxml");
+    }
+
+    @FXML
+    void goToSponsorManagementGrid(MouseEvent event) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/event/SponsorManagement.fxml"));
+            Parent root = loader.load();
+            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+            stage.getScene().setRoot(root);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @FXML
+    void goToCommentsManagement(ActionEvent event) {
+        navigate(event, "/blog/CommentsManagement.fxml");
+    }
+
+    @FXML
+    void goToCommentsManagementGrid(MouseEvent event) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/blog/CommentsManagement.fxml"));
+            Parent root = loader.load();
+            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+            stage.getScene().setRoot(root);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
 

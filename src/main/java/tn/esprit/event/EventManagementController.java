@@ -189,16 +189,6 @@ public class EventManagementController {
     }
 
     @FXML
-    private void goToHome(javafx.scene.input.MouseEvent event) {
-        navigate(event, "/home/Home.fxml");
-    }
-
-    @FXML
-    private void goToHome(ActionEvent event) {
-        navigate(event, "/home/Home.fxml");
-    }
-
-    @FXML
     private void goToHome() {
         switchScene("/home/Home.fxml");
     }
@@ -208,11 +198,6 @@ public class EventManagementController {
         navigate(event, "/ticket/TicketManagement.fxml");
     }
     
-    @FXML
-    private void goToBlog(ActionEvent event) {
-        navigate(event, "/blog/BlogManagement.fxml");
-    }
-
     @FXML
     private void goToBlog() {
         switchScene("/blog/BlogManagement.fxml");

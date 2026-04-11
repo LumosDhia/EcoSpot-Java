@@ -33,7 +33,7 @@
                         <VBox fx:id="adminSidebarLinks" spacing="5.0" visible="false" managed="false">
                             <children>
                                 <Button onAction="#goToBlogManagement" styleClass="sidebar-item" text="📰 Articles" />
-                                <Button styleClass="sidebar-item" text="💬 Comments" />
+                                <Button onAction="#goToCommentsManagement" styleClass="sidebar-item" text="💬 Comments" />
                                 <Button onAction="#goToEventManagement" styleClass="sidebar-item" text="📅 Events" />
                                 <Button onAction="#goToPendingTickets" styleClass="sidebar-item" text="🎫 Pending tickets" />
                                 <Button styleClass="sidebar-item" text="📋 All tickets" />
@@ -47,8 +47,9 @@
                         <VBox fx:id="ngoSidebarLinks" spacing="5.0" visible="false" managed="false">
                             <children>
                                 <Button onAction="#goToBlogManagement" styleClass="sidebar-item" text="📰 My articles" />
-                                <Button styleClass="sidebar-item" text="💬 Comments" />
+                                <Button onAction="#goToCommentsManagement" styleClass="sidebar-item" text="💬 Comments" />
                                 <Button onAction="#goToEventManagement" styleClass="sidebar-item" text="📅 My events" />
+                                <Button onAction="#goToAchievements" styleClass="sidebar-item" text="🏆 My achievements" />
                             </children>
                         </VBox>
 
@@ -57,8 +58,8 @@
                             <children>
                                 <Button onAction="#goToMyTickets" styleClass="sidebar-item" text="📋 My tickets" />
                                 <Button onAction="#goToCreateTicket" styleClass="sidebar-item" text="➕ New ticket" />
-                                <Button styleClass="sidebar-item" text="🌐 Community tickets" />
-                                <Button styleClass="sidebar-item" text="🏆 Achievements" />
+                                <Button onAction="#goToPendingTickets" styleClass="sidebar-item" text="🌐 Community tickets" />
+                                <Button onAction="#goToAchievements" styleClass="sidebar-item" text="🏆 Achievements" />
                             </children>
                         </VBox>
                     </children>
@@ -114,7 +115,11 @@
                                             <children>
                                                 <VBox alignment="CENTER" spacing="15.0">
                                                     <children>
-                                                        <Label text="🕒" style="-fx-font-size: 30px; -fx-text-fill: #2d6a4f;" />
+                                                        <StackPane styleClass="dashboard-icon-container">
+                                                            <children>
+                                                                <Label styleClass="dashboard-icon" text="&#xE823;" />
+                                                            </children>
+                                                        </StackPane>
                                                         <Label styleClass="card-title-lg" text="Pending tickets" />
                                                         <Label styleClass="card-subtitle" text="Review, publish, refuse or send back tickets" textAlignment="CENTER" wrapText="true" />
                                                     </children>
@@ -125,7 +130,11 @@
                                             <children>
                                                 <VBox alignment="CENTER" spacing="15.0">
                                                     <children>
-                                                        <Label text="✔️" style="-fx-font-size: 30px; -fx-text-fill: #2d6a4f;" />
+                                                        <StackPane styleClass="dashboard-icon-container">
+                                                            <children>
+                                                                <Label styleClass="dashboard-icon" text="&#xE73E;" />
+                                                            </children>
+                                                        </StackPane>
                                                         <Label styleClass="card-title-lg" text="Completions" />
                                                         <Label styleClass="card-subtitle" text="Mark ticket completions as achieved" textAlignment="CENTER" wrapText="true" />
                                                     </children>
@@ -139,9 +148,48 @@
                                                         <Label styleClass="stat-badge" text="12" />
                                                         <VBox alignment="CENTER" spacing="15.0">
                                                             <children>
-                                                                <Label text="📰" style="-fx-font-size: 30px;" />
+                                                                <StackPane styleClass="dashboard-icon-container">
+                                                                    <children>
+                                                                        <Label styleClass="dashboard-icon" text="&#xE8A5;" />
+                                                                    </children>
+                                                                </StackPane>
                                                                 <Label styleClass="card-title-lg" text="Articles" />
                                                                 <Label styleClass="card-subtitle" text="Manage blog articles (all authors)" textAlignment="CENTER" wrapText="true" />
+                                                            </children>
+                                                        </VBox>
+                                                    </children>
+                                                </StackPane>
+                                            </children>
+                                        </VBox>
+                                        <VBox onMouseClicked="#goToCommentsManagementGrid" styleClass="stat-card">
+                                            <children>
+                                                <VBox alignment="CENTER" spacing="15.0">
+                                                    <children>
+                                                        <StackPane styleClass="dashboard-icon-container">
+                                                            <children>
+                                                                <Label styleClass="dashboard-icon" text="&#xE8BD;" />
+                                                            </children>
+                                                        </StackPane>
+                                                        <Label styleClass="card-title-lg" text="Comments" />
+                                                        <Label styleClass="card-subtitle" text="View and manage blog comments" textAlignment="CENTER" wrapText="true" />
+                                                    </children>
+                                                </VBox>
+                                            </children>
+                                        </VBox>
+                                        <VBox onMouseClicked="#goToEventManagementGrid" styleClass="stat-card">
+                                            <children>
+                                                <StackPane alignment="TOP_RIGHT">
+                                                    <children>
+                                                        <Label styleClass="stat-badge" text="5" />
+                                                        <VBox alignment="CENTER" spacing="15.0">
+                                                            <children>
+                                                                <StackPane styleClass="dashboard-icon-container">
+                                                                    <children>
+                                                                        <Label styleClass="dashboard-icon" text="&#xE787;" />
+                                                                    </children>
+                                                                </StackPane>
+                                                                <Label styleClass="card-title-lg" text="Events" />
+                                                                <Label styleClass="card-subtitle" text="Create and manage events" textAlignment="CENTER" wrapText="true" />
                                                             </children>
                                                         </VBox>
                                                     </children>
@@ -155,7 +203,11 @@
                                                         <Label styleClass="stat-badge" text="187" />
                                                         <VBox alignment="CENTER" spacing="15.0">
                                                             <children>
-                                                                <Label text="👥" style="-fx-font-size: 30px;" />
+                                                                <StackPane styleClass="dashboard-icon-container">
+                                                                    <children>
+                                                                        <Label styleClass="dashboard-icon" text="&#xE716;" />
+                                                                    </children>
+                                                                </StackPane>
                                                                 <Label styleClass="card-title-lg" text="Users" />
                                                                 <Label styleClass="card-subtitle" text="Create users and manage roles" textAlignment="CENTER" wrapText="true" />
                                                             </children>
@@ -164,23 +216,72 @@
                                                 </StackPane>
                                             </children>
                                         </VBox>
+                                        <VBox onMouseClicked="#goToSponsorManagementGrid" styleClass="stat-card">
+                                            <children>
+                                                <VBox alignment="CENTER" spacing="15.0">
+                                                    <children>
+                                                        <StackPane styleClass="dashboard-icon-container">
+                                                            <children>
+                                                                <Label styleClass="dashboard-icon" text="&#xE12B;" />
+                                                            </children>
+                                                        </StackPane>
+                                                        <Label styleClass="card-title-lg" text="Sponsors" />
+                                                        <Label styleClass="card-subtitle" text="Manage sponsors" textAlignment="CENTER" wrapText="true" />
+                                                    </children>
+                                                </VBox>
+                                            </children>
+                                        </VBox>
+                                        <VBox styleClass="stat-card">
+                                            <children>
+                                                <VBox alignment="CENTER" spacing="15.0">
+                                                    <children>
+                                                        <StackPane styleClass="dashboard-icon-container">
+                                                            <children>
+                                                                <Label styleClass="dashboard-icon" text="&#xE8FD;" />
+                                                            </children>
+                                                        </StackPane>
+                                                        <Label styleClass="card-title-lg" text="Categories" />
+                                                        <Label styleClass="card-subtitle" text="Manage blog categories" textAlignment="CENTER" wrapText="true" />
+                                                    </children>
+                                                </VBox>
+                                            </children>
+                                        </VBox>
+                                        <VBox styleClass="stat-card">
+                                            <children>
+                                                <VBox alignment="CENTER" spacing="15.0">
+                                                    <children>
+                                                        <StackPane styleClass="dashboard-icon-container">
+                                                            <children>
+                                                                <Label styleClass="dashboard-icon" text="&#xE8EC;" />
+                                                            </children>
+                                                        </StackPane>
+                                                        <Label styleClass="card-title-lg" text="Tags" />
+                                                        <Label styleClass="card-subtitle" text="Manage blog tags" textAlignment="CENTER" wrapText="true" />
+                                                    </children>
+                                                </VBox>
+                                            </children>
+                                        </VBox>
                                     </children>
                                 </FlowPane>
 
                                 <!-- NGO CARDS GRID -->
                                 <FlowPane fx:id="ngoCardsGrid" hgap="25.0" vgap="25.0" styleClass="dashboard-grid" visible="false" managed="false">
                                     <children>
-                                        <!-- Create article -->
-                                        <VBox onMouseClicked="#goToCreateArticleGrid" styleClass="stat-card">
+                                        <!-- My articles -->
+                                        <VBox onMouseClicked="#goToBlogManagementGrid" styleClass="stat-card">
                                             <children>
                                                 <StackPane alignment="TOP_RIGHT">
                                                     <children>
                                                         <Label styleClass="stat-badge" text="12" />
                                                         <VBox alignment="CENTER" spacing="15.0">
                                                             <children>
-                                                                <Label text="📰" style="-fx-font-size: 40px; -fx-text-fill: #2d6a4f; -fx-opacity: 0.7;" />
-                                                                <Label styleClass="card-title-lg" text="Create article" />
-                                                                <Label styleClass="card-subtitle" text="Publish a new blog article" textAlignment="CENTER" wrapText="true" />
+                                                                <StackPane styleClass="dashboard-icon-container">
+                                                                    <children>
+                                                                        <Label styleClass="dashboard-icon" text="&#xE8A5;" />
+                                                                    </children>
+                                                                </StackPane>
+                                                                <Label styleClass="card-title-lg" text="My articles" />
+                                                                <Label styleClass="card-subtitle" text="View and manage your own articles" textAlignment="CENTER" wrapText="true" />
                                                             </children>
                                                         </VBox>
                                                     </children>
@@ -188,12 +289,33 @@
                                             </children>
                                         </VBox>
 
-                                        <!-- Comments -->
-                                        <VBox styleClass="stat-card">
+                                        <!-- Create article -->
+                                        <VBox onMouseClicked="#goToCreateArticleGrid" styleClass="stat-card">
                                             <children>
                                                 <VBox alignment="CENTER" spacing="15.0">
                                                     <children>
-                                                        <Label text="💬" style="-fx-font-size: 40px; -fx-text-fill: #2d6a4f; -fx-opacity: 0.7;" />
+                                                        <StackPane styleClass="dashboard-icon-container">
+                                                            <children>
+                                                                <Label styleClass="dashboard-icon" text="&#xE710;" />
+                                                            </children>
+                                                        </StackPane>
+                                                        <Label styleClass="card-title-lg" text="Create article" />
+                                                        <Label styleClass="card-subtitle" text="Publish a new blog article" textAlignment="CENTER" wrapText="true" />
+                                                    </children>
+                                                </VBox>
+                                            </children>
+                                        </VBox>
+
+                                        <!-- Comments -->
+                                        <VBox onMouseClicked="#goToCommentsManagementGrid" styleClass="stat-card">
+                                            <children>
+                                                <VBox alignment="CENTER" spacing="15.0">
+                                                    <children>
+                                                        <StackPane styleClass="dashboard-icon-container">
+                                                            <children>
+                                                                <Label styleClass="dashboard-icon" text="&#xE8BD;" />
+                                                            </children>
+                                                        </StackPane>
                                                         <Label styleClass="card-title-lg" text="Comments" />
                                                         <Label styleClass="card-subtitle" text="View and flag comments" textAlignment="CENTER" wrapText="true" />
                                                     </children>
@@ -202,14 +324,18 @@
                                         </VBox>
 
                                         <!-- Create event -->
-                                        <VBox styleClass="stat-card">
+                                        <VBox onMouseClicked="#goToEventManagementGrid" styleClass="stat-card">
                                             <children>
                                                 <StackPane alignment="TOP_RIGHT">
                                                     <children>
                                                         <Label styleClass="stat-badge" text="5" />
                                                         <VBox alignment="CENTER" spacing="15.0">
                                                             <children>
-                                                                <Label text="📅" style="-fx-font-size: 40px; -fx-text-fill: #2d6a4f; -fx-opacity: 0.7;" />
+                                                                <StackPane styleClass="dashboard-icon-container">
+                                                                    <children>
+                                                                        <Label styleClass="dashboard-icon" text="&#xE787;" />
+                                                                    </children>
+                                                                </StackPane>
                                                                 <Label styleClass="card-title-lg" text="Create event" />
                                                                 <Label styleClass="card-subtitle" text="Add a new event" textAlignment="CENTER" wrapText="true" />
                                                             </children>
@@ -220,11 +346,15 @@
                                         </VBox>
 
                                         <!-- My Achievements -->
-                                        <VBox styleClass="stat-card">
+                                        <VBox onMouseClicked="#goToAchievementsGrid" styleClass="stat-card">
                                             <children>
                                                 <VBox alignment="CENTER" spacing="15.0">
                                                     <children>
-                                                        <Label text="🏆" style="-fx-font-size: 40px; -fx-text-fill: #2d6a4f; -fx-opacity: 0.7;" />
+                                                        <StackPane styleClass="dashboard-icon-container">
+                                                            <children>
+                                                                <Label styleClass="dashboard-icon" text="&#xE734;" />
+                                                            </children>
+                                                        </StackPane>
                                                         <Label styleClass="card-title-lg" text="My Achievements" />
                                                         <Label styleClass="card-subtitle" text="Review your history of successfully resolved tickets." textAlignment="CENTER" wrapText="true" />
                                                     </children>
@@ -244,7 +374,11 @@
                                                         <Label styleClass="stat-badge" text="9" />
                                                         <VBox alignment="CENTER" spacing="15.0">
                                                             <children>
-                                                                <Label text="🎫" style="-fx-font-size: 40px;" />
+                                                                <StackPane styleClass="dashboard-icon-container">
+                                                                    <children>
+                                                                        <Label styleClass="dashboard-icon" text="&#xEBE7;" />
+                                                                    </children>
+                                                                </StackPane>
                                                                 <Label styleClass="card-title-lg" text="My tickets" />
                                                                 <Label styleClass="card-subtitle" text="View and manage your submitted environmental tickets" textAlignment="CENTER" wrapText="true" />
                                                             </children>
@@ -257,9 +391,43 @@
                                             <children>
                                                 <VBox alignment="CENTER" spacing="15.0">
                                                     <children>
-                                                        <Label text="➕" style="-fx-font-size: 40px;" />
+                                                        <StackPane styleClass="dashboard-icon-container">
+                                                            <children>
+                                                                <Label styleClass="dashboard-icon" text="&#xE710;" />
+                                                            </children>
+                                                        </StackPane>
                                                         <Label styleClass="card-title-lg" text="Create a ticket" />
                                                         <Label styleClass="card-subtitle" text="Report an environmental issue or suggestion quickly" textAlignment="CENTER" wrapText="true" />
+                                                    </children>
+                                                </VBox>
+                                            </children>
+                                        </VBox>
+                                        <VBox onMouseClicked="#goToPendingTicketsGrid" styleClass="stat-card">
+                                            <children>
+                                                <VBox alignment="CENTER" spacing="15.0">
+                                                    <children>
+                                                        <StackPane styleClass="dashboard-icon-container">
+                                                            <children>
+                                                                <Label styleClass="dashboard-icon" text="&#xE81C;" />
+                                                            </children>
+                                                        </StackPane>
+                                                        <Label styleClass="card-title-lg" text="Community tickets" />
+                                                        <Label styleClass="card-subtitle" text="Browse and complete eco-tickets from the community" textAlignment="CENTER" wrapText="true" />
+                                                    </children>
+                                                </VBox>
+                                            </children>
+                                        </VBox>
+                                        <VBox onMouseClicked="#goToAchievementsGrid" styleClass="stat-card">
+                                            <children>
+                                                <VBox alignment="CENTER" spacing="15.0">
+                                                    <children>
+                                                        <StackPane styleClass="dashboard-icon-container">
+                                                            <children>
+                                                                <Label styleClass="dashboard-icon" text="&#xE734;" />
+                                                            </children>
+                                                        </StackPane>
+                                                        <Label styleClass="card-title-lg" text="Achievements" />
+                                                        <Label styleClass="card-subtitle" text="See completed tickets and celebrate community impact" textAlignment="CENTER" wrapText="true" />
                                                     </children>
                                                 </VBox>
                                             </children>

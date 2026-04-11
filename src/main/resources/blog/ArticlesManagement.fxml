@@ -37,6 +37,7 @@
                     <Label onMouseClicked="#goToHomeMouse" style="-fx-cursor: hand;" styleClass="brand-name" text="EcoSpot" />
                     <Region HBox.hgrow="ALWAYS" />
                     <Button fx:id="homeBtn" onAction="#goToHome" styleClass="nav-link-btn" text="Home" />
+                    <Button onAction="#goToDashboard" styleClass="nav-link-btn" text="Dashboard" />
                     <Button styleClass="nav-link-btn" text="Events" />
                     <Button styleClass="nav-link-btn" text="🎟 Tickets" />
                     <Button styleClass="nav-link-btn" text="Achievements" />
@@ -57,8 +58,9 @@
                         <!-- Header matching the screenshot Admin > Blog articles ... -->
                         <HBox alignment="CENTER_LEFT" style="-fx-background-color: white; -fx-padding: 15 20; -fx-background-radius: 8; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.05), 8, 0, 0, 2);">
                             <children>
-                                <Label style="-fx-text-fill: #888; -fx-font-size: 14;" text="Admin › " />
-                                <Label style="-fx-text-fill: #333; -fx-font-size: 14; -fx-font-weight: bold;" text="Blog articles" />
+                                <Button onAction="#goToDashboard" styleClass="nav-link-btn" text="← Back" />
+                                <Label fx:id="breadcrumbPrefixLabel" style="-fx-text-fill: #888; -fx-font-size: 14;" text="Admin › " />
+                                <Label fx:id="breadcrumbTitleLabel" style="-fx-text-fill: #333; -fx-font-size: 14; -fx-font-weight: bold;" text="Blog articles" />
                                 <Region HBox.hgrow="ALWAYS" />
                                 
                                 <HBox alignment="CENTER" spacing="15.0">
@@ -73,7 +75,7 @@
                         </HBox>
 
                         <!-- Official & Admin Articles Section -->
-                        <VBox style="-fx-background-color: white; -fx-background-radius: 8; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.05), 10, 0, 0, 2);" VBox.vgrow="ALWAYS">
+                        <VBox fx:id="adminSectionBox" style="-fx-background-color: white; -fx-background-radius: 8; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.05), 10, 0, 0, 2);" VBox.vgrow="ALWAYS">
                             <children>
                                 <!-- Section Header -->
                                 <HBox alignment="CENTER_LEFT" style="-fx-padding: 15 20; -fx-border-color: transparent transparent #e0e0e0 transparent; -fx-border-width: 0 0 1 0;">
@@ -100,13 +102,19 @@
                         </VBox>
 
                         <!-- NGO Articles Section -->
-                        <VBox style="-fx-background-color: white; -fx-background-radius: 8; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.05), 10, 0, 0, 2);" VBox.vgrow="ALWAYS">
+                        <VBox fx:id="ngoSectionBox" style="-fx-background-color: white; -fx-background-radius: 8; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.05), 10, 0, 0, 2);" VBox.vgrow="ALWAYS">
                             <children>
                                 <!-- Section Header -->
                                 <VBox style="-fx-padding: 15 20; -fx-border-color: transparent transparent #e0e0e0 transparent; -fx-border-width: 0 0 1 0;" spacing="3">
                                     <children>
-                                        <Label style="-fx-font-size: 16; -fx-font-weight: bold; -fx-text-fill: #555;" text="NGO articles" />
-                                        <Label style="-fx-font-size: 12; -fx-text-fill: #557999; -fx-font-weight: bold;" text="You can only view, delete, or return for revision. No editing or publishing." />
+                                        <HBox alignment="CENTER_LEFT">
+                                            <children>
+                                                <Label fx:id="ngoSectionTitleLabel" style="-fx-font-size: 16; -fx-font-weight: bold; -fx-text-fill: #555;" text="NGO articles" />
+                                                <Region HBox.hgrow="ALWAYS" />
+                                                <Button onAction="#goToNewArticle" styleClass="btn-new-article" text="✍ Write new article" />
+                                            </children>
+                                        </HBox>
+                                        <Label fx:id="ngoSectionSubtitleLabel" style="-fx-font-size: 12; -fx-text-fill: #557999; -fx-font-weight: bold;" text="You can only view, delete, or return for revision. No editing or publishing." />
                                     </children>
                                 </VBox>
                                 

@@ -40,11 +40,9 @@ public class UserService {
 
     private void loadUsersFromDb() {
         users.clear();
-        users.add(new User(-1, "Admin User", "admin@mail.com", "admin123", "ADMIN"));
-        users.add(new User(-2, "NGO Organization", "ngo@mail.com", "ngo123", "NGO"));
-        users.add(new User(-3, "Regular User", "user@mail.com", "user123", "USER"));
+        ensureQuickUsersExist();
 
-        String req = "SELECT * FROM `user` WHERE email NOT IN ('admin@mail.com', 'ngo@mail.com', 'user@mail.com')";
+        String req = "SELECT * FROM `user`";
         try {
             Statement st = cnx.createStatement();
             ResultSet rs = st.executeQuery(req);
@@ -57,6 +55,38 @@ public class UserService {
                     rs.getString("role")
                 ));
             }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void ensureQuickUsersExist() {
+        ensureQuickUser("Admin User", "admin@mail.com", "admin123", "ADMIN");
+        ensureQuickUser("NGO Organization", "ngo@mail.com", "ngo123", "NGO");
+        ensureQuickUser("Regular User", "user@mail.com", "user123", "USER");
+    }
+
+    private void ensureQuickUser(String username, String email, String password, String role) {
+        String selectReq = "SELECT id FROM `user` WHERE email = ?";
+        try (PreparedStatement selectPs = cnx.prepareStatement(selectReq)) {
+            selectPs.setString(1, email);
+            try (ResultSet rs = selectPs.executeQuery()) {
+                if (rs.next()) {
+                    return;
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return;
+        }
+
+        String insertReq = "INSERT INTO `user` (`username`, `email`, `password`, `role`) VALUES (?, ?, ?, ?)";
+        try (PreparedStatement insertPs = cnx.prepareStatement(insertReq)) {
+            insertPs.setString(1, username);
+            insertPs.setString(2, email);
+            insertPs.setString(3, password);
+            insertPs.setString(4, role);
+            insertPs.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
         }

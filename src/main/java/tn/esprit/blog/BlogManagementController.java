@@ -79,10 +79,6 @@ public class BlogManagementController {
 
     private void refreshData() {
         allBlogs = blogService.getAll();
-        // If DB is empty, add some mock data for demonstration as requested "like this"
-        if (allBlogs.isEmpty()) {
-            addMockData();
-        }
         filterAndDisplay();
     }
 
@@ -129,32 +125,6 @@ public class BlogManagementController {
         };
 
         new Thread(loadTask).start();
-    }
-
-    private void addMockData() {
-        Category cat1 = new Category(1, "Waste Management");
-        Category cat2 = new Category(2, "Climate");
-        Category cat3 = new Category(3, "Sustainability");
-        Category cat4 = new Category(4, "Conservation");
-
-        allBlogs.add(new Blog(1, "Innovating the Recycling Process for a Circular Economy", 
-            "Transitioning to a circular economy requires a fundamental change in how we perceive and handle waste...", 
-            "Admin User", "https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=800", java.time.LocalDateTime.now().minusDays(7), cat1));
-        
-        allBlogs.add(new Blog(2, "The Role of Reforestation in Carbon Sequestration", 
-            "Reforestation is one of the most effective natural solutions we have to combat climate change. By...", 
-            "Admin User", "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=800", java.time.LocalDateTime.now().minusDays(11), cat2));
-
-        allBlogs.add(new Blog(3, "Urban Gardening: From Balconies to Community Hubs", 
-            "The rise of urban gardening is transforming barren city rooftops and concrete balconies into...", 
-            "Alice User", "https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?w=800", java.time.LocalDateTime.now().minusDays(17), cat3));
-
-        allBlogs.add(new Blog(4, "Marine Ecosystems: Protecting the Ocean's Biodiversity", 
-            "Our oceans cover more than 70% of the Earth's surface and harbor an incredible diversity of life, yet they...", 
-            "Bob User", "https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=800", java.time.LocalDateTime.now().minusDays(20), cat4));
-            
-        allBlogs.get(2).setViews(585);
-        allBlogs.get(3).setViews(174);
     }
 
     @FXML

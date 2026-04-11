@@ -17,11 +17,6 @@
                 <children>
                     <Label onMouseClicked="#goToHome" style="-fx-cursor: hand;" styleClass="top-bar-brand" text="🌿 EcoSpot | Event Editor" />
                     <Region HBox.hgrow="ALWAYS" />
-                    <HBox alignment="CENTER_RIGHT" spacing="5.0">
-                        <Button onAction="#handleMinimize" styleClass="win-btn" text="—" />
-                        <Button onAction="#handleMaximize" styleClass="win-btn" text="▢" />
-                        <Button onAction="#handleClose" styleClass="win-btn, win-btn-close" text="✕" />
-                    </HBox>
                 </children>
             </HBox>
 

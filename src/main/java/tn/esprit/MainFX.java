@@ -5,7 +5,6 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
-import javafx.stage.StageStyle;
 
 import javafx.scene.image.Image;
 import java.io.IOException;
@@ -23,15 +22,11 @@ public class MainFX extends Application {
             Parent root = FXMLLoader.load(getClass().getResource("/home/Home.fxml"));
             Scene scene = new Scene(root, 1000, 800);
             primaryStage.setTitle("EcoSpot Desktop App");
-            primaryStage.initStyle(StageStyle.UNDECORATED);
             
             // Set App Icon
             primaryStage.getIcons().add(new Image(getClass().getResourceAsStream("/images/leaf.png")));
             
             primaryStage.setScene(scene);
-            
-            // Handle window dragging
-            tn.esprit.util.WindowUtils.makeDraggable(primaryStage, root);
             
             primaryStage.show();
 

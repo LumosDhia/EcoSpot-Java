@@ -74,6 +74,7 @@
                                     <Label styleClass="hero-title" text="Achievements" />
                                     <Label alignment="CENTER" maxWidth="700.0" styleClass="hero-subtitle" text="Tickets completed by the community and approved by our team." textAlignment="CENTER" wrapText="true" />
                                     <Label style="-fx-text-fill: #fca311; -fx-font-weight: bold; -fx-padding: 20 0 0 0;" text="Home / Achievements" />
+                                    <Button onAction="#goToDashboard" styleClass="btn-hero-outline" text="← Back to Dashboard" />
                                 </children>
                             </VBox>
                         </children>

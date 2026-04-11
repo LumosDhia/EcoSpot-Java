@@ -9,6 +9,7 @@ public class Blog {
     private String title;
     private String content;
     private String author;
+    private String createdByEmail;
     private String image;
     private LocalDateTime publishedAt;
     private Category category;
@@ -48,6 +49,8 @@ public class Blog {
     public void setContent(String content) { this.content = content; }
     public String getAuthor() { return author; }
     public void setAuthor(String author) { this.author = author; }
+    public String getCreatedByEmail() { return createdByEmail; }
+    public void setCreatedByEmail(String createdByEmail) { this.createdByEmail = createdByEmail; }
     public String getImage() { return image; }
     public void setImage(String image) { this.image = image; }
     public LocalDateTime getPublishedAt() { return publishedAt; }

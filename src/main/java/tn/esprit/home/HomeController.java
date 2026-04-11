@@ -128,7 +128,8 @@ public class HomeController {
     private void goToTicketsFromIcon() {
         try {
             Parent root = FXMLLoader.load(getClass().getResource("/ticket/TicketManagement.fxml"));
-            Stage stage = (Stage) blogBtn.getScene().getWindow();
+            // Safe fallback if blogBtn hasn't been accessed yet
+            Stage stage = (Stage) (blogBtn != null ? blogBtn.getScene().getWindow() : dashboardTopBtn.getScene().getWindow());
             stage.getScene().setRoot(root);
         } catch (IOException e) {
             e.printStackTrace();
@@ -138,17 +139,6 @@ public class HomeController {
     @FXML
     private void goToEvents(ActionEvent event) {
         navigate(event, "/event/EventManagement.fxml");
-    }
-
-    @FXML
-    private void goToEvents() {
-        try {
-            Parent root = FXMLLoader.load(getClass().getResource("/event/EventManagement.fxml"));
-            Stage stage = (Stage) blogBtn.getScene().getWindow();
-            stage.getScene().setRoot(root);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
     }
 
     @FXML

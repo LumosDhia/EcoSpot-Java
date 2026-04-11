@@ -20,7 +20,7 @@
 
     <top>
         <VBox>
-            <!-- ===== TOP DARK BAR ===== -->
+            <!-- ===== TOP DARK BAR (Brand & Auth) ===== -->
             <HBox alignment="CENTER_LEFT" spacing="20.0" styleClass="top-bar">
                 <padding><Insets bottom="8.0" left="20.0" right="20.0" top="8.0" /></padding>
                 <children>
@@ -43,11 +43,6 @@
                     </HBox>
 
                     <Region HBox.hgrow="ALWAYS" />
-                    <HBox alignment="CENTER_RIGHT" spacing="5.0">
-                        <Button onAction="#handleMinimize" styleClass="win-btn" text="—" />
-                        <Button onAction="#handleMaximize" styleClass="win-btn" text="▢" />
-                        <Button onAction="#handleClose" styleClass="win-btn, win-btn-close" text="✕" />
-                    </HBox>
                 </children>
             </HBox>
 

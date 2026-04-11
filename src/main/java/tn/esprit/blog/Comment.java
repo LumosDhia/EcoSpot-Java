@@ -8,6 +8,8 @@ public class Comment {
     private String authorName;
     private String content;
     private LocalDateTime createdAt;
+    private String articleTitle;
+    private boolean flagged;
 
     public Comment() {}
 
@@ -36,4 +38,8 @@ public class Comment {
     public void setContent(String content) { this.content = content; }
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+    public String getArticleTitle() { return articleTitle; }
+    public void setArticleTitle(String articleTitle) { this.articleTitle = articleTitle; }
+    public boolean isFlagged() { return flagged; }
+    public void setFlagged(boolean flagged) { this.flagged = flagged; }
 }
