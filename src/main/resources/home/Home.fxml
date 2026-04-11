@@ -55,16 +55,10 @@
         <ScrollPane fitToWidth="true" style="-fx-background-color: #f0f7f4; -fx-background: #f0f7f4;">
             <content>
                 <VBox spacing="0.0">
-                    <!-- ===== HERO SECTION (forest background) ===== -->
-                    <StackPane>
+                    <!-- ===== HERO SECTION (full width background) ===== -->
+                    <VBox alignment="CENTER" spacing="0.0" styleClass="hero-banner">
                         <children>
-                            <ImageView fitHeight="300.0" fitWidth="1000.0" pickOnBounds="true" preserveRatio="false" styleClass="hero-image">
-                                <image>
-                                    <Image url="https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=1920" />
-                                </image>
-                                <StackPane.alignment>CENTER</StackPane.alignment>
-                            </ImageView>
-                            <VBox alignment="CENTER" spacing="18.0" styleClass="hero-section-overlay">
+                            <VBox alignment="CENTER" spacing="18.0" styleClass="hero-overlay" maxWidth="Infinity" HBox.hgrow="ALWAYS">
                                 <padding><Insets bottom="80.0" left="40.0" right="40.0" top="80.0" /></padding>
                                 <children>
                                     <Label styleClass="hero-title" text="Welcome to EcoSpot" />
@@ -79,7 +73,7 @@
                                 </children>
                             </VBox>
                         </children>
-                    </StackPane>
+                    </VBox>
 
                     <!-- ===== ABOUT SECTION ===== -->
                     <HBox alignment="CENTER" spacing="60.0" styleClass="about-section">
