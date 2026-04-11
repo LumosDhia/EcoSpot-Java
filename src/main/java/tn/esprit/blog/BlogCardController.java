@@ -5,6 +5,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 
 import javafx.fxml.FXMLLoader;
@@ -16,6 +17,7 @@ import java.time.format.DateTimeFormatter;
 
 public class BlogCardController {
 
+    @FXML private VBox cardContainer;
     @FXML private ImageView articleImage;
     @FXML private Label categoryLabel;
     @FXML private Label dateLabel;
@@ -45,25 +47,32 @@ public class BlogCardController {
         authorLabel.setText("👤 " + (blog.getAuthor() != null ? blog.getAuthor() : "Anonymous"));
         
         String content = blog.getContent();
-        if (content != null && content.length() > 100) {
-            excerptText.setText(content.substring(0, 97) + "...");
-        } else {
-            excerptText.setText(content);
+        if (content != null) {
+            // Strip HTML tags for clean excerpt
+            String plainText = content.replaceAll("<[^>]*>", "").replaceAll("&nbsp;", " ").trim();
+            if (plainText.length() > 100) {
+                excerptText.setText(plainText.substring(0, 97) + "...");
+            } else {
+                excerptText.setText(plainText);
+            }
         }
 
-        readMoreBtn.setOnAction(event -> {
-            try {
-                FXMLLoader loader = new FXMLLoader(getClass().getResource("/blog/BlogDetail.fxml"));
-                Parent root = loader.load();
-                
-                BlogDetailController detailController = loader.getController();
-                detailController.setArticle(blog);
-                
-                Stage stage = (Stage) readMoreBtn.getScene().getWindow();
-                stage.getScene().setRoot(root);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        });
+        readMoreBtn.setOnAction(event -> openDetail(blog));
+        cardContainer.setOnMouseClicked(event -> openDetail(blog));
+    }
+
+    private void openDetail(Blog blog) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/blog/BlogDetail.fxml"));
+            Parent root = loader.load();
+            
+            BlogDetailController detailController = loader.getController();
+            detailController.setArticle(blog);
+            
+            Stage stage = (Stage) cardContainer.getScene().getWindow();
+            stage.getScene().setRoot(root);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }

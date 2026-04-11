@@ -90,12 +90,12 @@ public class BlogManagementController {
                     FXMLLoader loader = new FXMLLoader(getClass().getResource("/blog/BlogCard.fxml"));
                     Node card = loader.load();
                     BlogCardController controller = loader.getController();
-                    controller.setData(b);
+                    // Update UI and initialize listeners on the FX Thread
+                    Platform.runLater(() -> {
+                        controller.setData(b);
+                        articlesGrid.getChildren().add(card);
+                    });
                     
-                    // Update UI in chunks on the FX Thread
-                    Platform.runLater(() -> articlesGrid.getChildren().add(card));
-                    
-                    // Small sleep to ensure the UI stays responsive between card additions
                     Thread.sleep(5); 
                 }
                 return null;
