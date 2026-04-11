@@ -103,6 +103,23 @@ public class DashboardController {
     }
 
     @FXML
+    void goToCreateTicket(ActionEvent event) {
+        navigate(event, "/ticket/CreateTicket.fxml");
+    }
+
+    @FXML
+    void goToCreateTicketGrid(MouseEvent event) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/ticket/CreateTicket.fxml"));
+            Parent root = loader.load();
+            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+            stage.getScene().setRoot(root);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @FXML
     void goToMyTickets(ActionEvent event) {
         navigate(event, "/ticket/MyTickets.fxml");
     }

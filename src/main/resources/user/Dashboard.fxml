@@ -56,7 +56,7 @@
                         <VBox fx:id="userSidebarLinks" spacing="5.0" visible="false" managed="false">
                             <children>
                                 <Button onAction="#goToMyTickets" styleClass="sidebar-item" text="📋 My tickets" />
-                                <Button styleClass="sidebar-item" text="➕ New ticket" />
+                                <Button onAction="#goToCreateTicket" styleClass="sidebar-item" text="➕ New ticket" />
                                 <Button styleClass="sidebar-item" text="🌐 Community tickets" />
                                 <Button styleClass="sidebar-item" text="🏆 Achievements" />
                             </children>
@@ -253,7 +253,7 @@
                                                 </StackPane>
                                             </children>
                                         </VBox>
-                                        <VBox styleClass="stat-card">
+                                        <VBox onMouseClicked="#goToCreateTicketGrid" styleClass="stat-card">
                                             <children>
                                                 <VBox alignment="CENTER" spacing="15.0">
                                                     <children>
