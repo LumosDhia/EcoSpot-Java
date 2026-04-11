@@ -7,12 +7,10 @@
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
-<?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
-<?import javafx.scene.text.Font?>
 
 <BorderPane prefHeight="800.0" prefWidth="1000.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="tn.esprit.ticket.TicketManagementController">
     <stylesheets>
@@ -47,42 +45,26 @@
     </top>
 
     <center>
-        <VBox spacing="30.0" styleClass="admin-content-bg">
+        <VBox spacing="30.0" style="-fx-background-color: #f0f7f4;">
             <padding><Insets bottom="40.0" left="40.0" right="40.0" top="30.0" /></padding>
             <children>
-                <!-- Header with Action Button -->
-                <HBox alignment="CENTER_LEFT">
+                <VBox spacing="5.0">
                     <children>
-                        <VBox spacing="5.0">
-                            <children>
-                                <Label styleClass="about-title" text="🎟 Ticket Management" />
-                                <Label style="-fx-text-fill: #666;" text="Manage your event tickets and pricing" />
-                            </children>
-                        </VBox>
-                        <Region HBox.hgrow="ALWAYS" />
-                        <Button styleClass="btn-hero-primary" text="+ Create New Ticket" onAction="#handleCreateTicket" />
+                        <Label styleClass="about-title" text="🎟 Available Tickets" />
+                        <Label style="-fx-text-fill: #666;" text="Browse and manage all currently issued tickets." />
                     </children>
-                </HBox>
+                </VBox>
 
-                <!-- Search and Filters -->
-                <HBox spacing="15.0" alignment="CENTER_LEFT">
-                    <children>
-                        <TextField promptText="Search tickets..." styleClass="search-field" prefWidth="300.0" />
-                        <Region HBox.hgrow="ALWAYS" />
-                    </children>
-                </HBox>
-
-                <!-- Tickets List Container -->
+                <!-- Tickets Table Container -->
                 <VBox spacing="15.0" styleClass="explore-card" VBox.vgrow="ALWAYS">
                     <padding><Insets bottom="20.0" left="20.0" right="20.0" top="20.0" /></padding>
                     <children>
-                        <TableView fx:id="ticketTable" prefHeight="400.0" VBox.vgrow="ALWAYS">
+                        <TableView fx:id="ticketTable" prefHeight="450.0" VBox.vgrow="ALWAYS">
                             <columns>
-                                <TableColumn fx:id="colId" prefWidth="60.0" text="ID" />
-                                <TableColumn fx:id="colEvent" prefWidth="200.0" text="Event ID" />
-                                <TableColumn fx:id="colType" prefWidth="150.0" text="Type" />
+                                <TableColumn fx:id="colId" prefWidth="80.0" text="Ticket ID" />
+                                <TableColumn fx:id="colEvent" prefWidth="250.0" text="Event ID" />
+                                <TableColumn fx:id="colType" prefWidth="150.0" text="Tier / Type" />
                                 <TableColumn fx:id="colPrice" prefWidth="120.0" text="Price ($)" />
-                                <TableColumn fx:id="colActions" prefWidth="150.0" text="Actions" />
                             </columns>
                             <columnResizePolicy>
                                 <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
