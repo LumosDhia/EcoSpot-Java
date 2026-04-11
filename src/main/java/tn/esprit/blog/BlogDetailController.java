@@ -122,6 +122,8 @@ public class BlogDetailController {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
     @FXML
     private void goToArticles() {
         try {
