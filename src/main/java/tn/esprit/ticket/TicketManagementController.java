@@ -71,6 +71,26 @@ public class TicketManagementController {
                 typeComboBox.setValue(selectedTicket.getType());
             }
         });
+
+        // Search Filter
+        searchField.textProperty().addListener((observable, oldValue, newValue) -> {
+            filterTickets(newValue);
+        });
+    }
+
+    private void filterTickets(String query) {
+        if (query == null || query.isEmpty()) {
+            ticketTable.setItems(ticketList);
+            return;
+        }
+        
+        String lowerQuery = query.toLowerCase();
+        ObservableList<Ticket> filtered = ticketList.filtered(t -> 
+            String.valueOf(t.getEventId()).contains(query) || 
+            t.getType().toLowerCase().contains(lowerQuery) ||
+            String.valueOf(t.getPrice()).contains(query)
+        );
+        ticketTable.setItems(filtered);
     }
 
     private void loadTickets() {
