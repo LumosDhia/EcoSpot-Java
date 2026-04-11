@@ -47,10 +47,29 @@ public class TicketService implements GlobalInterface<Ticket> {
     public void add2(Ticket ticket) {}
 
     @Override
-    public void delete(Ticket ticket) {}
+    public void delete(Ticket ticket) {
+        String req = "DELETE FROM `ticket` WHERE id = ?";
+        try (PreparedStatement ps = cnx.prepareStatement(req)) {
+            ps.setInt(1, ticket.getId());
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
 
     @Override
-    public void update(Ticket ticket) {}
+    public void update(Ticket ticket) {
+        String req = "UPDATE `ticket` SET event_id = ?, price = ?, type = ? WHERE id = ?";
+        try (PreparedStatement ps = cnx.prepareStatement(req)) {
+            ps.setInt(1, ticket.getEventId());
+            ps.setDouble(2, ticket.getPrice());
+            ps.setString(3, ticket.getType());
+            ps.setInt(4, ticket.getId());
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
 
     @Override
     public List<Ticket> getAll() {
