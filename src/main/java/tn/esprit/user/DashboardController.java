@@ -103,6 +103,11 @@ public class DashboardController {
     }
 
     @FXML
+    void goToPendingTickets(ActionEvent event) {
+        navigate(event, "/ticket/PendingTickets.fxml");
+    }
+
+    @FXML
     void goToCreateTicket(ActionEvent event) {
         navigate(event, "/ticket/CreateTicket.fxml");
     }
