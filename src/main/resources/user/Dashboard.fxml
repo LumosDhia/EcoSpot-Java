@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.net.URL?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<BorderPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" 
+            fx:controller="tn.esprit.user.DashboardController">
+    <stylesheets>
+        <URL value="@../style.css" />
+    </stylesheets>
+
+    <top>
+        <VBox>
+            <!-- ===== TOP DARK BAR ===== -->
+            <HBox alignment="CENTER_LEFT" spacing="20.0" styleClass="top-bar">
+                <padding>
+                    <Insets bottom="8.0" left="20.0" right="20.0" top="8.0" />
+                </padding>
+                <children>
+                    <Label styleClass="top-bar-brand" text="🌿 EcoSpot" />
+                    <HBox alignment="CENTER_LEFT" spacing="10.0">
+                        <children>
+                            <Label text="📈" textFill="WHITE" />
+                            <Label fx:id="dashboardRoleLabel" styleClass="top-bar-brand" text="Dashboard" />
+                        </children>
+                    </HBox>
+                    <Region HBox.hgrow="ALWAYS" />
+                    <Button onAction="#handleLogout" styleClass="top-bar-link" text="⮑ Logout" />
+                </children>
+            </HBox>
+
+            <!-- ===== WHITE SECONDARY NAV ===== -->
+            <HBox alignment="CENTER_LEFT" spacing="10.0" styleClass="main-nav">
+                <padding>
+                    <Insets bottom="12.0" left="20.0" right="20.0" top="12.0" />
+                </padding>
+                <children>
+                    <Label styleClass="brand-name" text="EcoSpot" />
+                    <Region HBox.hgrow="ALWAYS" />
+                    <Button styleClass="nav-link-btn" text="Overview" />
+                    <Button styleClass="nav-link-btn" text="Profile" />
+                    <Button fx:id="userMgmtBtn" onAction="#goToUserManagement" styleClass="nav-link-btn" text="Members" visible="false" managed="false" />
+                    <Button styleClass="nav-link-btn-active" text="Statistics" />
+                </children>
+            </HBox>
+        </VBox>
+    </top>
+
+    <center>
+        <VBox alignment="CENTER" spacing="20.0" style="-fx-background-color: #f0f7f4;">
+            <children>
+                <Label fx:id="welcomeLabel" text="Welcome to your Dashboard">
+                    <font>
+                        <Font name="System Bold" size="32.0" />
+                    </font>
+                </Label>
+                <Label fx:id="roleDescriptionLabel" text="You have access to the platform tools." textFill="#555555">
+                    <font>
+                        <Font size="16.0" />
+                    </font>
+                </Label>
+                
+                <HBox alignment="CENTER" spacing="30.0">
+                    <padding><Insets top="40.0" /></padding>
+                    <children>
+                        <VBox alignment="CENTER" prefHeight="150.0" prefWidth="200.0" spacing="10.0" styleClass="explore-card">
+                            <children>
+                                <Label text="📊" style="-fx-font-size: 40px;" />
+                                <Label text="Analytics" styleClass="card-title" />
+                            </children>
+                        </VBox>
+                        <VBox alignment="CENTER" prefHeight="150.0" prefWidth="200.0" spacing="10.0" styleClass="explore-card">
+                            <children>
+                                <Label text="⚙️" style="-fx-font-size: 40px;" />
+                                <Label text="Settings" styleClass="card-title" />
+                            </children>
+                        </VBox>
+                        <VBox fx:id="adminCard" alignment="CENTER" prefHeight="150.0" prefWidth="200.0" spacing="10.0" styleClass="explore-card" visible="false" managed="false">
+                            <children>
+                                <Label text="🛡️" style="-fx-font-size: 40px;" />
+                                <Label text="Admin Panel" styleClass="card-title" />
+                            </children>
+                        </VBox>
+                    </children>
+                </HBox>
+            </children>
+        </VBox>
+    </center>
+</BorderPane>

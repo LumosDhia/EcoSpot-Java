@@ -58,19 +58,20 @@
                         <VBox styleClass="login-card" spacing="25.0" alignment="CENTER">
                             <children>
                                 <Label text="Sign in" styleClass="login-title" />
+                                <Label fx:id="errorLabel" style="-fx-text-fill: #e74c3c; -fx-font-size: 13px;" visible="false" managed="false" />
                                 
 
                                 <VBox spacing="10.0" alignment="CENTER_LEFT">
                                     <children>
                                         <Label text="Email" styleClass="field-label" />
-                                        <TextField promptText="Enter your email" styleClass="login-input" />
+                                        <TextField fx:id="emailField" promptText="Enter your email" styleClass="login-input" />
                                     </children>
                                 </VBox>
 
                                 <VBox spacing="10.0" alignment="CENTER_LEFT">
                                     <children>
                                         <Label text="Password" styleClass="field-label" />
-                                        <PasswordField promptText="Enter your password" styleClass="login-input" />
+                                        <PasswordField fx:id="passwordField" promptText="Enter your password" styleClass="login-input" />
                                         <HBox alignment="CENTER_RIGHT">
                                             <children>
                                                 <Label text="Forgot password?" styleClass="forgot-link" />
@@ -81,7 +82,7 @@
 
                                 <VBox spacing="15.0">
                                     <children>
-                                        <Button text="Sign in" styleClass="btn-signin" maxWidth="Infinity" />
+                                        <Button fx:id="signInBtn" text="Sign in" styleClass="btn-signin" maxWidth="Infinity" onAction="#handleLogin" />
                                         <Button text="Register" styleClass="btn-register-outline" maxWidth="Infinity" onAction="#goToRegister" />
                                     </children>
                                 </VBox>

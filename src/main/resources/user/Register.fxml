@@ -61,13 +61,14 @@
                                 <VBox alignment="CENTER" spacing="5.0">
                                     <children>
                                         <Label text="Register" styleClass="login-title" />
+                                        <Label fx:id="errorLabel" style="-fx-text-fill: #e74c3c; -fx-font-size: 13px;" visible="false" managed="false" />
                                     </children>
                                 </VBox>
 
                                 <VBox spacing="5.0">
                                     <children>
                                         <Label text="Email" styleClass="field-label" />
-                                        <TextField promptText="Email" styleClass="login-input" />
+                                        <TextField fx:id="emailField" promptText="Email" styleClass="login-input" />
                                     </children>
                                 </VBox>
 
@@ -76,13 +77,13 @@
                                         <VBox spacing="5.0" HBox.hgrow="ALWAYS">
                                             <children>
                                                 <Label text="First name" styleClass="field-label" />
-                                                <TextField promptText="First name" styleClass="login-input" />
+                                                <TextField fx:id="firstNameField" promptText="First name" styleClass="login-input" />
                                             </children>
                                         </VBox>
                                         <VBox spacing="5.0" HBox.hgrow="ALWAYS">
                                             <children>
                                                 <Label text="Last name" styleClass="field-label" />
-                                                <TextField promptText="Last name" styleClass="login-input" />
+                                                <TextField fx:id="lastNameField" promptText="Last name" styleClass="login-input" />
                                             </children>
                                         </VBox>
                                     </children>
@@ -91,53 +92,43 @@
                                 <VBox spacing="5.0">
                                     <children>
                                         <Label text="Address" styleClass="field-label" />
-                                        <TextField promptText="Address" styleClass="login-input" />
+                                        <TextField fx:id="addressField" promptText="Address" styleClass="login-input" />
                                     </children>
                                 </VBox>
 
                                 <VBox spacing="5.0">
                                     <children>
                                         <Label text="ZIP code" styleClass="field-label" />
-                                        <TextField promptText="e.g. 75001" styleClass="login-input" />
+                                        <TextField fx:id="zipCodeField" promptText="e.g. 75001" styleClass="login-input" />
                                     </children>
                                 </VBox>
 
                                 <VBox spacing="5.0">
                                     <children>
                                         <Label text="City" styleClass="field-label" />
-                                        <HBox styleClass="search-input-group" alignment="CENTER_LEFT">
-                                            <children>
-                                                <TextField promptText="Search for your city (e.g. Paris)" style="-fx-background-color: transparent;" HBox.hgrow="ALWAYS" />
-                                                <Button text="Search" styleClass="btn-search-city" />
-                                            </children>
-                                        </HBox>
-                                        <VBox styleClass="search-results-area">
-                                            <children>
-                                                <Label text="Search and select below" style="-fx-text-fill: #888;" />
-                                            </children>
-                                        </VBox>
+                                        <TextField fx:id="cityField" promptText="City" styleClass="login-input" />
                                     </children>
                                 </VBox>
 
                                 <VBox spacing="5.0">
                                     <children>
                                         <Label text="Password" styleClass="field-label" />
-                                        <PasswordField promptText="Password" styleClass="login-input" />
+                                        <PasswordField fx:id="passwordField" promptText="Password" styleClass="login-input" />
                                     </children>
                                 </VBox>
 
                                 <VBox spacing="5.0">
                                     <children>
                                         <Label text="Repeat password" styleClass="field-label" />
-                                        <PasswordField promptText="Repeat password" styleClass="login-input" />
+                                        <PasswordField fx:id="repeatPasswordField" promptText="Repeat password" styleClass="login-input" />
                                     </children>
                                 </VBox>
 
-                                <CheckBox text="I agree to the terms and conditions" styleClass="terms-checkbox" />
+                                <CheckBox fx:id="termsCheckBox" text="I agree to the terms and conditions" styleClass="terms-checkbox" />
 
                                 <VBox spacing="15.0">
                                     <children>
-                                        <Button text="Register" styleClass="btn-signin" maxWidth="Infinity" />
+                                        <Button fx:id="registerBtn" text="Register" styleClass="btn-signin" maxWidth="Infinity" onAction="#handleRegister" />
                                         <Button text="Already have an account? Sign in" styleClass="btn-register-outline" maxWidth="Infinity" onAction="#goToLogin" />
                                     </children>
                                 </VBox>
