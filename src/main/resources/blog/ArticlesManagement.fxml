@@ -80,7 +80,7 @@
                                     <children>
                                         <Label style="-fx-font-size: 16; -fx-font-weight: bold; -fx-text-fill: #555;" text="Official &amp; Admin Articles" />
                                         <Region HBox.hgrow="ALWAYS" />
-                                        <Button styleClass="btn-new-article" text="➕ New article" />
+                                        <Button onAction="#goToNewArticle" styleClass="btn-new-article" text="➕ New article" />
                                     </children>
                                 </HBox>
                                 
