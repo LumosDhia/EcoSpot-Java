@@ -137,15 +137,28 @@ public class TicketService implements GlobalInterface<Ticket> {
                 if (domain != null) t.setDomain(ActionDomain.valueOf(domain));
                 t.setLatitude(rs.getDouble("latitude"));
                 t.setLongitude(rs.getDouble("longitude"));
-                t.setUserId(rs.getInt("user_id"));
+                t.setUserId(0); // Default if conversion fails
+                try {
+                    Object uid = rs.getObject("user_id");
+                    if (uid instanceof Number) t.setUserId(((Number) uid).intValue());
+                } catch (Exception e) { /* Ignore binary IDs for now */ }
                 
-                int ngoId = rs.getInt("assigned_ngo_id");
-                if (!rs.wasNull()) t.setAssignedNgoId(ngoId);
+                int ngoId = 0;
+                try {
+                    Object nid = rs.getObject("assigned_ngo_id");
+                    if (nid instanceof Number) {
+                        t.setAssignedNgoId(((Number) nid).intValue());
+                    }
+                } catch (Exception e) { /* Ignore */ }
                 
                 t.setAdminNotes(rs.getString("admin_notes"));
                 
-                int completedById = rs.getInt("completed_by_id");
-                if (!rs.wasNull()) t.setCompletedById(completedById);
+                try {
+                    Object cid = rs.getObject("completed_by_id");
+                    if (cid instanceof Number) {
+                        t.setCompletedById(((Number) cid).intValue());
+                    }
+                } catch (Exception e) { /* Ignore */ }
                 
                 t.setCompletionMessage(rs.getString("completion_message"));
                 t.setCompletionImage(rs.getString("completion_image"));
