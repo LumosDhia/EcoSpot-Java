@@ -34,12 +34,12 @@
                             <children>
                                 <Button onAction="#goToBlogManagement" styleClass="sidebar-item" text="📰 Articles" />
                                 <Button styleClass="sidebar-item" text="💬 Comments" />
-                                <Button styleClass="sidebar-item" text="📅 Events" />
+                                <Button onAction="#goToEventManagement" styleClass="sidebar-item" text="📅 Events" />
                                 <Button onAction="#goToPendingTickets" styleClass="sidebar-item" text="🎫 Pending tickets" />
                                 <Button styleClass="sidebar-item" text="📋 All tickets" />
                                 <Button styleClass="sidebar-item" text="✅ Completions" />
                                 <Button onAction="#goToUserManagement" styleClass="sidebar-item" text="👥 Users" />
-                                <Button styleClass="sidebar-item" text="🤝 Sponsors" />
+                                <Button onAction="#goToSponsorManagement" styleClass="sidebar-item" text="🤝 Sponsors" />
                             </children>
                         </VBox>
 
@@ -48,7 +48,7 @@
                             <children>
                                 <Button onAction="#goToBlogManagement" styleClass="sidebar-item" text="📰 My articles" />
                                 <Button styleClass="sidebar-item" text="💬 Comments" />
-                                <Button styleClass="sidebar-item" text="📅 My events" />
+                                <Button onAction="#goToEventManagement" styleClass="sidebar-item" text="📅 My events" />
                             </children>
                         </VBox>
 

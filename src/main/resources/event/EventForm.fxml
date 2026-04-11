@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import java.net.URL?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane style="-fx-background-color: #f8fbf9;" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="tn.esprit.event.EventFormController">
+    <stylesheets>
+        <URL value="@../style.css" />
+    </stylesheets>
+
+    <top>
+        <VBox>
+            <!-- ===== TOP DARK BAR ===== -->
+            <HBox alignment="CENTER_LEFT" spacing="20.0" styleClass="top-bar">
+                <padding><Insets bottom="8.0" left="20.0" right="20.0" top="8.0" /></padding>
+                <children>
+                    <Label onMouseClicked="#goToHome" style="-fx-cursor: hand;" styleClass="top-bar-brand" text="🌿 EcoSpot | Event Editor" />
+                    <Region HBox.hgrow="ALWAYS" />
+                    <HBox alignment="CENTER_RIGHT" spacing="5.0">
+                        <Button onAction="#handleMinimize" styleClass="win-btn" text="—" />
+                        <Button onAction="#handleMaximize" styleClass="win-btn" text="▢" />
+                        <Button onAction="#handleClose" styleClass="win-btn, win-btn-close" text="✕" />
+                    </HBox>
+                </children>
+            </HBox>
+
+            <!-- ===== WHITE SECONDARY NAV ===== -->
+            <HBox alignment="CENTER_LEFT" spacing="10.0" styleClass="main-nav">
+                <padding><Insets bottom="12.0" left="20.0" right="20.0" top="12.0" /></padding>
+                <children>
+                    <Label onMouseClicked="#goToHome" style="-fx-cursor: hand;" styleClass="brand-name" text="EcoSpot" />
+                    <Region HBox.hgrow="ALWAYS" />
+                    <Button onAction="#goToHome" styleClass="nav-link-btn" text="Home" />
+                    <Button onAction="#goToEvents" styleClass="nav-link-btn-active" text="Events" />
+                    <Button styleClass="nav-link-btn" text="🎟 Tickets" />
+                    <Button styleClass="nav-link-btn" text="Achievements" />
+                    <Button onAction="#goToBlog" styleClass="nav-btn-blog" text="Blog" />
+                </children>
+            </HBox>
+        </VBox>
+    </top>
+
+    <center>
+        <ScrollPane fitToWidth="true" style="-fx-background: transparent; -fx-background-color: transparent;">
+            <content>
+                <VBox alignment="CENTER" spacing="25.0">
+                    <padding><Insets bottom="40.0" left="60.0" right="60.0" top="40.0" /></padding>
+                    <children>
+                        <VBox maxWidth="600.0" spacing="20.0" style="-fx-background-color: white; -fx-padding: 30; -fx-background-radius: 15; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 10, 0, 0, 5);">
+                            <children>
+                                <Label fx:id="formTitle" styleClass="section-title" text="Add New Event" />
+                                
+                                <VBox spacing="10.0">
+                                    <children>
+                                        <Label text="Event Name (*)" style="-fx-font-weight: bold; -fx-text-fill: #2d6a4f;" />
+                                        <TextField fx:id="nameField" promptText="Enter event name (min 5 chars)..." styleClass="search-field" />
+                                    </children>
+                                </VBox>
+                                
+                                <VBox spacing="10.0">
+                                    <children>
+                                        <Label text="Location (*)" style="-fx-font-weight: bold; -fx-text-fill: #2d6a4f;" />
+                                        <TextField fx:id="locationField" promptText="City, Country..." styleClass="search-field" />
+                                    </children>
+                                </VBox>
+
+                                <HBox spacing="20.0">
+                                    <children>
+                                        <VBox spacing="10.0" HBox.hgrow="ALWAYS">
+                                            <children>
+                                                <Label text="Capacity (*)" style="-fx-font-weight: bold; -fx-text-fill: #2d6a4f;" />
+                                                <TextField fx:id="capacityField" promptText="Max participants (number)" styleClass="search-field" />
+                                            </children>
+                                        </VBox>
+                                        <VBox spacing="10.0" HBox.hgrow="ALWAYS">
+                                            <children>
+                                                <Label style="-fx-font-weight: bold; -fx-text-fill: #2d6a4f;" text="Event Image (*)" />
+                                                <HBox alignment="CENTER_LEFT" spacing="10.0">
+                                                    <children>
+                                                        <Button onAction="#importImage" styleClass="nav-link-btn" text="📁 Import" />
+                                                        <Label fx:id="imageNameLabel" style="-fx-text-fill: #666;" text="No image selected" />
+                                                    </children>
+                                                </HBox>
+                                            </children>
+                                        </VBox>
+                                    </children>
+                                </HBox>
+
+                                <HBox spacing="20.0">
+                                    <children>
+                                        <VBox spacing="10.0" HBox.hgrow="ALWAYS">
+                                            <children>
+                                                <Label text="Start Date (*)" style="-fx-font-weight: bold; -fx-text-fill: #2d6a4f;" />
+                                                <DatePicker fx:id="startDatePicker" editable="false" maxWidth="Infinity" styleClass="search-field" />
+                                            </children>
+                                        </VBox>
+                                        <VBox spacing="10.0" HBox.hgrow="ALWAYS">
+                                            <children>
+                                                <Label text="End Date (*)" style="-fx-font-weight: bold; -fx-text-fill: #2d6a4f;" />
+                                                <DatePicker fx:id="endDatePicker" editable="false" maxWidth="Infinity" styleClass="search-field" />
+                                            </children>
+                                        </VBox>
+                                    </children>
+                                </HBox>
+
+                                <VBox spacing="10.0">
+                                    <children>
+                                        <Label text="Description (*)" style="-fx-font-weight: bold; -fx-text-fill: #2d6a4f;" />
+                                        <TextArea fx:id="descriptionArea" prefHeight="120.0" promptText="Describe the event goals and activities (min 20 chars)..." styleClass="search-field" wrapText="true" />
+                                    </children>
+                                </VBox>
+
+                                <VBox spacing="10.0">
+                                    <children>
+                                        <HBox alignment="CENTER_LEFT" spacing="10.0">
+                                            <children>
+                                                <Label text="Sponsors" style="-fx-font-weight: bold; -fx-text-fill: #2d6a4f;" />
+                                                <Region HBox.hgrow="ALWAYS" />
+                                                <HBox spacing="10.0">
+                                                    <children>
+                                                        
+                                                        <Button onAction="#openSponsorPicker" styleClass="btn-secondary" text="+ Select Sponsors" />
+                                                    </children>
+                                                </HBox>
+                                            </children>
+                                        </HBox>
+                                        <FlowPane fx:id="selectedSponsorsFlow" hgap="10.0" vgap="10.0" />
+                                    </children>
+                                </VBox>
+
+                                <HBox alignment="CENTER_RIGHT" spacing="15.0">
+                                    <children>
+                                        <Button onAction="#cancel" styleClass="nav-link-btn" text="Cancel" />
+                                        <Button fx:id="saveBtn" onAction="#save" prefWidth="120.0" styleClass="btn-hero-primary" text="Save Event" />
+                                    </children>
+                                </HBox>
+                            </children>
+                        </VBox>
+                    </children>
+                </VBox>
+            </content>
+        </ScrollPane>
+    </center>
+</BorderPane>

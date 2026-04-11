@@ -200,6 +200,17 @@ public class DashboardController {
         }
     }
 
+    @FXML
+    void goToEventManagement(ActionEvent event) {
+        navigate(event, "/event/EventManagement.fxml");
+    }
+
+    @FXML
+    void goToSponsorManagement(ActionEvent event) {
+        navigate(event, "/event/SponsorManagement.fxml");
+    }
+
+
     private void navigate(ActionEvent event, String fxmlPath) {
         try {
             System.out.println("Navigating to: " + fxmlPath);

@@ -24,28 +24,38 @@ public class HomeController {
         System.out.println("Home Screen Initialized");
         if (tn.esprit.util.SessionManager.isLoggedIn()) {
             // Hide Login/Register
-            authLinks.setVisible(false);
-            authLinks.setManaged(false);
+            if (authLinks != null) {
+                authLinks.setVisible(false);
+                authLinks.setManaged(false);
+            }
             
             // Show Dashboard/Logout
-            userLinks.setVisible(true);
-            userLinks.setManaged(true);
+            if (userLinks != null) {
+                userLinks.setVisible(true);
+                userLinks.setManaged(true);
+            }
             
             // Set Dashboard text based on role
             tn.esprit.user.User user = tn.esprit.util.SessionManager.getCurrentUser();
-            if (user.getRole().equalsIgnoreCase("ADMIN")) {
-                dashboardTopBtn.setText("📊 Admin Dashboard");
-            } else if (user.getRole().equalsIgnoreCase("NGO")) {
-                dashboardTopBtn.setText("📊 NGO Dashboard");
-            } else {
-                dashboardTopBtn.setText("📊 My Dashboard");
+            if (dashboardTopBtn != null) {
+                if (user.getRole().equalsIgnoreCase("ADMIN")) {
+                    dashboardTopBtn.setText("📊 Admin Dashboard");
+                } else if (user.getRole().equalsIgnoreCase("NGO")) {
+                    dashboardTopBtn.setText("📊 NGO Dashboard");
+                } else {
+                    dashboardTopBtn.setText("📊 My Dashboard");
+                }
             }
         } else {
             // Guest mode
-            authLinks.setVisible(true);
-            authLinks.setManaged(true);
-            userLinks.setVisible(false);
-            userLinks.setManaged(false);
+            if (authLinks != null) {
+                authLinks.setVisible(true);
+                authLinks.setManaged(true);
+            }
+            if (userLinks != null) {
+                userLinks.setVisible(false);
+                userLinks.setManaged(false);
+            }
         }
     }
 
@@ -116,9 +126,24 @@ public class HomeController {
 
     @FXML
     private void goToTicketsFromIcon() {
-        // Overload for mouse click events on generic nodes
         try {
             Parent root = FXMLLoader.load(getClass().getResource("/ticket/TicketManagement.fxml"));
+            Stage stage = (Stage) blogBtn.getScene().getWindow();
+            stage.getScene().setRoot(root);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @FXML
+    private void goToEvents(ActionEvent event) {
+        navigate(event, "/event/EventManagement.fxml");
+    }
+
+    @FXML
+    private void goToEvents() {
+        try {
+            Parent root = FXMLLoader.load(getClass().getResource("/event/EventManagement.fxml"));
             Stage stage = (Stage) blogBtn.getScene().getWindow();
             stage.getScene().setRoot(root);
         } catch (IOException e) {
@@ -131,6 +156,11 @@ public class HomeController {
         navigate(event, "/ticket/Achievements.fxml");
     }
 
+    @FXML
+    void goToSponsors(ActionEvent event) {
+        switchScene("/event/SponsorManagement.fxml");
+    }
+
     private void navigate(ActionEvent event, String fxmlPath) {
         try {
             Parent root = FXMLLoader.load(getClass().getResource(fxmlPath));
@@ -139,5 +169,30 @@ public class HomeController {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    private void switchScene(String fxmlPath) {
+        try {
+            Parent root = FXMLLoader.load(getClass().getResource(fxmlPath));
+            Stage stage = (Stage) blogBtn.getScene().getWindow();
+            stage.getScene().setRoot(root);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @FXML
+    private void handleMinimize() {
+        tn.esprit.util.WindowUtils.minimize(blogBtn);
+    }
+
+    @FXML
+    private void handleMaximize() {
+        tn.esprit.util.WindowUtils.toggleFullScreen(blogBtn);
+    }
+
+    @FXML
+    private void handleClose() {
+        tn.esprit.util.WindowUtils.close(blogBtn);
     }
 }
