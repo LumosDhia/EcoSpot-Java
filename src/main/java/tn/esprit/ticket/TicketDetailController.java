@@ -37,6 +37,7 @@ public class TicketDetailController {
 
     @FXML
     public void initialize() {
+        tn.esprit.util.NavigationHistory.track(titleLabel, "/ticket/TicketDetail.fxml");
         // Session Management
         if (tn.esprit.util.SessionManager.isLoggedIn()) {
             authLinks.setVisible(false);
@@ -171,7 +172,9 @@ public class TicketDetailController {
     
     @FXML
     private void goToTickets(ActionEvent event) {
-        navigate(event, "/ticket/TicketManagement.fxml");
+        if (!tn.esprit.util.NavigationHistory.goBack(event)) {
+            navigate(event, "/ticket/TicketManagement.fxml");
+        }
     }
     
     @FXML

@@ -22,6 +22,14 @@ public class LoginController {
     private UserService userService = new UserService();
 
     @FXML
+    public void initialize() {
+        // Prevent showing login form when user is already authenticated.
+        if (tn.esprit.util.SessionManager.isLoggedIn()) {
+            javafx.application.Platform.runLater(this::redirectIfAlreadyLoggedIn);
+        }
+    }
+
+    @FXML
     void goToHome(javafx.scene.input.MouseEvent event) {
         try {
             Parent root = FXMLLoader.load(getClass().getResource("/home/Home.fxml"));
@@ -84,6 +92,32 @@ public class LoginController {
             stage.getScene().setRoot(root);
         } catch (IOException e) {
             e.printStackTrace();
+        }
+    }
+
+    private void redirectIfAlreadyLoggedIn() {
+        try {
+            User current = tn.esprit.util.SessionManager.getCurrentUser();
+            if (current == null || emailField.getScene() == null) {
+                return;
+            }
+
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/user/Dashboard.fxml"));
+            Parent root = loader.load();
+            DashboardController controller = loader.getController();
+            if (controller != null) {
+                controller.setUser(current);
+            }
+            Stage stage = (Stage) emailField.getScene().getWindow();
+            stage.getScene().setRoot(root);
+        } catch (IOException e) {
+            // Fallback route if dashboard loading fails.
+            try {
+                Parent root = FXMLLoader.load(getClass().getResource("/home/Home.fxml"));
+                Stage stage = (Stage) emailField.getScene().getWindow();
+                stage.getScene().setRoot(root);
+            } catch (IOException ignored) {
+            }
         }
     }
 }

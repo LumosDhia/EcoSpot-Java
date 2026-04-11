@@ -19,6 +19,8 @@ public class UserService {
     public UserService() {
         cnx = MyConnection.getInstance().getCnx();
         ensureTableExists();
+        ensureQuickUsersExist();
+        ensureQuickAppUsersExist();
         loadUsersFromDb();
     }
 
@@ -40,7 +42,6 @@ public class UserService {
 
     private void loadUsersFromDb() {
         users.clear();
-        ensureQuickUsersExist();
 
         String req = "SELECT * FROM `user`";
         try {
@@ -94,12 +95,139 @@ public class UserService {
 
     public User authenticate(String email, String password) {
         if (email == null || password == null) return null;
+        loadUsersFromDb();
         for (User user : users) {
             if (user.getEmail().equals(email) && user.getPassword().equals(password)) {
                 return user;
             }
         }
         return null;
+    }
+
+    private void ensureQuickAppUsersExist() {
+        if (!hasTable("app_user")) return;
+        ensureQuickAppUser("admin@mail.com", "Admin", "User", "ROLE_ADMIN");
+        ensureQuickAppUser("ngo@mail.com", "NGO", "Organization", "ROLE_NGO");
+        ensureQuickAppUser("user@mail.com", "Regular", "User", "ROLE_USER");
+
+        ensureQuickAppUser("admin@ecospot.local", "Admin", "User", "ROLE_ADMIN");
+        ensureQuickAppUser("ngo@ecospot.local", "NGO", "Organization", "ROLE_NGO");
+        ensureQuickAppUser("user@ecospot.local", "Regular", "User", "ROLE_USER");
+    }
+
+    private void ensureQuickAppUser(String email, String firstName, String lastName, String role) {
+        String selectReq = "SELECT 1 FROM app_user WHERE email = ? LIMIT 1";
+        try (PreparedStatement ps = cnx.prepareStatement(selectReq)) {
+            ps.setString(1, email);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) return;
+            }
+        } catch (SQLException e) {
+            return;
+        }
+
+        boolean hasId = hasColumn("app_user", "id");
+        boolean hasEmail = hasColumn("app_user", "email");
+        boolean hasPassword = hasColumn("app_user", "password");
+        boolean hasRoles = hasColumn("app_user", "roles");
+        boolean hasFirstname = hasColumn("app_user", "firstname");
+        boolean hasLastname = hasColumn("app_user", "lastname");
+        boolean hasIsVerified = hasColumn("app_user", "is_verified");
+        boolean hasEnabled = hasColumn("app_user", "enabled");
+        boolean hasCreatedAt = hasColumn("app_user", "created_at");
+        boolean hasUpdatedAt = hasColumn("app_user", "updated_at");
+
+        StringBuilder columns = new StringBuilder();
+        StringBuilder values = new StringBuilder();
+        List<Object> params = new ArrayList<>();
+
+        if (hasId) {
+            appendColumn(columns, values, "id", "UUID_TO_BIN(UUID())");
+        }
+        if (hasEmail) {
+            appendColumn(columns, values, "email", "?");
+            params.add(email);
+        }
+        if (hasPassword) {
+            appendColumn(columns, values, "password", "?");
+            params.add("123456");
+        }
+        if (hasRoles) {
+            appendColumn(columns, values, "roles", "?");
+            params.add(role);
+        }
+        if (hasFirstname) {
+            appendColumn(columns, values, "firstname", "?");
+            params.add(firstName);
+        }
+        if (hasLastname) {
+            appendColumn(columns, values, "lastname", "?");
+            params.add(lastName);
+        }
+        if (hasIsVerified) {
+            appendColumn(columns, values, "is_verified", "?");
+            params.add(Boolean.TRUE);
+        }
+        if (hasEnabled) {
+            appendColumn(columns, values, "enabled", "?");
+            params.add(Boolean.TRUE);
+        }
+        if (hasCreatedAt) {
+            appendColumn(columns, values, "created_at", "NOW()");
+        }
+        if (hasUpdatedAt) {
+            appendColumn(columns, values, "updated_at", "NOW()");
+        }
+
+        if (columns.length() == 0) return;
+
+        String req = "INSERT INTO app_user (" + columns + ") VALUES (" + values + ")";
+        try (PreparedStatement ps = cnx.prepareStatement(req)) {
+            int i = 1;
+            for (Object param : params) {
+                if (param instanceof Boolean) {
+                    ps.setBoolean(i++, (Boolean) param);
+                } else {
+                    ps.setString(i++, String.valueOf(param));
+                }
+            }
+            ps.executeUpdate();
+        } catch (SQLException ignored) {
+        }
+    }
+
+    private void appendColumn(StringBuilder columns, StringBuilder values, String column, String valueExpr) {
+        if (columns.length() > 0) {
+            columns.append(", ");
+            values.append(", ");
+        }
+        columns.append(column);
+        values.append(valueExpr);
+    }
+
+    private boolean hasTable(String tableName) {
+        String req = "SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = ? LIMIT 1";
+        try (PreparedStatement ps = cnx.prepareStatement(req)) {
+            ps.setString(1, tableName);
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next();
+            }
+        } catch (SQLException e) {
+            return false;
+        }
+    }
+
+    private boolean hasColumn(String tableName, String columnName) {
+        String req = "SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = ? AND COLUMN_NAME = ? LIMIT 1";
+        try (PreparedStatement ps = cnx.prepareStatement(req)) {
+            ps.setString(1, tableName);
+            ps.setString(2, columnName);
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next();
+            }
+        } catch (SQLException e) {
+            return false;
+        }
     }
 
     public List<User> getAllUsers() {

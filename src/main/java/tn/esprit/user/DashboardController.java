@@ -36,6 +36,17 @@ public class DashboardController {
     @FXML private FlowPane ngoCardsGrid;
     @FXML private FlowPane userCardsGrid;
 
+    @FXML
+    public void initialize() {
+        // When screens are restored via history, setUser(...) might not be called manually.
+        // In that case, bind the dashboard from the active session automatically.
+        if (tn.esprit.util.SessionManager.isLoggedIn() && tn.esprit.util.SessionManager.getCurrentUser() != null) {
+            setUser(tn.esprit.util.SessionManager.getCurrentUser());
+        } else {
+            hideAllGrids();
+        }
+    }
+
     public void setUser(User user) {
         tn.esprit.util.NavigationHistory.track(adminCardsGrid, "/user/Dashboard.fxml");
         String role = user.getRole();
@@ -136,6 +147,11 @@ public class DashboardController {
     void handleLogout(ActionEvent event) {
         tn.esprit.util.SessionManager.logout();
         navigate(event, "/user/Login.fxml");
+    }
+
+    @FXML
+    void goToPublicSite(ActionEvent event) {
+        navigate(event, "/home/Home.fxml");
     }
 
     @FXML

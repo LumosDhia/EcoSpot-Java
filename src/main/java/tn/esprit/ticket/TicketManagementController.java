@@ -36,6 +36,7 @@ public class TicketManagementController {
     @FXML
     public void initialize() {
         System.out.println("Ticket Management Initialized - Loading Cards...");
+        tn.esprit.util.NavigationHistory.track(ticketsFlowPane, "/ticket/TicketManagement.fxml");
         
         // Session Management
         if (tn.esprit.util.SessionManager.isLoggedIn()) {
