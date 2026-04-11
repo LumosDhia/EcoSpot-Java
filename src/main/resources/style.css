@@ -395,3 +395,29 @@
     -fx-text-fill: #52b788;
     -fx-font-size: 12px;
 }
+/* ================================
+   WINDOW CONTROLS
+   ================================ */
+.window-controls-container {
+    -fx-spacing: 12;
+    -fx-alignment: CENTER_RIGHT;
+}
+
+.win-btn {
+    -fx-background-color: transparent;
+    -fx-text-fill: white;
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-padding: 5 10;
+    -fx-cursor: hand;
+    -fx-background-radius: 4;
+}
+
+.win-btn:hover {
+    -fx-background-color: rgba(255, 255, 255, 0.1);
+}
+
+.win-btn-close:hover {
+    -fx-background-color: #ff4d4d;
+    -fx-text-fill: white;
+}

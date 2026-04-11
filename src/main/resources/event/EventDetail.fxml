@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import java.net.URL?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+
+<BorderPane style="-fx-background-color: white;" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="tn.esprit.event.EventDetailController">
+    <stylesheets>
+        <URL value="@../style.css" />
+    </stylesheets>
+
+    <top>
+        <VBox>
+            <!-- ===== TOP DARK BAR ===== -->
+            <HBox alignment="CENTER_LEFT" spacing="20.0" styleClass="top-bar">
+                <padding><Insets bottom="8.0" left="20.0" right="20.0" top="8.0" /></padding>
+                <children>
+                    <Label onMouseClicked="#goToHome" style="-fx-cursor: hand;" styleClass="top-bar-brand" text="🌿 EcoSpot" />
+                    <Region HBox.hgrow="ALWAYS" />
+                    <HBox alignment="CENTER_RIGHT" spacing="5.0">
+                        <Button onAction="#handleMinimize" styleClass="win-btn" text="—" />
+                        <Button onAction="#handleMaximize" styleClass="win-btn" text="▢" />
+                        <Button onAction="#handleClose" styleClass="win-btn, win-btn-close" text="✕" />
+                    </HBox>
+                </children>
+            </HBox>
+
+            <!-- ===== WHITE SECONDARY NAV ===== -->
+            <HBox alignment="CENTER_LEFT" spacing="10.0" styleClass="main-nav">
+                <padding><Insets bottom="12.0" left="20.0" right="20.0" top="12.0" /></padding>
+                <children>
+                    <Label onMouseClicked="#goToHome" style="-fx-cursor: hand;" styleClass="brand-name" text="EcoSpot" />
+                    <Region HBox.hgrow="ALWAYS" />
+                    <Button onAction="#goToHome" styleClass="nav-link-btn" text="Home" />
+                    <Button onAction="#goToEvents" styleClass="nav-link-btn-active" text="Events" />
+                    <Button styleClass="nav-link-btn" text="🎟 Tickets" />
+                    <Button styleClass="nav-link-btn" text="Achievements" />
+                    <Button onAction="#goToBlog" styleClass="nav-btn-blog" text="Blog" />
+                </children>
+            </HBox>
+        </VBox>
+    </top>
+
+    <center>
+        <ScrollPane fitToWidth="true" style="-fx-background: white; -fx-background-color: white;">
+            <content>
+                <VBox alignment="CENTER" spacing="30.0">
+                    <padding><Insets bottom="50.0" left="100.0" right="100.0" top="50.0" /></padding>
+                    <children>
+                        <Label fx:id="nameLabel" styleClass="detail-hero-title" text="Event Name" style="-fx-text-fill: #2d6a4f;" />
+                        
+                        <ImageView fx:id="eventImg" fitHeight="400.0" fitWidth="800.0" pickOnBounds="true" preserveRatio="false" styleClass="detail-main-img" />
+                        
+                        <VBox maxWidth="800.0" spacing="20.0">
+                            <children>
+                                <HBox spacing="40.0" style="-fx-background-color: #f8fbf9; -fx-padding: 20; -fx-background-radius: 10;">
+                                    <children>
+                                        <VBox spacing="5.0">
+                                            <children>
+                                                <Label text="WHEN" style="-fx-text-fill: #888; -fx-font-size: 12;" />
+                                                <Label fx:id="dateLabel" text="Oct 10 - Oct 12, 2026" style="-fx-font-weight: bold; -fx-font-size: 16;" />
+                                            </children>
+                                        </VBox>
+                                        <VBox spacing="5.0">
+                                            <children>
+                                                <Label text="WHERE" style="-fx-text-fill: #888; -fx-font-size: 12;" />
+                                                <Label fx:id="locationLabel" text="Tunis, Tunisia" style="-fx-font-weight: bold; -fx-font-size: 16;" />
+                                            </children>
+                                        </VBox>
+                                        <VBox spacing="5.0">
+                                            <children>
+                                                <Label text="CAPACITY" style="-fx-text-fill: #888; -fx-font-size: 12;" />
+                                                <Label fx:id="capacityLabel" text="500 Participants" style="-fx-font-weight: bold; -fx-font-size: 16;" />
+                                            </children>
+                                        </VBox>
+                                    </children>
+                                </HBox>
+
+                                <Label text="About this Event" styleClass="section-title" />
+                                <Text fx:id="descriptionText" wrappingWidth="800.0" style="-fx-font-size: 16; -fx-fill: #444;" />
+                                
+                                <VBox spacing="10.0">
+                                    <children>
+                                        <Label style="-fx-font-weight: bold; -fx-text-fill: #2d6a4f; -fx-font-size: 14;" text="Supported by" />
+                                        <FlowPane fx:id="sponsorContainer" hgap="20.0" vgap="15.0">
+                                            <padding><Insets bottom="10.0" left="0" right="0" top="5.0" /></padding>
+                                        </FlowPane>
+                                    </children>
+                                </VBox>
+                                <Separator />
+                                
+                                <HBox spacing="15.0">
+                                    <children>
+                                        
+                                        <Region HBox.hgrow="ALWAYS" />
+                                        <Button prefHeight="45.0" prefWidth="150.0" styleClass="btn-hero-primary" text="Join Event" />
+                                    </children>
+                                </HBox>
+                            </children>
+                        </VBox>
+                    </children>
+                </VBox>
+            </content>
+        </ScrollPane>
+    </center>
+</BorderPane>

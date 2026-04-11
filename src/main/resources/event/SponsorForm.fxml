@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import java.net.URL?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane style="-fx-background-color: #f8fbf9;" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="tn.esprit.event.SponsorFormController">
+    <stylesheets>
+        <URL value="@../style.css" />
+    </stylesheets>
+
+    <top>
+        <VBox>
+            <HBox alignment="CENTER_LEFT" spacing="20.0" styleClass="top-bar">
+                <padding><Insets bottom="8.0" left="20.0" right="20.0" top="8.0" /></padding>
+                <children>
+                    <Label onMouseClicked="#goToHome" style="-fx-cursor: hand;" styleClass="top-bar-brand" text="🌿 EcoSpot | Sponsor Editor" />
+                    <Region HBox.hgrow="ALWAYS" />
+                    <HBox alignment="CENTER_RIGHT" spacing="5.0">
+                        <Button onAction="#handleMinimize" styleClass="win-btn" text="—" />
+                        <Button onAction="#handleMaximize" styleClass="win-btn" text="▢" />
+                        <Button onAction="#handleClose" styleClass="win-btn, win-btn-close" text="✕" />
+                    </HBox>
+                </children>
+            </HBox>
+        </VBox>
+    </top>
+
+    <center>
+        <VBox alignment="CENTER" spacing="25.0">
+            <padding><Insets bottom="40.0" left="60.0" right="60.0" top="40.0" /></padding>
+            <children>
+                <VBox maxWidth="500.0" spacing="20.0" style="-fx-background-color: white; -fx-padding: 30; -fx-background-radius: 15; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 10, 0, 0, 5);">
+                    <children>
+                        <Label fx:id="formTitle" styleClass="section-title" text="Add New Sponsor" />
+                        
+                        <VBox spacing="10.0">
+                            <children>
+                                <Label text="Sponsor Name (*)" style="-fx-font-weight: bold; -fx-text-fill: #2d6a4f;" />
+                                <TextField fx:id="nameField" promptText="Company name..." styleClass="search-field" />
+                            </children>
+                        </VBox>
+
+                        <VBox spacing="10.0">
+                            <children>
+                                <Label text="Sector (*)" style="-fx-font-weight: bold; -fx-text-fill: #2d6a4f;" />
+                                <TextField fx:id="sectorField" promptText="e.g. Technology, Energy..." styleClass="search-field" />
+                            </children>
+                        </VBox>
+
+                        <VBox spacing="10.0">
+                            <children>
+                                <Label text="Location (*)" style="-fx-font-weight: bold; -fx-text-fill: #2d6a4f;" />
+                                <TextField fx:id="locationField" promptText="City, Country..." styleClass="search-field" />
+                            </children>
+                        </VBox>
+
+                        <VBox spacing="10.0">
+                            <children>
+                                <Label style="-fx-font-weight: bold; -fx-text-fill: #2d6a4f;" text="Sponsor Logo (*)" />
+                                <HBox alignment="CENTER_LEFT" spacing="10.0">
+                                    <children>
+                                        <Button onAction="#importImage" styleClass="nav-link-btn" text="📁 Import Logo" />
+                                        <Label fx:id="imageNameLabel" style="-fx-text-fill: #666;" text="No logo selected" />
+                                    </children>
+                                </HBox>
+                            </children>
+                        </VBox>
+
+                        <VBox spacing="10.0">
+                            <children>
+                                <Label text="Description (*)" style="-fx-font-weight: bold; -fx-text-fill: #2d6a4f;" />
+                                <TextArea fx:id="descriptionArea" prefHeight="100.0" promptText="About the sponsor..." styleClass="search-field" wrapText="true" />
+                            </children>
+                        </VBox>
+
+                        <HBox alignment="CENTER_RIGHT" spacing="15.0">
+                            <children>
+                                <Button onAction="#cancel" styleClass="nav-link-btn" text="Cancel" />
+                                <Button fx:id="saveBtn" onAction="#save" prefWidth="120.0" styleClass="btn-hero-primary" text="Save Sponsor" />
+                            </children>
+                        </HBox>
+                    </children>
+                </VBox>
+            </children>
+        </VBox>
+    </center>
+</BorderPane>

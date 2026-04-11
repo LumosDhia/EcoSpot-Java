@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+
+<VBox fx:id="cardContainer" prefWidth="280.0" spacing="0" styleClass="article-card" stylesheets="@../style.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="tn.esprit.event.EventCardController">
+   <children>
+      <StackPane prefHeight="180.0">
+         <children>
+            <ImageView fx:id="eventImage" fitHeight="180.0" fitWidth="280.0" pickOnBounds="true" preserveRatio="false">
+               <image>
+                  <Image url="https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=800" />
+               </image>
+            </ImageView>
+         </children>
+      </StackPane>
+      <VBox spacing="10" style="-fx-padding: 15;">
+         <children>
+            <HBox alignment="CENTER_LEFT" spacing="10">
+               <children>
+                  <Label fx:id="locationLabel" styleClass="category-tag" text="Tunis, TN" />
+                  <Region HBox.hgrow="ALWAYS" />
+                  <Label fx:id="dateLabel" styleClass="article-date" text="Oct 10, 2026">
+                     <graphic>
+                        <Label text="📅" />
+                     </graphic>
+                  </Label>
+               </children>
+            </HBox>
+            <Label fx:id="nameLabel" styleClass="article-title" text="Event Name Placeholder" wrapText="true">
+               <font>
+                  <Font name="System Bold" size="16.0" />
+               </font>
+            </Label>
+            <HBox spacing="10" styleClass="article-stats-container">
+               <children>
+                  <Label fx:id="capacityLabel" styleClass="stat-label" text="👥 500 max" />
+               </children>
+            </HBox>
+            <TextFlow prefHeight="60.0">
+               <children>
+                  <Text fx:id="descriptionText" styleClass="article-excerpt" text="Description placeholder for the event..." />
+               </children>
+            </TextFlow>
+            <HBox spacing="10">
+               <children>
+                  <Button fx:id="detailsBtn" maxWidth="1.7976931348623157E308" styleClass="read-more-btn" text="See Details" HBox.hgrow="ALWAYS" />
+               </children>
+            </HBox>
+         </children>
+      </VBox>
+   </children>
+</VBox>
