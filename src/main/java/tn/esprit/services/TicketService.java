@@ -1,7 +1,7 @@
 package tn.esprit.services;
 
 import tn.esprit.interfaces.GlobalInterface;
-import tn.esprit.ticket.Ticket;
+import tn.esprit.ticket.*;
 import tn.esprit.util.MyConnection;
 
 import java.sql.*;
@@ -19,9 +19,19 @@ public class TicketService implements GlobalInterface<Ticket> {
     private void ensureTableExists() {
         String req = "CREATE TABLE IF NOT EXISTS `ticket` (" +
                 "`id` INT AUTO_INCREMENT PRIMARY KEY," +
-                "`event_id` INT," +
-                "`price` DOUBLE," +
-                "`type` VARCHAR(50)" +
+                "`title` VARCHAR(255)," +
+                "`description` TEXT," +
+                "`location` VARCHAR(255)," +
+                "`image` VARCHAR(255)," +
+                "`status` VARCHAR(50)," +
+                "`priority` VARCHAR(50)," +
+                "`domain` VARCHAR(50)," +
+                "`latitude` DOUBLE," +
+                "`longitude` DOUBLE," +
+                "`user_id` INT," +
+                "`assigned_ngo_id` INT," +
+                "`is_spam` TINYINT(1) DEFAULT 0," +
+                "`created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP" +
                 ")";
         try (Statement st = cnx.createStatement()) {
             st.execute(req);
@@ -32,11 +42,22 @@ public class TicketService implements GlobalInterface<Ticket> {
 
     @Override
     public void add(Ticket ticket) {
-        String req = "INSERT INTO `ticket` (event_id, price, type) VALUES (?, ?, ?)";
+        String req = "INSERT INTO `ticket` (title, description, location, image, status, priority, domain, latitude, longitude, user_id, assigned_ngo_id, is_spam) " +
+                     "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         try (PreparedStatement ps = cnx.prepareStatement(req)) {
-            ps.setInt(1, ticket.getEventId());
-            ps.setDouble(2, ticket.getPrice());
-            ps.setString(3, ticket.getType());
+            ps.setString(1, ticket.getTitle());
+            ps.setString(2, ticket.getDescription());
+            ps.setString(3, ticket.getLocation());
+            ps.setString(4, ticket.getImage());
+            ps.setString(5, ticket.getStatus().name());
+            ps.setString(6, ticket.getPriority().name());
+            ps.setString(7, ticket.getDomain() != null ? ticket.getDomain().name() : null);
+            ps.setDouble(8, ticket.getLatitude());
+            ps.setDouble(9, ticket.getLongitude());
+            ps.setInt(10, ticket.getUserId());
+            if (ticket.getAssignedNgoId() != null) ps.setInt(11, ticket.getAssignedNgoId());
+            else ps.setNull(11, Types.INTEGER);
+            ps.setBoolean(12, ticket.isSpam());
             ps.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -59,12 +80,21 @@ public class TicketService implements GlobalInterface<Ticket> {
 
     @Override
     public void update(Ticket ticket) {
-        String req = "UPDATE `ticket` SET event_id = ?, price = ?, type = ? WHERE id = ?";
+        String req = "UPDATE `ticket` SET title=?, description=?, location=?, image=?, status=?, priority=?, domain=?, latitude=?, longitude=?, assigned_ngo_id=?, is_spam=? WHERE id=?";
         try (PreparedStatement ps = cnx.prepareStatement(req)) {
-            ps.setInt(1, ticket.getEventId());
-            ps.setDouble(2, ticket.getPrice());
-            ps.setString(3, ticket.getType());
-            ps.setInt(4, ticket.getId());
+            ps.setString(1, ticket.getTitle());
+            ps.setString(2, ticket.getDescription());
+            ps.setString(3, ticket.getLocation());
+            ps.setString(4, ticket.getImage());
+            ps.setString(5, ticket.getStatus().name());
+            ps.setString(6, ticket.getPriority().name());
+            ps.setString(7, ticket.getDomain() != null ? ticket.getDomain().name() : null);
+            ps.setDouble(8, ticket.getLatitude());
+            ps.setDouble(9, ticket.getLongitude());
+            if (ticket.getAssignedNgoId() != null) ps.setInt(10, ticket.getAssignedNgoId());
+            else ps.setNull(10, Types.INTEGER);
+            ps.setBoolean(11, ticket.isSpam());
+            ps.setInt(12, ticket.getId());
             ps.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -74,15 +104,27 @@ public class TicketService implements GlobalInterface<Ticket> {
     @Override
     public List<Ticket> getAll() {
         List<Ticket> tickets = new ArrayList<>();
-        String req = "SELECT * FROM `ticket`";
+        String req = "SELECT * FROM `ticket` ORDER BY created_at DESC";
         try (Statement st = cnx.createStatement(); ResultSet rs = st.executeQuery(req)) {
             while (rs.next()) {
-                tickets.add(new Ticket(
-                        rs.getInt("id"),
-                        rs.getInt("event_id"),
-                        rs.getDouble("price"),
-                        rs.getString("type")
-                ));
+                Ticket t = new Ticket();
+                t.setId(rs.getInt("id"));
+                t.setTitle(rs.getString("title"));
+                t.setDescription(rs.getString("description"));
+                t.setLocation(rs.getString("location"));
+                t.setImage(rs.getString("image"));
+                t.setStatus(TicketStatus.valueOf(rs.getString("status")));
+                t.setPriority(TicketPriority.valueOf(rs.getString("priority")));
+                String domain = rs.getString("domain");
+                if (domain != null) t.setDomain(ActionDomain.valueOf(domain));
+                t.setLatitude(rs.getDouble("latitude"));
+                t.setLongitude(rs.getDouble("longitude"));
+                t.setUserId(rs.getInt("user_id"));
+                int ngoId = rs.getInt("assigned_ngo_id");
+                if (!rs.wasNull()) t.setAssignedNgoId(ngoId);
+                t.setSpam(rs.getBoolean("is_spam"));
+                t.setCreatedAt(rs.getTimestamp("created_at").toLocalDateTime());
+                tickets.add(t);
             }
         } catch (SQLException e) {
             e.printStackTrace();
