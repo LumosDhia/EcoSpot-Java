@@ -18,9 +18,9 @@ public class MainFX extends Application {
     public void start(Stage primaryStage) {
 
         try {
-            Parent root = FXMLLoader.load(getClass().getResource("/PersonneManagementGUI.fxml"));
+            Parent root = FXMLLoader.load(getClass().getResource("/home/Home.fxml"));
             Scene scene = new Scene(root);
-            primaryStage.setTitle("PIDEV 3A28");
+            primaryStage.setTitle("EcoSpot Desktop App");
             primaryStage.setScene(scene);
             primaryStage.show();
 
