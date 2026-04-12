@@ -55,7 +55,7 @@ public class MyTicketsController {
             // If User_id isn't properly mapped in current DB stub, we'll load all to guarantee something shows for demo purposes 
             // but normally it would be: ticketService.getByUserId(u.getId())
             userTickets = ticketService.getAll().stream()
-                .filter(t -> t.getUserId() != null && t.getUserId() == u.getId())
+                .filter(t -> t.getUserId() == u.getId())
                 .collect(Collectors.toList());
             
             // Fallback: If no tickets belong strictly to this user ID, just show all tickets for demo purposes so it's not empty
