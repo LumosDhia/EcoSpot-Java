@@ -45,7 +45,7 @@
                     <Button styleClass="nav-link-btn" text="🎟 Tickets" />
                     <Button styleClass="nav-link-btn" text="Achievements" />
                     <Button onAction="#goToBlog" styleClass="nav-link-btn" text="Blog" />
-                    <Button onAction="#goToArticles" styleClass="nav-link-btn-active" text="Articles" />
+
                 </children>
             </HBox>
         </VBox>

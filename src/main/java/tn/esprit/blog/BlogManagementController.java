@@ -211,6 +211,16 @@ public class BlogManagementController {
         navigate(event, "/ticket/Achievements.fxml");
     }
 
+    @FXML
+    private void goToArticles(javafx.event.ActionEvent event) {
+        navigate(event, "/blog/ArticlesManagement.fxml");
+    }
+
+    @FXML
+    private void goToBlog(javafx.event.ActionEvent event) {
+        navigate(event, "/blog/BlogManagement.fxml");
+    }
+
     private void navigate(javafx.event.ActionEvent event, String fxmlPath) {
         try {
             Parent root = FXMLLoader.load(getClass().getResource(fxmlPath));

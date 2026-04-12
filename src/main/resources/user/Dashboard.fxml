@@ -32,7 +32,7 @@
                         <!-- ADMIN SIDEBAR LINKS -->
                         <VBox fx:id="adminSidebarLinks" spacing="5.0" visible="false" managed="false">
                             <children>
-                                <Button styleClass="sidebar-item" text="📰 Articles" />
+                                <Button onAction="#goToBlogManagement" styleClass="sidebar-item" text="📰 Articles" />
                                 <Button styleClass="sidebar-item" text="💬 Comments" />
                                 <Button styleClass="sidebar-item" text="📅 Events" />
                                 <Button onAction="#goToPendingTickets" styleClass="sidebar-item" text="🎫 Pending tickets" />
@@ -46,7 +46,7 @@
                         <!-- NGO SIDEBAR LINKS -->
                         <VBox fx:id="ngoSidebarLinks" spacing="5.0" visible="false" managed="false">
                             <children>
-                                <Button styleClass="sidebar-item" text="📰 My articles" />
+                                <Button onAction="#goToBlogManagement" styleClass="sidebar-item" text="📰 My articles" />
                                 <Button styleClass="sidebar-item" text="💬 Comments" />
                                 <Button styleClass="sidebar-item" text="📅 My events" />
                             </children>
@@ -132,7 +132,7 @@
                                                 </VBox>
                                             </children>
                                         </VBox>
-                                        <VBox styleClass="stat-card">
+                                        <VBox onMouseClicked="#goToBlogManagementGrid" styleClass="stat-card">
                                             <children>
                                                 <StackPane alignment="TOP_RIGHT">
                                                     <children>
@@ -171,7 +171,7 @@
                                 <FlowPane fx:id="ngoCardsGrid" hgap="25.0" vgap="25.0" styleClass="dashboard-grid" visible="false" managed="false">
                                     <children>
                                         <!-- Create article -->
-                                        <VBox styleClass="stat-card">
+                                        <VBox onMouseClicked="#goToCreateArticleGrid" styleClass="stat-card">
                                             <children>
                                                 <StackPane alignment="TOP_RIGHT">
                                                     <children>

@@ -171,6 +171,35 @@ public class DashboardController {
         }
     }
 
+    @FXML
+    void goToBlogManagement(ActionEvent event) {
+        navigate(event, "/blog/ArticlesManagement.fxml");
+    }
+
+    @FXML
+    void goToBlogManagementGrid(MouseEvent event) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/blog/ArticlesManagement.fxml"));
+            Parent root = loader.load();
+            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+            stage.getScene().setRoot(root);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @FXML
+    void goToCreateArticleGrid(MouseEvent event) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/blog/NewArticle.fxml"));
+            Parent root = loader.load();
+            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+            stage.getScene().setRoot(root);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     private void navigate(ActionEvent event, String fxmlPath) {
         try {
             System.out.println("Navigating to: " + fxmlPath);

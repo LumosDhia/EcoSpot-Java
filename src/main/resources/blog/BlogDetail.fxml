@@ -41,7 +41,7 @@
                     <Button styleClass="nav-link-btn" text="🎟 Tickets" />
                     <Button styleClass="nav-link-btn" text="Achievements" />
                     <Button onAction="#goToBlog" styleClass="nav-btn-blog" text="Blog" />
-                    <Button onAction="#goToArticles" styleClass="nav-link-btn" text="Articles" />
+
                 </children>
             </HBox>
         </VBox>
@@ -142,7 +142,7 @@
                                           <Label styleClass="footer-heading" text="QUICK LINKS" />
                                           <Label onMouseClicked="#goToHome" styleClass="footer-link" text="Home" />
                                           <Label onMouseClicked="#goToBlog" styleClass="footer-link" text="Blog" />
-                                          <Label onMouseClicked="#goToArticles" styleClass="footer-link" text="Articles" />
+
                                        </children>
                                     </VBox>
                                  </children>
