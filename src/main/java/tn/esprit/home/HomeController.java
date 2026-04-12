@@ -93,8 +93,15 @@ public class HomeController {
     }
 
     @FXML
-    private void goToHome(javafx.event.Event event) {
-        navigate(event, "/home/Home.fxml");
+    private void goToHome() {
+        // Already home, or reload
+        try {
+            Parent root = FXMLLoader.load(getClass().getResource("/home/Home.fxml"));
+            Stage stage = (Stage) blogBtn.getScene().getWindow();
+            stage.getScene().setRoot(root);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     @FXML
@@ -103,29 +110,16 @@ public class HomeController {
     }
 
     @FXML
-    private void goToTickets(javafx.event.Event event) {
+    private void goToTickets(ActionEvent event) {
         navigate(event, "/ticket/TicketManagement.fxml");
     }
 
     @FXML
-    private void goToReportIssue(javafx.event.Event event) {
-        navigate(event, "/ticket/TicketReporting.fxml");
-    }
-
-    @FXML
-    private void goToPublicBoard(javafx.event.Event event) {
-        navigate(event, "/ticket/TicketPublicBoard.fxml");
-    }
-
-    @FXML
-    private void goToAchievements(javafx.event.Event event) {
-        navigate(event, "/ticket/TicketAchievements.fxml");
-    }
-
-    private void navigate(javafx.event.Event event, String path) {
+    private void goToTicketsFromIcon() {
+        // Overload for mouse click events on generic nodes
         try {
-            Parent root = FXMLLoader.load(getClass().getResource(path));
-            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+            Parent root = FXMLLoader.load(getClass().getResource("/ticket/TicketManagement.fxml"));
+            Stage stage = (Stage) blogBtn.getScene().getWindow();
             stage.getScene().setRoot(root);
         } catch (IOException e) {
             e.printStackTrace();

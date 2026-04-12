@@ -2,120 +2,95 @@
 
 <?import java.net.URL?>
 <?import javafx.geometry.Insets?>
-<?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<VBox prefHeight="800.0" prefWidth="1200.0" styleClass="admin-content-bg" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="tn.esprit.ticket.TicketManagementController">
+<BorderPane prefHeight="800.0" prefWidth="1000.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="tn.esprit.ticket.TicketManagementController">
     <stylesheets>
         <URL value="@../style.css" />
     </stylesheets>
-    
-    <children>
-        <!-- TOP BAR -->
-        <HBox alignment="CENTER_LEFT" spacing="15.0" styleClass="admin-top-bar">
-            <padding>
-                <Insets bottom="10.0" left="20.0" right="20.0" top="10.0" />
-            </padding>
+
+    <top>
+        <VBox>
+            <!-- ===== TOP DARK BAR ===== -->
+            <HBox alignment="CENTER_LEFT" spacing="20.0" styleClass="top-bar">
+                <padding><Insets bottom="8.0" left="20.0" right="20.0" top="8.0" /></padding>
+                <children>
+                    <Label onMouseClicked="#goToHome" style="-fx-cursor: hand;" styleClass="top-bar-brand" text="🌿 EcoSpot" />
+                    <Region HBox.hgrow="ALWAYS" />
+                </children>
+            </HBox>
+
+            <!-- ===== WHITE SECONDARY NAV ===== -->
+            <HBox alignment="CENTER_LEFT" spacing="10.0" styleClass="main-nav">
+                <padding><Insets bottom="12.0" left="20.0" right="20.0" top="12.0" /></padding>
+                <children>
+                    <Label onMouseClicked="#goToHome" style="-fx-cursor: hand;" styleClass="brand-name" text="EcoSpot" />
+                    <Region HBox.hgrow="ALWAYS" />
+                    <Button onAction="#goToHome" styleClass="nav-link-btn" text="Home" />
+                    <Button styleClass="nav-link-btn" text="Events" />
+                    <Button styleClass="nav-link-btn-active" text="🎟 Tickets" />
+                    <Button styleClass="nav-link-btn" text="Achievements" />
+                    <Button styleClass="nav-btn-blog" text="Blog" />
+                </children>
+            </HBox>
+        </VBox>
+    </top>
+
+    <center>
+        <VBox spacing="30.0" styleClass="admin-content-bg">
+            <padding><Insets bottom="40.0" left="40.0" right="40.0" top="30.0" /></padding>
             <children>
-                <Button onAction="#handleBackHome" style="-fx-background-color: transparent; -fx-text-fill: #2d6a4f; -fx-cursor: hand;" text="⬅ Back" />
-                <Label styleClass="breadcrumb-text" text="Admin › Environmental Portal" />
-                <Region HBox.hgrow="ALWAYS" />
-                <HBox alignment="CENTER" spacing="10.0">
-                    <Label styleClass="admin-profile-name" text="GHACEN" />
-                    <Label style="-fx-background-color: #2d6a4f; -fx-text-fill: white; -fx-padding: 5 10; -fx-background-radius: 15;" text="System Admin" />
+                <!-- Header with Action Button -->
+                <HBox alignment="CENTER_LEFT">
+                    <children>
+                        <VBox spacing="5.0">
+                            <children>
+                                <Label styleClass="about-title" text="🎟 Ticket Management" />
+                                <Label style="-fx-text-fill: #666;" text="Manage your event tickets and pricing" />
+                            </children>
+                        </VBox>
+                        <Region HBox.hgrow="ALWAYS" />
+                        <Button styleClass="btn-hero-primary" text="+ Create New Ticket" onAction="#handleCreateTicket" />
+                    </children>
                 </HBox>
+
+                <!-- Search and Filters -->
+                <HBox spacing="15.0" alignment="CENTER_LEFT">
+                    <children>
+                        <TextField promptText="Search tickets..." styleClass="search-field" prefWidth="300.0" />
+                        <Region HBox.hgrow="ALWAYS" />
+                    </children>
+                </HBox>
+
+                <!-- Tickets List Container -->
+                <VBox spacing="15.0" styleClass="explore-card" VBox.vgrow="ALWAYS">
+                    <padding><Insets bottom="20.0" left="20.0" right="20.0" top="20.0" /></padding>
+                    <children>
+                        <TableView fx:id="ticketTable" prefHeight="400.0" VBox.vgrow="ALWAYS">
+                            <columns>
+                                <TableColumn fx:id="colId" prefWidth="60.0" text="ID" />
+                                <TableColumn fx:id="colEvent" prefWidth="200.0" text="Event ID" />
+                                <TableColumn fx:id="colType" prefWidth="150.0" text="Type" />
+                                <TableColumn fx:id="colPrice" prefWidth="120.0" text="Price ($)" />
+                                <TableColumn fx:id="colActions" prefWidth="150.0" text="Actions" />
+                            </columns>
+                            <columnResizePolicy>
+                                <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
+                            </columnResizePolicy>
+                        </TableView>
+                    </children>
+                </VBox>
             </children>
-        </HBox>
-
-        <TabPane tabClosingPolicy="UNAVAILABLE" VBox.vgrow="ALWAYS">
-            <tabs>
-                <!-- TAB 1: MODERATION -->
-                <Tab text="📋 Moderation Desk">
-                    <content>
-                        <HBox spacing="20.0">
-                            <padding>
-                                <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
-                            </padding>
-                            <children>
-                                <!-- Form Area -->
-                                <VBox prefWidth="380.0" spacing="15.0" styleClass="stat-card">
-                                    <children>
-                                        <Label text="Moderation Panel">
-                                            <font><Font name="System Bold" size="18.0" /></font>
-                                        </Label>
-                                        <VBox spacing="5.0">
-                                            <Label styleClass="field-label" text="Admin Notes / Rejection Reason" />
-                                            <TextArea fx:id="adminNotesArea" prefRowCount="4" styleClass="search-field" wrapText="true" />
-                                        </VBox>
-                                        <Separator />
-                                        <Button onAction="#handlePublish" prefWidth="Infinity" styleClass="btn-signin" text="✅ Approve &amp; Publish" />
-                                        <Button onAction="#handleSendBack" prefWidth="Infinity" style="-fx-background-color: #fca311; -fx-text-fill: white;" text="↩ Send Back for Fixes" />
-                                        <Button onAction="#handleRefuse" prefWidth="Infinity" style="-fx-background-color: #bc4749; -fx-text-fill: white;" text="❌ Refuse Report" />
-                                    </children>
-                                </VBox>
-                                <!-- Table Area -->
-                                <VBox spacing="15.0" styleClass="stat-card" HBox.hgrow="ALWAYS">
-                                    <children>
-                                        <Label text="Pending Submissions">
-                                            <font><Font name="System Bold" size="18.0" /></font>
-                                        </Label>
-                                        <TableView fx:id="pendingTable" VBox.vgrow="ALWAYS">
-                                            <columns>
-                                                <TableColumn fx:id="pIdCol" prefWidth="40.0" text="ID" />
-                                                <TableColumn fx:id="pTitleCol" prefWidth="180.0" text="Title" />
-                                                <TableColumn fx:id="pUserCol" prefWidth="120.0" text="Reporter" />
-                                                <TableColumn fx:id="pPriorityCol" prefWidth="90.0" text="Priority" />
-                                                <TableColumn fx:id="pLocationCol" prefWidth="150.0" text="Location" />
-                                            </columns>
-                                        </TableView>
-                                    </children>
-                                </VBox>
-                            </children>
-                        </HBox>
-                    </content>
-                </Tab>
-
-                <!-- TAB 2: COMPLETIONS -->
-                <Tab text="🏆 Achievement Validation">
-                    <content>
-                        <HBox spacing="20.0">
-                            <padding>
-                                <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
-                            </padding>
-                            <children>
-                                <VBox prefWidth="400.0" spacing="15.0" styleClass="stat-card">
-                                    <children>
-                                        <Label text="Proof of Work">
-                                            <font><Font name="System Bold" size="18.0" /></font>
-                                        </Label>
-                                        <VBox spacing="5.0">
-                                            <Label styleClass="field-label" text="Completion Message" />
-                                            <Label fx:id="proofMessageLabel" style="-fx-background-color: #f8faf9; -fx-padding: 10;" wrapText="true" text="Select a request to view proof..." />
-                                        </VBox>
-                                        <Button onAction="#handleMarkAchieved" prefWidth="Infinity" styleClass="btn-signin" text="🏆 Validate Achievement" />
-                                    </children>
-                                </VBox>
-                                <VBox spacing="15.0" styleClass="stat-card" HBox.hgrow="ALWAYS">
-                                    <children>
-                                        <Label text="Submitted Proofs">
-                                            <font><Font name="System Bold" size="18.0" /></font>
-                                        </Label>
-                                        <TableView fx:id="completionTable" VBox.vgrow="ALWAYS">
-                                            <columns>
-                                                <TableColumn fx:id="cIdCol" prefWidth="40.0" text="ID" />
-                                                <TableColumn fx:id="cTitleCol" prefWidth="200.0" text="Ticket Title" />
-                                                <TableColumn fx:id="cWorkerCol" prefWidth="150.0" text="Completed By" />
-                                                <TableColumn fx:id="cDateCol" prefWidth="150.0" text="Date Submitted" />
-                                            </columns>
-                                        </TableView>
-                                    </children>
-                                </VBox>
-                            </children>
-                        </HBox>
-                    </content>
-                </Tab>
-            </tabs>
-        </TabPane>
-    </children>
-</VBox>
+        </VBox>
+    </center>
+</BorderPane>

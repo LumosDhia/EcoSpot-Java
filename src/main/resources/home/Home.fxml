@@ -44,17 +44,16 @@
             </HBox>
 
             <!-- ===== WHITE SECONDARY NAV ===== -->
-            <HBox alignment="CENTER" spacing="25.0" styleClass="main-nav">
-                <padding><Insets bottom="15.0" left="60.0" right="60.0" top="15.0" /></padding>
+            <HBox alignment="CENTER_LEFT" spacing="10.0" styleClass="main-nav">
+                <padding><Insets bottom="12.0" left="20.0" right="20.0" top="12.0" /></padding>
                 <children>
+                    <Label onMouseClicked="#goToHome" style="-fx-cursor: hand;" styleClass="brand-name" text="EcoSpot" />
                     <Region HBox.hgrow="ALWAYS" />
-                    <Button onAction="#goToHome" styleClass="nav-link-active" text="Home" />
+                    <Button styleClass="nav-link-btn" text="Home" />
                     <Button styleClass="nav-link-btn" text="Events" />
-                    <Button styleClass="nav-link-btn" text="📍 Nearby" />
-                    <Button onAction="#goToPublicBoard" styleClass="nav-ticket-bubble" text="🎟 Tickets" />
-                    <Button onAction="#goToAchievements" styleClass="nav-link-btn" text="Achievements" />
+                    <Button onAction="#goToTickets" styleClass="nav-link-btn" text="🎟 Tickets" />
+                    <Button styleClass="nav-link-btn" text="Achievements" />
                     <Button fx:id="blogBtn" onAction="#goToBlog" styleClass="nav-btn-blog" text="Blog" />
-                    <Region HBox.hgrow="ALWAYS" />
                 </children>
             </HBox>
         </VBox>
@@ -120,25 +119,18 @@
                                             <Label styleClass="card-text" text="Join community events and workshops near you." textAlignment="CENTER" wrapText="true" />
                                         </children>
                                     </VBox>
-                                    <VBox alignment="CENTER" onMouseClicked="#goToReportIssue" spacing="12.0" style="-fx-cursor: hand;" styleClass="explore-card" HBox.hgrow="ALWAYS">
+                                    <VBox alignment="CENTER" onMouseClicked="#goToTicketsFromIcon" spacing="12.0" style="-fx-cursor: hand;" styleClass="explore-card" HBox.hgrow="ALWAYS">
                                         <children>
-                                            <Label style="-fx-font-size: 36px;" text="📢" />
-                                            <Label styleClass="card-title" text="Report" />
-                                            <Label styleClass="card-text" text="Spotted environmental damage? Report it here." textAlignment="CENTER" wrapText="true" />
+                                            <Label style="-fx-font-size: 36px;" text="🎟" />
+                                            <Label styleClass="card-title" text="Tickets" />
+                                            <Label styleClass="card-text" text="Get your passes for upcoming workshops." textAlignment="CENTER" wrapText="true" />
                                         </children>
                                     </VBox>
-                                    <VBox alignment="CENTER" onMouseClicked="#goToPublicBoard" spacing="12.0" style="-fx-cursor: hand;" styleClass="explore-card" HBox.hgrow="ALWAYS">
-                                        <children>
-                                            <Label style="-fx-font-size: 36px;" text="🎯" />
-                                            <Label styleClass="card-title" text="Actions" />
-                                            <Label styleClass="card-text" text="Browse published tasks and restore the planet." textAlignment="CENTER" wrapText="true" />
-                                        </children>
-                                    </VBox>
-                                    <VBox alignment="CENTER" onMouseClicked="#goToAchievements" spacing="12.0" style="-fx-cursor: hand;" styleClass="explore-card" HBox.hgrow="ALWAYS">
+                                    <VBox alignment="CENTER" spacing="12.0" styleClass="explore-card" HBox.hgrow="ALWAYS">
                                         <children>
                                             <Label style="-fx-font-size: 36px;" text="🏆" />
-                                            <Label styleClass="card-title" text="Heroes" />
-                                            <Label styleClass="card-text" text="See our community hall of fame and eco-milestones." textAlignment="CENTER" wrapText="true" />
+                                            <Label styleClass="card-title" text="Achievements" />
+                                            <Label styleClass="card-text" text="Track your eco-impact and community milestones." textAlignment="CENTER" wrapText="true" />
                                         </children>
                                     </VBox>
                                 </children>
