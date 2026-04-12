@@ -8,8 +8,8 @@
     -fx-border-color: #e5e7eb;
     -fx-border-radius: 4;
     -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.05), 10, 0, 0, 4);
-    -fx-min-width: 320;
-    -fx-max-width: 320;
+    -fx-min-width: 380;
+    -fx-max-width: 380;
     -fx-min-height: 250;
 }
 
@@ -56,7 +56,7 @@
 
 .ticket-title {
     -fx-text-fill: #1f2937;
-    -fx-font-size: 16px;
+    -fx-font-size: 18px;
     -fx-font-weight: bold;
 }
 
@@ -67,7 +67,7 @@
 
 .ticket-description {
     -fx-text-fill: #6b7280;
-    -fx-font-size: 13px;
+    -fx-font-size: 14px;
     -fx-line-spacing: 2;
 }
 
@@ -121,8 +121,8 @@
     -fx-border-radius: 4;
     -fx-background-radius: 4;
     -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.05), 10, 0, 0, 4);
-    -fx-min-width: 320;
-    -fx-max-width: 320;
+    -fx-min-width: 380;
+    -fx-max-width: 380;
     -fx-min-height: 180;
 }
 

@@ -99,8 +99,8 @@ public class TicketManagementController {
 
         // Ticket Image Thumbnail
         ImageView cardImg = new ImageView();
-        cardImg.setFitWidth(280);
-        cardImg.setFitHeight(120);
+        cardImg.setFitWidth(340);
+        cardImg.setFitHeight(180);
         cardImg.setPreserveRatio(true);
         if (t.getImage() != null && !t.getImage().isEmpty()) {
             loadImageRobustly(t.getImage(), cardImg);
@@ -111,7 +111,6 @@ public class TicketManagementController {
         Label desc = new Label(t.getDescription());
         desc.getStyleClass().add("ticket-description");
         desc.setWrapText(true);
-        desc.setMaxHeight(60); 
 
         HBox buttons = new HBox(10);
         buttons.setAlignment(Pos.CENTER_LEFT);

@@ -112,8 +112,8 @@ public class AchievementsController {
 
         // Ticket Image Thumbnail
         javafx.scene.image.ImageView cardImg = new javafx.scene.image.ImageView();
-        cardImg.setFitWidth(280);
-        cardImg.setFitHeight(120);
+        cardImg.setFitWidth(340);
+        cardImg.setFitHeight(180);
         cardImg.setPreserveRatio(true);
         if (t.getImage() != null && !t.getImage().isEmpty()) {
             loadImageRobustly(t.getImage(), cardImg);

@@ -109,9 +109,8 @@ public class MyTicketsController {
 
         // Description
         Label desc = new Label(t.getDescription());
-        desc.setStyle("-fx-text-fill: #9ca3af; -fx-font-size: 13px;");
+        desc.setStyle("-fx-text-fill: #9ca3af; -fx-font-size: 14px;");
         desc.setWrapText(true);
-        desc.setMaxHeight(60); 
 
         content.getChildren().addAll(title, loc, desc);
 
