@@ -54,6 +54,20 @@ public class TicketService implements GlobalInterface<Ticket> {
 
     @Override
     public List<Ticket> getAll() {
-        return new ArrayList<>();
+        List<Ticket> tickets = new ArrayList<>();
+        String req = "SELECT * FROM `ticket`";
+        try (Statement st = cnx.createStatement(); ResultSet rs = st.executeQuery(req)) {
+            while (rs.next()) {
+                tickets.add(new Ticket(
+                        rs.getInt("id"),
+                        rs.getInt("event_id"),
+                        rs.getDouble("price"),
+                        rs.getString("type")
+                ));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return tickets;
     }
 }
