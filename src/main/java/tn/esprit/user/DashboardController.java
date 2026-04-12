@@ -108,6 +108,18 @@ public class DashboardController {
     }
 
     @FXML
+    void goToPendingTicketsGrid(MouseEvent event) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/ticket/PendingTickets.fxml"));
+            Parent root = loader.load();
+            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+            stage.getScene().setRoot(root);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @FXML
     void goToCreateTicket(ActionEvent event) {
         navigate(event, "/ticket/CreateTicket.fxml");
     }
