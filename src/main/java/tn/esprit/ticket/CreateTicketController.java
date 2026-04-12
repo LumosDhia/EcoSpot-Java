@@ -37,7 +37,37 @@ public class CreateTicketController {
         } else {
             userNameLabel.setText("Guest");
         }
+        
+        setupInputControls();
     }
+
+    private void setupInputControls() {
+        // Validation visually triggers when users are typing
+        titleInput.textProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue.trim().length() < 5) {
+                titleInput.setStyle("-fx-border-color: #ef4444; -fx-padding: 10; -fx-background-color: white; -fx-border-radius: 4; -fx-font-size: 14px;");
+            } else {
+                titleInput.setStyle("-fx-border-color: #10b981; -fx-padding: 10; -fx-background-color: white; -fx-border-radius: 4; -fx-font-size: 14px;");
+            }
+        });
+
+        descriptionInput.textProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue.trim().length() < 20) {
+                descriptionInput.setStyle("-fx-border-color: #ef4444; -fx-padding: 5; -fx-background-color: white; -fx-border-radius: 4; -fx-font-size: 14px;");
+            } else {
+                descriptionInput.setStyle("-fx-border-color: #10b981; -fx-padding: 5; -fx-background-color: white; -fx-border-radius: 4; -fx-font-size: 14px;");
+            }
+        });
+
+        locationInput.textProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue.trim().isEmpty()) {
+                locationInput.setStyle("-fx-border-color: #ef4444; -fx-padding: 10; -fx-background-color: white; -fx-border-radius: 4; -fx-font-size: 14px;");
+            } else {
+                locationInput.setStyle("-fx-border-color: #10b981; -fx-padding: 10; -fx-background-color: white; -fx-border-radius: 4; -fx-font-size: 14px;");
+            }
+        });
+    }
+
 
     @FXML
     void handleChooseFile(ActionEvent event) {
