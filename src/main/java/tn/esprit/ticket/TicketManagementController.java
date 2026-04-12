@@ -41,6 +41,27 @@ public class TicketManagementController {
         priceCol.setCellValueFactory(new PropertyValueFactory<>("price"));
         typeCol.setCellValueFactory(new PropertyValueFactory<>("type"));
         
+        // Actions Column
+        actionsCol.setCellFactory(param -> new TableCell<>() {
+            private final Button deleteBtn = new Button("Delete");
+            {
+                deleteBtn.setStyle("-fx-background-color: #bc4749; -fx-text-fill: white; -fx-background-radius: 5;");
+                deleteBtn.setCursor(javafx.scene.Cursor.HAND);
+                deleteBtn.setOnAction(event -> {
+                    Ticket t = getTableView().getItems().get(getIndex());
+                    ticketService.delete(t);
+                    loadTickets();
+                });
+            }
+
+            @Override
+            protected void updateItem(Void item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty) setGraphic(null);
+                else setGraphic(deleteBtn);
+            }
+        });
+
         // Selection listener
         ticketTable.getSelectionModel().selectedItemProperty().addListener((obs, oldSelection, newSelection) -> {
             if (newSelection != null) {
