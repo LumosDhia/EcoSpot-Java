@@ -41,33 +41,36 @@
 
 .nav-link-btn {
     -fx-background-color: transparent;
-    -fx-text-fill: #888888;
-    -fx-font-size: 15px;
+    -fx-text-fill: #4b5563; /* Greyish */
+    -fx-font-size: 16px;
+    -fx-font-weight: normal;
     -fx-cursor: hand;
-    -fx-padding: 6 14;
+    -fx-padding: 6 15;
 }
 
 .nav-link-btn:hover {
-    -fx-text-fill: #1b4332;
+    -fx-text-fill: #2d6a4f;
 }
 
 .nav-link-active {
-    -fx-text-fill: #2d6a4f;
+    -fx-text-fill: #2d6a4f; /* Active Green */
     -fx-font-weight: bold;
     -fx-background-color: transparent;
-    -fx-font-size: 15px;
+    -fx-font-size: 16px;
+    -fx-padding: 6 15;
 }
 
 .nav-ticket-bubble {
     -fx-background-color: #f0fdf4;
-    -fx-border-color: #d1fae5;
-    -fx-border-radius: 25;
-    -fx-background-radius: 25;
+    -fx-border-color: #10b981;
+    -fx-border-radius: 30;
+    -fx-background-radius: 30;
     -fx-text-fill: #065f46;
     -fx-font-weight: bold;
-    -fx-padding: 10 25;
+    -fx-font-size: 16px;
+    -fx-padding: 10 30;
     -fx-cursor: hand;
-    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.05), 5, 0, 0, 0);
+    -fx-effect: dropshadow(three-pass-box, rgba(16,185,129,0.2), 15, 0, 0, 0);
 }
 
 .nav-ticket-bubble:hover {
@@ -77,10 +80,10 @@
 .nav-btn-blog {
     -fx-background-color: #2d6a4f;
     -fx-text-fill: white;
-    -fx-font-size: 15px;
+    -fx-font-size: 16px;
     -fx-font-weight: bold;
     -fx-cursor: hand;
-    -fx-padding: 10 25;
+    -fx-padding: 12 28;
     -fx-background-radius: 4;
 }
 
