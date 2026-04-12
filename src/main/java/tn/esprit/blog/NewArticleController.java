@@ -27,6 +27,8 @@ public class NewArticleController {
     @FXML private ImageView imagePreview;
     @FXML private VBox categoriesContainer;
     @FXML private VBox tagsContainer;
+    @FXML private TextField newCategoryField;
+    @FXML private TextField newTagField;
     @FXML private VBox revisionAlertBox;
     @FXML private Label revisionNoteLabel;
 
@@ -98,6 +100,7 @@ public class NewArticleController {
     }
 
     private void loadCategories() {
+        categoriesContainer.getChildren().clear();
         List<Category> categories = categoryService.getAll();
         for (Category cat : categories) {
             RadioButton rb = new RadioButton(cat.getName());
@@ -139,50 +142,16 @@ public class NewArticleController {
         String title = titleField.getText();
         String content = contentEditor.getHtmlText();
         
-        // --- Validation Logic (Controle de Saisir) ---
-        
-        // 1. Title Validation
-        if (title == null || title.trim().isEmpty()) {
-            showAlert("Validation Error", "Title is required.");
-            return;
-        }
-        if (title.length() < 5 || title.length() > 100) {
-            showAlert("Validation Error", "Title must be between 5 and 100 characters.");
-            return;
-        }
-        if (!title.matches(".*[a-zA-Z].*[a-zA-Z].*[a-zA-Z].*[a-zA-Z].*[a-zA-Z].*")) {
-            showAlert("Validation Error", "Title must contain at least 5 letters.");
-            return;
-        }
-        if (!title.substring(0, 1).matches("[a-zA-Z]")) {
-            showAlert("Validation Error", "Title must start with a letter.");
-            return;
-        }
+        createCategoryFromInputIfNeeded();
+        createTagsFromInputIfNeeded();
 
-        // 2. Content Validation
-        // Clean HTML tags to count actual text length for meaningful validation
-        String plainText = content.replaceAll("<[^>]*>", "").trim();
-        if (plainText.isEmpty()) {
-            showAlert("Validation Error", "Content is required.");
-            return;
-        }
-        if (plainText.length() < 20) {
-            showAlert("Validation Error", "The article content must be more detailed (at least 20 characters).");
-            return;
-        }
-        if (!plainText.matches(".*[a-zA-Z].*[a-zA-Z].*[a-zA-Z].*[a-zA-Z].*[a-zA-Z].*")) {
-            showAlert("Validation Error", "The article content must contain at least 5 letters.");
-            return;
-        }
-
-        // 3. Category Validation
+        // Validation Logic (Controle de Saisir)
         RadioButton selectedCat = (RadioButton) categoryGroup.getSelectedToggle();
-        if (selectedCat == null) {
-            showAlert("Validation Error", "Please select a category.");
+        String validationError = ArticleInputValidator.validate(title, content, selectedCat != null);
+        if (validationError != null) {
+            showAlert("Validation Error", validationError);
             return;
         }
-
-        // --- End Validation ---
 
         Blog blog = (editArticle != null) ? editArticle : new Blog();
         blog.setTitle(title);
@@ -212,6 +181,55 @@ public class NewArticleController {
         }
         
         goToArticles();
+    }
+
+    private void createCategoryFromInputIfNeeded() {
+        if (newCategoryField == null) return;
+        String value = newCategoryField.getText();
+        if (value == null || value.trim().isEmpty()) return;
+
+        Category created = categoryService.createIfMissing(value);
+        if (created == null) return;
+
+        loadCategories();
+        categoryGroup.getToggles().stream()
+                .filter(t -> {
+                    Object data = t.getUserData();
+                    return data instanceof Category && ((Category) data).getId() == created.getId();
+                })
+                .findFirst()
+                .ifPresent(t -> t.setSelected(true));
+        newCategoryField.clear();
+    }
+
+    private void createTagsFromInputIfNeeded() {
+        if (newTagField == null) return;
+        String raw = newTagField.getText();
+        if (raw == null || raw.trim().isEmpty()) return;
+
+        String[] parts = raw.split(",");
+        List<Integer> createdOrMatchedIds = new ArrayList<>();
+        for (String p : parts) {
+            Tag t = tagService.createIfMissing(p);
+            if (t != null) {
+                createdOrMatchedIds.add(t.getId());
+            }
+        }
+
+        loadTags();
+        for (javafx.scene.Node node : tagsContainer.getChildren()) {
+            if (node instanceof CheckBox) {
+                CheckBox cb = (CheckBox) node;
+                Object data = cb.getUserData();
+                if (data instanceof Tag) {
+                    Tag tag = (Tag) data;
+                    if (createdOrMatchedIds.contains(tag.getId())) {
+                        cb.setSelected(true);
+                    }
+                }
+            }
+        }
+        newTagField.clear();
     }
 
 

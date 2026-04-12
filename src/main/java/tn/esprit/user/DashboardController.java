@@ -165,7 +165,29 @@ public class DashboardController {
     }
 
     @FXML
+    void goToAllTickets(ActionEvent event) {
+        navigate(event, "/ticket/TicketManagement.fxml");
+    }
+
+    @FXML
+    void goToCompletions(ActionEvent event) {
+        navigate(event, "/ticket/PendingTickets.fxml");
+    }
+
+    @FXML
     void goToPendingTicketsGrid(MouseEvent event) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/ticket/PendingTickets.fxml"));
+            Parent root = loader.load();
+            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+            stage.getScene().setRoot(root);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @FXML
+    void goToCompletionsGrid(MouseEvent event) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/ticket/PendingTickets.fxml"));
             Parent root = loader.load();
@@ -318,6 +340,49 @@ public class DashboardController {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/blog/CommentsManagement.fxml"));
             Parent root = loader.load();
+            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+            stage.getScene().setRoot(root);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @FXML
+    void goToTaxonomyManagementGrid(MouseEvent event) {
+        navigateToTaxonomy(event, null);
+    }
+
+    @FXML
+    void goToCategoriesManagementGrid(MouseEvent event) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/blog/CategoriesManagement.fxml"));
+            Parent root = loader.load();
+            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+            stage.getScene().setRoot(root);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @FXML
+    void goToTagsManagementGrid(MouseEvent event) {
+        navigateToTaxonomy(event, "TAGS");
+    }
+
+    private void navigateToTaxonomy(MouseEvent event, String section) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/blog/TaxonomyManagement.fxml"));
+            Parent root = loader.load();
+            Object controller = loader.getController();
+            if (controller instanceof tn.esprit.blog.TaxonomyManagementController) {
+                tn.esprit.blog.TaxonomyManagementController taxonomyController =
+                        (tn.esprit.blog.TaxonomyManagementController) controller;
+                if ("CATEGORIES".equals(section)) {
+                    taxonomyController.showCategoriesOnly();
+                } else if ("TAGS".equals(section)) {
+                    taxonomyController.showTagsOnly();
+                }
+            }
             Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
             stage.getScene().setRoot(root);
         } catch (IOException e) {

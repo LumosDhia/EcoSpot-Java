@@ -36,8 +36,8 @@
                                 <Button onAction="#goToCommentsManagement" styleClass="sidebar-item" text="💬 Comments" />
                                 <Button onAction="#goToEventManagement" styleClass="sidebar-item" text="📅 Events" />
                                 <Button onAction="#goToPendingTickets" styleClass="sidebar-item" text="🎫 Pending tickets" />
-                                <Button styleClass="sidebar-item" text="📋 All tickets" />
-                                <Button styleClass="sidebar-item" text="✅ Completions" />
+                                <Button onAction="#goToAllTickets" styleClass="sidebar-item" text="📋 All tickets" />
+                                <Button onAction="#goToCompletions" styleClass="sidebar-item" text="✅ Completions" />
                                 <Button onAction="#goToUserManagement" styleClass="sidebar-item" text="👥 Users" />
                                 <Button onAction="#goToSponsorManagement" styleClass="sidebar-item" text="🤝 Sponsors" />
                             </children>
@@ -125,7 +125,7 @@
                                                 </VBox>
                                             </children>
                                         </VBox>
-                                        <VBox styleClass="stat-card">
+                                        <VBox onMouseClicked="#goToCompletionsGrid" styleClass="stat-card">
                                             <children>
                                                 <VBox alignment="CENTER" spacing="15.0">
                                                     <children>
@@ -187,7 +187,7 @@
                                                                         <Label styleClass="dashboard-icon" text="&#xE787;" />
                                                                     </children>
                                                                 </StackPane>
-                                                                <Label styleClass="card-title-lg" text="Events" />
+                                                                <Label styleClass="card-title-lg" text="Manage events" />
                                                                 <Label styleClass="card-subtitle" text="Create and manage events" textAlignment="CENTER" wrapText="true" />
                                                             </children>
                                                         </VBox>
@@ -224,13 +224,13 @@
                                                                 <Label styleClass="dashboard-icon" text="&#xE12B;" />
                                                             </children>
                                                         </StackPane>
-                                                        <Label styleClass="card-title-lg" text="Sponsors" />
+                                                        <Label styleClass="card-title-lg" text="Manage sponsors" />
                                                         <Label styleClass="card-subtitle" text="Manage sponsors" textAlignment="CENTER" wrapText="true" />
                                                     </children>
                                                 </VBox>
                                             </children>
                                         </VBox>
-                                        <VBox styleClass="stat-card">
+                                        <VBox onMouseClicked="#goToCategoriesManagementGrid" styleClass="stat-card">
                                             <children>
                                                 <VBox alignment="CENTER" spacing="15.0">
                                                     <children>
@@ -245,7 +245,7 @@
                                                 </VBox>
                                             </children>
                                         </VBox>
-                                        <VBox styleClass="stat-card">
+                                        <VBox onMouseClicked="#goToTagsManagementGrid" styleClass="stat-card">
                                             <children>
                                                 <VBox alignment="CENTER" spacing="15.0">
                                                     <children>
@@ -335,8 +335,8 @@
                                                                         <Label styleClass="dashboard-icon" text="&#xE787;" />
                                                                     </children>
                                                                 </StackPane>
-                                                                <Label styleClass="card-title-lg" text="Create event" />
-                                                                <Label styleClass="card-subtitle" text="Add a new event" textAlignment="CENTER" wrapText="true" />
+                                                                <Label styleClass="card-title-lg" text="Manage events" />
+                                                                <Label styleClass="card-subtitle" text="Manage your events" textAlignment="CENTER" wrapText="true" />
                                                             </children>
                                                         </VBox>
                                                     </children>

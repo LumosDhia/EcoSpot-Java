@@ -2,6 +2,9 @@ package tn.esprit.services;
 
 import org.junit.jupiter.api.*;
 import tn.esprit.user.User;
+
+import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
@@ -64,5 +67,93 @@ public class UserServiceTest {
                                                         null, null, null, 
                                                         "testpass123", "testpass123", true);
         assertEquals("SUCCESS", result, "Valid data should return SUCCESS");
+    }
+
+    @Test
+    @Order(7)
+    public void testAdminCanCreateUserInDatabase() {
+        String uniqueEmail = "admin_create_" + System.currentTimeMillis() + "@example.com";
+        String result = userService.validateAndRegisterAdmin(
+                "Admin",
+                "Created",
+                uniqueEmail,
+                "USER",
+                "pass123",
+                "pass123"
+        );
+        assertEquals("SUCCESS", result, "Admin user creation should persist in DB");
+
+        User created = userService.authenticate(uniqueEmail, "pass123");
+        assertNotNull(created, "Created user must be readable from DB/auth flow");
+        assertEquals("USER", created.getRole(), "Created user role should match");
+    }
+
+    @Test
+    @Order(8)
+    public void testAdminCanPromoteAndDemoteUserRoleInDatabase() {
+        String uniqueEmail = "role_change_" + System.currentTimeMillis() + "@example.com";
+        String createResult = userService.validateAndRegisterAdmin(
+                "Role",
+                "Tester",
+                uniqueEmail,
+                "USER",
+                "pass123",
+                "pass123"
+        );
+        assertEquals("SUCCESS", createResult);
+
+        User created = userService.authenticate(uniqueEmail, "pass123");
+        assertNotNull(created);
+
+        userService.updateUserRoleDirectly(created.getId(), "NGO");
+        User promoted = userService.authenticate(uniqueEmail, "pass123");
+        assertNotNull(promoted);
+        assertEquals("NGO", promoted.getRole(), "Role should be updated to NGO in DB");
+
+        userService.updateUserRoleDirectly(created.getId(), "ADMIN");
+        User promotedAgain = userService.authenticate(uniqueEmail, "pass123");
+        assertNotNull(promotedAgain);
+        assertEquals("ADMIN", promotedAgain.getRole(), "Role should be updated to ADMIN in DB");
+    }
+
+    @Test
+    @Order(9)
+    public void testAdminCanDeleteUserInDatabase() {
+        String uniqueEmail = "delete_user_" + System.currentTimeMillis() + "@example.com";
+        String createResult = userService.validateAndRegisterAdmin(
+                "Delete",
+                "Tester",
+                uniqueEmail,
+                "USER",
+                "pass123",
+                "pass123"
+        );
+        assertEquals("SUCCESS", createResult);
+
+        User created = userService.authenticate(uniqueEmail, "pass123");
+        assertNotNull(created);
+
+        userService.removeUser(created.getId());
+        User deleted = userService.authenticate(uniqueEmail, "pass123");
+        assertNull(deleted, "Deleted user should no longer authenticate");
+    }
+
+    @Test
+    @Order(10)
+    public void testUserManagementListReadsFromDatabase() {
+        String uniqueEmail = "list_user_" + System.currentTimeMillis() + "@example.com";
+        String createResult = userService.validateAndRegisterAdmin(
+                "List",
+                "Tester",
+                uniqueEmail,
+                "USER",
+                "pass123",
+                "pass123"
+        );
+        assertEquals("SUCCESS", createResult);
+
+        List<User> users = userService.getAllUsers();
+        boolean found = users.stream().anyMatch(u -> uniqueEmail.equalsIgnoreCase(u.getEmail()));
+        assertTrue(found, "getAllUsers should include newly inserted DB user");
     }
 }

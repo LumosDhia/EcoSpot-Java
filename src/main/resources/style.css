@@ -465,6 +465,28 @@
 .table-row-cell:even {
     -fx-background-color: #fcfcfc;
 }
+
+/* Keep selection highlighted with readable text (not white text) */
+.table-row-cell:selected,
+.table-row-cell:filled:selected {
+    -fx-background-color: #dff3e8;
+}
+
+.table-row-cell:selected .table-cell,
+.table-row-cell:filled:selected .table-cell {
+    -fx-text-fill: #1b4332;
+}
+
+.table-view:focused .table-row-cell:selected,
+.table-view:focused .table-row-cell:filled:selected {
+    -fx-background-color: #cdeedd;
+}
+
+.list-view .list-cell:filled:selected,
+.list-view:focused .list-cell:filled:selected {
+    -fx-background-color: #dff3e8;
+    -fx-text-fill: #1b4332;
+}
 /* ================================
    MODERN BUTTON TEMPLATES (The "Templates" you asked for)
    ================================ */

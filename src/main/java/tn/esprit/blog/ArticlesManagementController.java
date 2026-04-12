@@ -49,11 +49,18 @@ public class ArticlesManagementController {
     private BlogService blogService = new BlogService();
     private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
     private boolean ngoMode = false;
+    private boolean adminMode = false;
+    private String currentOwnerEmail;
 
     @FXML
     public void initialize() {
         User currentUser = tn.esprit.util.SessionManager.getCurrentUser();
         ngoMode = currentUser != null && "NGO".equalsIgnoreCase(currentUser.getRole());
+        adminMode = currentUser != null && "ADMIN".equalsIgnoreCase(currentUser.getRole());
+        currentOwnerEmail = blogService.resolveCurrentOwnerEmail();
+        if ((currentOwnerEmail == null || currentOwnerEmail.isEmpty()) && currentUser != null) {
+            currentOwnerEmail = currentUser.getEmail();
+        }
         tn.esprit.util.NavigationHistory.track(homeBtn, "/blog/ArticlesManagement.fxml");
         setupTables();
         loadData();
@@ -165,6 +172,25 @@ public class ArticlesManagementController {
                 if (empty) {
                     setGraphic(null);
                 } else {
+                    Blog blog = getTableView().getItems().get(getIndex());
+                    boolean isOwnArticle = isOwnedByCurrentUser(blog);
+                    editBtn.setDisable(false);
+                    deleteBtn.setDisable(false);
+                    revisionBtn.setDisable(false);
+
+                    if (!isAdminTable && !allowNgoEdit) {
+                        editBtn.setVisible(false);
+                        editBtn.setManaged(false);
+                        boolean canReviewThisArticle = !(adminMode && isOwnArticle);
+                        revisionBtn.setVisible(canReviewThisArticle);
+                        revisionBtn.setManaged(canReviewThisArticle);
+                        revisionBtn.setDisable(!canReviewThisArticle);
+                    } else {
+                        editBtn.setVisible(true);
+                        editBtn.setManaged(true);
+                        revisionBtn.setVisible(false);
+                        revisionBtn.setManaged(false);
+                    }
                     setGraphic(pane);
                 }
             }
@@ -208,9 +234,14 @@ public class ArticlesManagementController {
     }
 
     private void handleReturnToRevision(Blog blog) {
+        if (adminMode && isOwnedByCurrentUser(blog)) {
+            Alert warn = new Alert(Alert.AlertType.INFORMATION, "You cannot review your own article.");
+            warn.showAndWait();
+            return;
+        }
         TextInputDialog inputDialog = new TextInputDialog();
         inputDialog.setTitle("Return for revision");
-        inputDialog.setHeaderText("Send article back to NGO writer");
+        inputDialog.setHeaderText("Send article back for revision");
         inputDialog.setContentText("Revision note:");
         inputDialog.showAndWait().ifPresent(note -> {
             String trimmedNote = note == null ? "" : note.trim();
@@ -240,6 +271,13 @@ public class ArticlesManagementController {
             btn.setStyle("-fx-background-color: #6c757d; -fx-text-fill: white; -fx-font-size: 10; -fx-background-radius: 4;");
         }
         return btn;
+    }
+
+    private boolean isOwnedByCurrentUser(Blog blog) {
+        if (blog == null || currentOwnerEmail == null || blog.getCreatedByEmail() == null) {
+            return false;
+        }
+        return blog.getCreatedByEmail().equalsIgnoreCase(currentOwnerEmail);
     }
 
     private void loadData() {
