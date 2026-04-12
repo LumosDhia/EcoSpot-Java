@@ -146,7 +146,10 @@ public class TicketManagementController {
         btnComplete.getStyleClass().add("ticket-btn-complete");
         btnComplete.setOnAction(e -> markCompleted(t));
         
-        buttons.getChildren().addAll(btnView, btnComplete);
+        buttons.getChildren().add(btnView);
+        if (tn.esprit.util.SessionManager.isLoggedIn()) {
+            buttons.getChildren().add(btnComplete);
+        }
 
         content.getChildren().addAll(header, title, loc, desc, buttons);
 

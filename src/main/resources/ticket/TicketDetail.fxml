@@ -106,7 +106,7 @@
                         <Region prefHeight="20.0" />
 
                         <!-- Action Row -->
-                        <HBox spacing="20.0" alignment="CENTER_LEFT" style="-fx-border-color: #e5e7eb transparent transparent transparent; -fx-padding: 30 0 0 0;">
+                        <HBox fx:id="completionBox" spacing="20.0" alignment="CENTER_LEFT" style="-fx-border-color: #e5e7eb transparent transparent transparent; -fx-padding: 30 0 0 0;">
                             <children>
                                 <Button onAction="#handleComplete" styleClass="ticket-btn-complete" style="-fx-font-size: 14px; -fx-padding: 10 25;" text="I completed this" />
                                 <Label style="-fx-text-fill: #6b7280;" text="Submit proof that you completed this task." />

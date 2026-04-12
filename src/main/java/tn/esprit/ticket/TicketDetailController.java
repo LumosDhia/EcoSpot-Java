@@ -28,6 +28,7 @@ public class TicketDetailController {
     @FXML private ImageView ticketImageView;
     @FXML private HBox authLinks;
     @FXML private HBox userLinks;
+    @FXML private HBox completionBox;
     @FXML private Button dashboardTopBtn;
 
     private Ticket currentTicket;
@@ -56,6 +57,10 @@ public class TicketDetailController {
             authLinks.setManaged(true);
             userLinks.setVisible(false);
             userLinks.setManaged(false);
+            
+            // Hide completion box for guests
+            completionBox.setVisible(false);
+            completionBox.setManaged(false);
         }
     }
 
