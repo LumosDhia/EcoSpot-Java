@@ -16,9 +16,9 @@
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
-<?import javafx.scene.text.Font?>
 <?import javafx.scene.text.Text?>
 <?import javafx.scene.text.TextFlow?>
+<?import javafx.scene.web.WebView?>
 
 <BorderPane style="-fx-background-color: white;" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="tn.esprit.blog.BlogDetailController">
     <stylesheets>
@@ -92,37 +92,11 @@
                                  <children>
                                     <Label fx:id="categoryLabel" styleClass="category-tag" text="Waste Management" />
                                     <Label fx:id="titleLabel" styleClass="detail-article-title" text="Innovating the Recycling Process for a Circular Economy" wrapText="true" />
-                                    <HBox spacing="10.0">
-                                       <children>
-                                          <Label styleClass="detail-tag" text="#Recycling" />
-                                          <Label styleClass="detail-tag" text="#Innovation" />
-                                       </children>
-                                    </HBox>
-                                    <HBox alignment="CENTER_LEFT" spacing="20.0" styleClass="detail-meta-row">
-                                       <children>
-                                          <Label fx:id="dateLabel" text="🕒 18 days ago" />
-                                          <Label fx:id="readTimeLabel" text="📖 1 min read" />
-                                          <Label fx:id="authorLabel" text="👤 Writer: Admin User" />
-                                       </children>
-                                    </HBox>
+                                    <WebView fx:id="contentWebView" prefHeight="400.0" minHeight="200.0" style="-fx-background-color: transparent;" />
                                     
                                     <Separator />
-                                    
-                                    <TextFlow fx:id="contentFlow" lineSpacing="5.0">
-                                       <children>
-                                          <Text fx:id="contentText" styleClass="detail-content-text" text="Article content goes here..." />
-                                       </children>
-                                    </TextFlow>
-                                    
-                                    <Separator />
-                                    
-                                    <HBox alignment="CENTER_LEFT" spacing="15.0">
-                                       <children>
-                                          <Label text="Rate this article:" style="-fx-font-weight: bold;" />
-                                          <Button styleClass="btn-reaction-like" text="👍 Like" />
-                                          <Button styleClass="btn-reaction-dislike" text="👎 Dislike" />
-                                       </children>
-                                    </HBox>
+                                 </children>
+                              </VBox>
                                  </children>
                               </VBox>
                               

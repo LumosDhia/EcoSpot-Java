@@ -1,6 +1,8 @@
 package tn.esprit.blog;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Blog {
     private int id;
@@ -10,6 +12,7 @@ public class Blog {
     private String image;
     private LocalDateTime publishedAt;
     private Category category;
+    private List<Tag> tags = new ArrayList<>();
     private int views;
     private int likesCount;
     private int dislikesCount;
@@ -48,6 +51,8 @@ public class Blog {
     public void setPublishedAt(LocalDateTime publishedAt) { this.publishedAt = publishedAt; }
     public Category getCategory() { return category; }
     public void setCategory(Category category) { this.category = category; }
+    public List<Tag> getTags() { return tags; }
+    public void setTags(List<Tag> tags) { this.tags = tags; }
     public int getViews() { return views; }
     public void setViews(int views) { this.views = views; }
     public int getLikesCount() { return likesCount; }

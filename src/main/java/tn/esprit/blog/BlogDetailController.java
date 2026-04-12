@@ -27,7 +27,7 @@ public class BlogDetailController {
     @FXML private Label dateLabel;
     @FXML private Label readTimeLabel;
     @FXML private Label authorLabel;
-    @FXML private Text contentText;
+    @FXML private javafx.scene.web.WebView contentWebView;
     
     // Comments
     @FXML private VBox commentsContainer;
@@ -60,7 +60,7 @@ public class BlogDetailController {
         readTimeLabel.setText("📖 " + blog.getReadingTime() + " min read");
         authorLabel.setText("👤 Writer: " + (blog.getAuthor() != null ? blog.getAuthor() : "Admin User"));
         
-        contentText.setText(blog.getContent());
+        contentWebView.getEngine().loadContent(blog.getContent());
         
         loadComments();
     }

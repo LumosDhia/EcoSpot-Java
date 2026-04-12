@@ -11,9 +11,11 @@ import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import tn.esprit.services.BlogService;
 import tn.esprit.services.CategoryService;
+import tn.esprit.services.TagService;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 public class NewArticleController {
@@ -31,6 +33,7 @@ public class NewArticleController {
     private String selectedImagePath = "";
     private ToggleGroup categoryGroup = new ToggleGroup();
     private Blog editArticle = null;
+    private TagService tagService = new TagService();
 
     @FXML
     public void initialize() {
@@ -59,6 +62,19 @@ public class NewArticleController {
                 .findFirst()
                 .ifPresent(t -> t.setSelected(true));
         }
+        
+        // Tags pre-selection
+        if (blog.getTags() != null) {
+            for (javafx.scene.Node node : tagsContainer.getChildren()) {
+                if (node instanceof CheckBox) {
+                    CheckBox cb = (CheckBox) node;
+                    Tag tag = (Tag) cb.getUserData();
+                    if (blog.getTags().stream().anyMatch(t -> t.getId() == tag.getId())) {
+                        cb.setSelected(true);
+                    }
+                }
+            }
+        }
     }
 
     private void loadCategories() {
@@ -73,9 +89,11 @@ public class NewArticleController {
     }
 
     private void loadTags() {
-        String[] tags = {"Eco-Friendly", "Conservation", "Climate Change", "Nature", "Green Living"};
-        for (String tag : tags) {
-            CheckBox cb = new CheckBox(tag);
+        tagsContainer.getChildren().clear();
+        List<Tag> tags = tagService.getAll();
+        for (Tag tag : tags) {
+            CheckBox cb = new CheckBox(tag.getName());
+            cb.setUserData(tag);
             cb.setStyle("-fx-text-fill: #555;");
             tagsContainer.getChildren().add(cb);
         }
@@ -151,6 +169,18 @@ public class NewArticleController {
         blog.setContent(content);
         blog.setImage(selectedImagePath);
         blog.setCategory((Category) selectedCat.getUserData());
+
+        // Extract Tags
+        List<Tag> selectedTags = new ArrayList<>();
+        for (javafx.scene.Node node : tagsContainer.getChildren()) {
+            if (node instanceof CheckBox) {
+                CheckBox cb = (CheckBox) node;
+                if (cb.isSelected()) {
+                    selectedTags.add((Tag) cb.getUserData());
+                }
+            }
+        }
+        blog.setTags(selectedTags);
 
         if (editArticle != null) {
             blogService.update(blog);

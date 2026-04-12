@@ -9,6 +9,7 @@ import java.sql.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import tn.esprit.blog.Tag;
 
 public class BlogService implements GlobalInterface<Blog> {
 
@@ -24,7 +25,7 @@ public class BlogService implements GlobalInterface<Blog> {
         // Implementation for adding blog (PreparedStatement)
         String req = "INSERT INTO article (title, content, image, created_at, published_at, slug, created_by_id, writer_id, category_id, views) " +
                      "VALUES (?, ?, ?, NOW(), NOW(), ?, UNHEX(?), UNHEX(?), ?, 0)";
-        try (PreparedStatement ps = cnx.prepareStatement(req)) {
+        try (PreparedStatement ps = cnx.prepareStatement(req, Statement.RETURN_GENERATED_KEYS)) {
             ps.setString(1, blog.getTitle());
             ps.setString(2, blog.getContent());
             ps.setString(3, blog.getImage() != null ? blog.getImage() : "");
@@ -45,14 +46,47 @@ public class BlogService implements GlobalInterface<Blog> {
             }
             
             ps.executeUpdate();
+            
+            // Get the generated ID
+            ResultSet generatedKeys = ps.getGeneratedKeys();
+            if (generatedKeys.next()) {
+                int articleId = generatedKeys.getInt(1);
+                saveTags(articleId, blog.getTags());
+            }
+            
             System.out.println("Article added successfully!");
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
 
+    private void saveTags(int articleId, List<Tag> tags) {
+        // Delete existing tags
+        String delReq = "DELETE FROM article_tag WHERE article_id = ?";
+        try (PreparedStatement ps = cnx.prepareStatement(delReq)) {
+            ps.setInt(1, articleId);
+            ps.executeUpdate();
+        } catch (SQLException e) { e.printStackTrace(); }
+
+        // Insert new tags
+        if (tags != null && !tags.isEmpty()) {
+            String insReq = "INSERT INTO article_tag (article_id, tag_id) VALUES (?, ?)";
+            try (PreparedStatement ps = cnx.prepareStatement(insReq)) {
+                for (Tag tag : tags) {
+                    ps.setInt(1, articleId);
+                    ps.setInt(2, tag.getId());
+                    ps.addBatch();
+                }
+                ps.executeBatch();
+            } catch (SQLException e) { e.printStackTrace(); }
+        }
+    }
+
     @Override
     public void delete(Blog blog) {
+        // First delete tags
+        saveTags(blog.getId(), null);
+        
         String req = "DELETE FROM article WHERE id = ?";
         try (PreparedStatement ps = cnx.prepareStatement(req)) {
             ps.setInt(1, blog.getId());
@@ -77,6 +111,9 @@ public class BlogService implements GlobalInterface<Blog> {
             }
             ps.setInt(5, blog.getId());
             ps.executeUpdate();
+            
+            saveTags(blog.getId(), blog.getTags());
+            
             System.out.println("Article updated successfully!");
         } catch (SQLException e) {
             e.printStackTrace();
@@ -90,7 +127,6 @@ public class BlogService implements GlobalInterface<Blog> {
 
     public List<Blog> search(String query) {
         List<Blog> blogs = new ArrayList<>();
-        // Updated query to join with app_user for author info
         String req = "SELECT a.*, c.name as category_name, u.firstname, u.roles " +
                      "FROM article a " +
                      "LEFT JOIN category c ON a.category_id = c.id " +
@@ -109,18 +145,16 @@ public class BlogService implements GlobalInterface<Blog> {
                 b.setContent(rs.getString("content"));
                 b.setImage(rs.getString("image"));
                 
-                // Roles for filtering logic in controllers
-                String roles = rs.getString("roles");
                 String authorName = rs.getString("firstname");
+                String roles = rs.getString("roles");
                 if (authorName != null) {
-                    // Prepend [ADMIN] if role contains ROLE_ADMIN for filtering
                     if (roles != null && roles.contains("ROLE_ADMIN")) {
                         b.setAuthor("Admin [" + authorName + "]");
                     } else {
                         b.setAuthor(authorName);
                     }
                 } else {
-                    b.setAuthor("Unknown Author");
+                    b.setAuthor("Admin");
                 }
                 
                 Timestamp ts = rs.getTimestamp("published_at");
@@ -138,8 +172,10 @@ public class BlogService implements GlobalInterface<Blog> {
                 }
                 
                 b.setViews(rs.getInt("views"));
-                b.setLikesCount((int) (Math.random() * 50)); 
-                b.setReadingTime((int) (Math.random() * 10) + 1);
+                b.setReadingTime(b.getReadingTime());
+                
+                // Fetch tags for this blog
+                b.setTags(getTagsForArticle(b.getId()));
                 
                 blogs.add(b);
             }
@@ -147,5 +183,20 @@ public class BlogService implements GlobalInterface<Blog> {
             e.printStackTrace();
         }
         return blogs;
+    }
+
+    private List<Tag> getTagsForArticle(int articleId) {
+        List<Tag> tags = new ArrayList<>();
+        String req = "SELECT t.* FROM tag t JOIN article_tag at ON t.id = at.tag_id WHERE at.article_id = ?";
+        try (PreparedStatement ps = cnx.prepareStatement(req)) {
+            ps.setInt(1, articleId);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                tags.add(new Tag(rs.getInt("id"), rs.getString("name")));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return tags;
     }
 }
