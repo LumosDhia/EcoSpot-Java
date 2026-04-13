@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.net.URL?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Font?>
+
+<VBox prefHeight="720.0" prefWidth="1100.0" styleClass="admin-content-bg" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="tn.esprit.ticket.TicketPublicBoardController">
+    <stylesheets>
+        <URL value="@../style.css" />
+    </stylesheets>
+    
+    <children>
+        <!-- TOP BAR -->
+        <HBox alignment="CENTER_LEFT" spacing="15.0" styleClass="admin-top-bar">
+            <padding>
+                <Insets bottom="10.0" left="20.0" right="20.0" top="10.0" />
+            </padding>
+            <children>
+                <Button onAction="#handleBackHome" style="-fx-background-color: transparent; -fx-text-fill: #2d6a4f; -fx-cursor: hand;" text="⬅ Back" />
+                <Label styleClass="breadcrumb-text" text="Community › Public Action Board" />
+                <Region HBox.hgrow="ALWAYS" />
+                <Button onAction="#goToMyReports" style="-fx-border-color: #2d6a4f; -fx-border-radius: 5; -fx-text-fill: #2d6a4f;" text="My Reports" />
+            </children>
+        </HBox>
+
+        <HBox spacing="20.0" VBox.vgrow="ALWAYS">
+            <padding>
+                <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+            </padding>
+            <children>
+                <!-- Task List -->
+                <VBox spacing="15.0" styleClass="stat-card" HBox.hgrow="ALWAYS">
+                    <children>
+                        <Label text="Open Environmental Tasks">
+                            <font><Font name="System Bold" size="18.0" /></font>
+                        </Label>
+                        <TableView fx:id="publicTable" VBox.vgrow="ALWAYS">
+                            <columns>
+                                <TableColumn fx:id="colTitle" prefWidth="250.0" text="Action Title" />
+                                <TableColumn fx:id="colDomain" prefWidth="120.0" text="Category" />
+                                <TableColumn fx:id="colPriority" prefWidth="100.0" text="Urgency" />
+                                <TableColumn fx:id="colLocation" prefWidth="180.0" text="Where?" />
+                            </columns>
+                        </TableView>
+                    </children>
+                </VBox>
+
+                <!-- Action Panel -->
+                <VBox fx:id="actionPanel" disable="true" prefWidth="400.0" spacing="15.0" styleClass="stat-card">
+                    <children>
+                        <Label text="Submit Resolution">
+                            <font><Font name="System Bold" size="18.0" /></font>
+                        </Label>
+                        <VBox spacing="5.0">
+                            <Label styleClass="field-label" text="Message to Admin" />
+                            <TextArea fx:id="proofMessageArea" prefRowCount="5" promptText="Explain what you did to resolve the issue..." styleClass="search-field" wrapText="true" />
+                        </VBox>
+                        <VBox spacing="5.0">
+                            <Label styleClass="field-label" text="Photo Proof (URL or path)" />
+                            <TextField fx:id="proofImageField" promptText="Enter image URL" styleClass="search-field" />
+                        </VBox>
+                        <Separator />
+                        <Button onAction="#handleComplete" prefWidth="Infinity" styleClass="btn-signin" text="🏆 Submit Completion" />
+                        <Label style="-fx-text-fill: #888; -fx-font-size: 11px;" text="Note: Your completion must be validated by an administrator before appearing in Achievements." wrapText="true" />
+                    </children>
+                </VBox>
+            </children>
+        </HBox>
+    </children>
+</VBox>
