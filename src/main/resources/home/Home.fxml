@@ -27,7 +27,7 @@
                 <children>
                     <Label onMouseClicked="#goToHome" style="-fx-cursor: hand;" styleClass="top-bar-brand" text="🌿 EcoSpot" />
                     <Button onAction="#goToLogin" styleClass="top-bar-link" text="🔑 Login" />
-                    <Button styleClass="top-bar-link" text="👤 Register" />
+                    <Button onAction="#goToRegister" styleClass="top-bar-link" text="👤 Register" />
                     <Region HBox.hgrow="ALWAYS" />
                 </children>
             </HBox>

@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.net.URL?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+
+<BorderPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="tn.esprit.user.RegisterController">
+    <stylesheets>
+        <URL value="@../style.css" />
+    </stylesheets>
+
+    <top>
+        <VBox>
+            <!-- ===== TOP DARK BAR ===== -->
+            <HBox alignment="CENTER_LEFT" styleClass="top-bar" spacing="20.0">
+                <padding><Insets left="20.0" right="20.0" top="8.0" bottom="8.0" /></padding>
+                <children>
+                    <Label onMouseClicked="#goToHome" style="-fx-cursor: hand;" styleClass="top-bar-brand" text="🌿 EcoSpot" />
+                    <Button styleClass="top-bar-link" text="🔑 Login" onAction="#goToLogin" />
+                    <Button styleClass="top-bar-link" text="👤 Register" />
+                    <Region HBox.hgrow="ALWAYS" />
+                    <Button styleClass="top-bar-link" text="🌐 EN ▾" />
+                    <Button styleClass="top-bar-link" text="🏠" onAction="#goToHome" />
+                </children>
+            </HBox>
+
+            <!-- ===== WHITE SECONDARY NAV ===== -->
+            <HBox alignment="CENTER_LEFT" styleClass="main-nav" spacing="15.0">
+                <padding><Insets left="20.0" right="20.0" top="12.0" bottom="12.0" /></padding>
+                <children>
+                    <Label onMouseClicked="#goToHome" style="-fx-cursor: hand;" styleClass="brand-name" text="EcoSpot" />
+                    <Region HBox.hgrow="ALWAYS" />
+                    <Button styleClass="nav-link-btn" text="Home" onAction="#goToHome" />
+                    <Button styleClass="nav-link-btn" text="Events" />
+                    <Button styleClass="nav-link-btn-active" text="🎟 Tickets" />
+                    <Button styleClass="nav-link-btn" text="Achievements" />
+                    <Button styleClass="nav-btn-blog" text="Blog" />
+                </children>
+            </HBox>
+        </VBox>
+    </top>
+
+    <center>
+        <ScrollPane fitToWidth="true" style="-fx-background-color: #f0f7f4; -fx-background: #f0f7f4;">
+            <content>
+                <VBox alignment="CENTER" spacing="30.0">
+                    <padding><Insets top="40.0" bottom="40.0" /></padding>
+                    <children>
+                        <VBox styleClass="register-card" spacing="15.0">
+                            <children>
+                                <VBox alignment="CENTER" spacing="5.0">
+                                    <children>
+                                        <Label text="Register" styleClass="login-title" />
+                                    </children>
+                                </VBox>
+
+                                <VBox spacing="5.0">
+                                    <children>
+                                        <Label text="Email" styleClass="field-label" />
+                                        <TextField promptText="Email" styleClass="login-input" />
+                                    </children>
+                                </VBox>
+
+                                <HBox spacing="15.0">
+                                    <children>
+                                        <VBox spacing="5.0" HBox.hgrow="ALWAYS">
+                                            <children>
+                                                <Label text="First name" styleClass="field-label" />
+                                                <TextField promptText="First name" styleClass="login-input" />
+                                            </children>
+                                        </VBox>
+                                        <VBox spacing="5.0" HBox.hgrow="ALWAYS">
+                                            <children>
+                                                <Label text="Last name" styleClass="field-label" />
+                                                <TextField promptText="Last name" styleClass="login-input" />
+                                            </children>
+                                        </VBox>
+                                    </children>
+                                </HBox>
+
+                                <VBox spacing="5.0">
+                                    <children>
+                                        <Label text="Address" styleClass="field-label" />
+                                        <TextField promptText="Address" styleClass="login-input" />
+                                    </children>
+                                </VBox>
+
+                                <VBox spacing="5.0">
+                                    <children>
+                                        <Label text="ZIP code" styleClass="field-label" />
+                                        <TextField promptText="e.g. 75001" styleClass="login-input" />
+                                    </children>
+                                </VBox>
+
+                                <VBox spacing="5.0">
+                                    <children>
+                                        <Label text="City" styleClass="field-label" />
+                                        <HBox styleClass="search-input-group" alignment="CENTER_LEFT">
+                                            <children>
+                                                <TextField promptText="Search for your city (e.g. Paris)" style="-fx-background-color: transparent;" HBox.hgrow="ALWAYS" />
+                                                <Button text="Search" styleClass="btn-search-city" />
+                                            </children>
+                                        </HBox>
+                                        <VBox styleClass="search-results-area">
+                                            <children>
+                                                <Label text="Search and select below" style="-fx-text-fill: #888;" />
+                                            </children>
+                                        </VBox>
+                                    </children>
+                                </VBox>
+
+                                <VBox spacing="5.0">
+                                    <children>
+                                        <Label text="Password" styleClass="field-label" />
+                                        <PasswordField promptText="Password" styleClass="login-input" />
+                                    </children>
+                                </VBox>
+
+                                <VBox spacing="5.0">
+                                    <children>
+                                        <Label text="Repeat password" styleClass="field-label" />
+                                        <PasswordField promptText="Repeat password" styleClass="login-input" />
+                                    </children>
+                                </VBox>
+
+                                <CheckBox text="I agree to the terms and conditions" styleClass="terms-checkbox" />
+
+                                <VBox spacing="15.0">
+                                    <children>
+                                        <Button text="Register" styleClass="btn-signin" maxWidth="Infinity" />
+                                        <Button text="Already have an account? Sign in" styleClass="btn-register-outline" maxWidth="Infinity" onAction="#goToLogin" />
+                                    </children>
+                                </VBox>
+                            </children>
+                        </VBox>
+                    </children>
+                </VBox>
+            </content>
+        </ScrollPane>
+    </center>
+</BorderPane>

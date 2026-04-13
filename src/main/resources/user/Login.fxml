@@ -82,7 +82,7 @@
                                 <VBox spacing="15.0">
                                     <children>
                                         <Button text="Sign in" styleClass="btn-signin" maxWidth="Infinity" />
-                                        <Button text="Register" styleClass="btn-register-outline" maxWidth="Infinity" />
+                                        <Button text="Register" styleClass="btn-register-outline" maxWidth="Infinity" onAction="#goToRegister" />
                                     </children>
                                 </VBox>
                             </children>

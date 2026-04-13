@@ -51,4 +51,15 @@ public class HomeController {
             e.printStackTrace();
         }
     }
+
+    @FXML
+    private void goToRegister() {
+        try {
+            Parent root = FXMLLoader.load(getClass().getResource("/user/Register.fxml"));
+            Stage stage = (Stage) blogBtn.getScene().getWindow();
+            stage.getScene().setRoot(root);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 }

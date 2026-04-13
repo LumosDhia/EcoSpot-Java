@@ -9,7 +9,7 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 import java.io.IOException;
 
-public class LoginController {
+public class RegisterController {
 
     @FXML
     void goToHome(ActionEvent event) {
@@ -24,20 +24,20 @@ public class LoginController {
     }
 
     @FXML
-    void handleLogin(ActionEvent event) {
-        // Login logic here
-        System.out.println("Login button clicked");
-    }
-
-    @FXML
-    void goToRegister(ActionEvent event) {
+    void goToLogin(ActionEvent event) {
         try {
-            Parent root = FXMLLoader.load(getClass().getResource("/user/Register.fxml"));
+            Parent root = FXMLLoader.load(getClass().getResource("/user/Login.fxml"));
             Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
             stage.setScene(new Scene(root));
             stage.show();
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    @FXML
+    void handleRegister(ActionEvent event) {
+        // Registration logic here
+        System.out.println("Register button clicked");
     }
 }
