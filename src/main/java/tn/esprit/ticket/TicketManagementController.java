@@ -11,14 +11,20 @@ import java.util.List;
 
 public class TicketManagementController {
 
-    @FXML private TextField eventIdField;
-    @FXML private TextField priceField;
-    @FXML private ComboBox<String> typeComboBox;
+    @FXML private TextField titleField;
+    @FXML private TextArea descriptionArea;
+    @FXML private TextField locationField;
+    @FXML private ComboBox<TicketStatus> statusComboBox;
+    @FXML private ComboBox<TicketPriority> priorityComboBox;
+    @FXML private ComboBox<ActionDomain> domainComboBox;
+    
     @FXML private TableView<Ticket> ticketTable;
     @FXML private TableColumn<Ticket, Integer> idCol;
-    @FXML private TableColumn<Ticket, Integer> eventIdCol;
-    @FXML private TableColumn<Ticket, Double> priceCol;
-    @FXML private TableColumn<Ticket, String> typeCol;
+    @FXML private TableColumn<Ticket, String> titleCol;
+    @FXML private TableColumn<Ticket, TicketStatus> statusCol;
+    @FXML private TableColumn<Ticket, TicketPriority> priorityCol;
+    @FXML private TableColumn<Ticket, ActionDomain> domainCol;
+    @FXML private TableColumn<Ticket, String> locationCol;
     @FXML private TableColumn<Ticket, Void> actionsCol;
     @FXML private TextField searchField;
 
@@ -29,7 +35,10 @@ public class TicketManagementController {
     @FXML
     public void initialize() {
         ticketService = new TicketService();
-        typeComboBox.setItems(FXCollections.observableArrayList("Standard", "VIP", "Backstage", "Early Bird"));
+        
+        statusComboBox.setItems(FXCollections.observableArrayList(TicketStatus.values()));
+        priorityComboBox.setItems(FXCollections.observableArrayList(TicketPriority.values()));
+        domainComboBox.setItems(FXCollections.observableArrayList(ActionDomain.values()));
         
         setupTable();
         loadTickets();
@@ -37,9 +46,11 @@ public class TicketManagementController {
 
     private void setupTable() {
         idCol.setCellValueFactory(new PropertyValueFactory<>("id"));
-        eventIdCol.setCellValueFactory(new PropertyValueFactory<>("eventId"));
-        priceCol.setCellValueFactory(new PropertyValueFactory<>("price"));
-        typeCol.setCellValueFactory(new PropertyValueFactory<>("type"));
+        titleCol.setCellValueFactory(new PropertyValueFactory<>("title"));
+        statusCol.setCellValueFactory(new PropertyValueFactory<>("status"));
+        priorityCol.setCellValueFactory(new PropertyValueFactory<>("priority"));
+        domainCol.setCellValueFactory(new PropertyValueFactory<>("domain"));
+        locationCol.setCellValueFactory(new PropertyValueFactory<>("location"));
         
         // Actions Column
         actionsCol.setCellFactory(param -> new TableCell<>() {
@@ -66,9 +77,12 @@ public class TicketManagementController {
         ticketTable.getSelectionModel().selectedItemProperty().addListener((obs, oldSelection, newSelection) -> {
             if (newSelection != null) {
                 selectedTicket = newSelection;
-                eventIdField.setText(String.valueOf(selectedTicket.getEventId()));
-                priceField.setText(String.valueOf(selectedTicket.getPrice()));
-                typeComboBox.setValue(selectedTicket.getType());
+                titleField.setText(selectedTicket.getTitle());
+                descriptionArea.setText(selectedTicket.getDescription());
+                locationField.setText(selectedTicket.getLocation());
+                statusComboBox.setValue(selectedTicket.getStatus());
+                priorityComboBox.setValue(selectedTicket.getPriority());
+                domainComboBox.setValue(selectedTicket.getDomain());
             }
         });
 
@@ -86,9 +100,9 @@ public class TicketManagementController {
         
         String lowerQuery = query.toLowerCase();
         ObservableList<Ticket> filtered = ticketList.filtered(t -> 
-            String.valueOf(t.getEventId()).contains(query) || 
-            t.getType().toLowerCase().contains(lowerQuery) ||
-            String.valueOf(t.getPrice()).contains(query)
+            t.getTitle().toLowerCase().contains(lowerQuery) || 
+            t.getLocation().toLowerCase().contains(lowerQuery) ||
+            t.getStatus().name().toLowerCase().contains(lowerQuery)
         );
         ticketTable.setItems(filtered);
     }
@@ -101,41 +115,52 @@ public class TicketManagementController {
 
     @FXML
     private void handleSave() {
-        try {
-            int eventId = Integer.parseInt(eventIdField.getText());
-            double price = Double.parseDouble(priceField.getText());
-            String type = typeComboBox.getValue();
+        String title = titleField.getText();
+        String description = descriptionArea.getText();
+        String location = locationField.getText();
+        TicketStatus status = statusComboBox.getValue();
+        TicketPriority priority = priorityComboBox.getValue();
+        ActionDomain domain = domainComboBox.getValue();
 
-            if (type == null) {
-                showAlert("Validation Error", "Please select a ticket type.");
-                return;
-            }
-
-            if (selectedTicket == null) {
-                Ticket t = new Ticket(0, eventId, price, type);
-                ticketService.add(t);
-                showAlert("Success", "Ticket added successfully!");
-            } else {
-                selectedTicket.setEventId(eventId);
-                selectedTicket.setPrice(price);
-                selectedTicket.setType(type);
-                ticketService.update(selectedTicket);
-                showAlert("Success", "Ticket updated successfully!");
-            }
-
-            handleClear();
-            loadTickets();
-
-        } catch (NumberFormatException e) {
-            showAlert("Input Error", "Please enter valid numbers for Event ID and Price.");
+        if (title.isEmpty() || status == null || priority == null) {
+            showAlert("Validation Error", "Please fill in all mandatory fields (Title, Status, Priority).");
+            return;
         }
+
+        if (selectedTicket == null) {
+            Ticket t = new Ticket();
+            t.setTitle(title);
+            t.setDescription(description);
+            t.setLocation(location);
+            t.setStatus(status);
+            t.setPriority(priority);
+            t.setDomain(domain);
+            t.setUserId(1); // Default user for now
+            ticketService.add(t);
+            showAlert("Success", "Report submitted successfully!");
+        } else {
+            selectedTicket.setTitle(title);
+            selectedTicket.setDescription(description);
+            selectedTicket.setLocation(location);
+            selectedTicket.setStatus(status);
+            selectedTicket.setPriority(priority);
+            selectedTicket.setDomain(domain);
+            ticketService.update(selectedTicket);
+            showAlert("Success", "Report updated successfully!");
+        }
+
+        handleClear();
+        loadTickets();
     }
 
     @FXML
     private void handleClear() {
-        eventIdField.clear();
-        priceField.clear();
-        typeComboBox.setValue(null);
+        titleField.clear();
+        descriptionArea.clear();
+        locationField.clear();
+        statusComboBox.setValue(null);
+        priorityComboBox.setValue(null);
+        domainComboBox.setValue(null);
         selectedTicket = null;
         ticketTable.getSelectionModel().clearSelection();
     }
@@ -143,8 +168,8 @@ public class TicketManagementController {
     @FXML
     private void handleBackHome(javafx.event.ActionEvent event) {
         try {
-            Parent root = FXMLLoader.load(getClass().getResource("/home/Home.fxml"));
-            Stage stage = (Stage) ((javafx.scene.Node) event.getSource()).getScene().getWindow();
+            javafx.scene.Parent root = javafx.fxml.FXMLLoader.load(getClass().getResource("/home/Home.fxml"));
+            javafx.stage.Stage stage = (javafx.stage.Stage) ((javafx.scene.Node) event.getSource()).getScene().getWindow();
             stage.getScene().setRoot(root);
         } catch (java.io.IOException e) {
             e.printStackTrace();
