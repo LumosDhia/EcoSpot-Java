@@ -27,6 +27,8 @@ public class NewArticleController {
     @FXML private ImageView imagePreview;
     @FXML private VBox categoriesContainer;
     @FXML private VBox tagsContainer;
+    @FXML private VBox revisionAlertBox;
+    @FXML private Label revisionNoteLabel;
 
     private BlogService blogService = new BlogService();
     private CategoryService categoryService = new CategoryService();
@@ -63,6 +65,16 @@ public class NewArticleController {
             } catch (Exception e) {}
         }
         
+        publicationChoice.setValue(blog.getIsPublished() ? "Publish immediately" : "Save as draft");
+        
+        if (blog.getAdminRevisionNote() != null && !blog.getAdminRevisionNote().trim().isEmpty()) {
+            revisionAlertBox.setVisible(true);
+            revisionAlertBox.setManaged(true);
+            revisionNoteLabel.setText(blog.getAdminRevisionNote());
+        } else {
+            revisionAlertBox.setVisible(false);
+            revisionAlertBox.setManaged(false);
+        }
         if (blog.getCategory() != null) {
             categoryGroup.getToggles().stream()
                 .filter(t -> ((Category)t.getUserData()).getId() == blog.getCategory().getId())
@@ -176,6 +188,9 @@ public class NewArticleController {
         blog.setContent(content);
         blog.setImage(selectedImagePath);
         blog.setCategory((Category) selectedCat.getUserData());
+        
+        // Set publication status
+        blog.setIsPublished("Publish immediately".equals(publicationChoice.getValue()));
 
         // Extract Tags
         List<Tag> selectedTags = new ArrayList<>();
@@ -197,6 +212,7 @@ public class NewArticleController {
         
         goToArticles();
     }
+
 
     private void showAlert(String title, String message) {
         Alert alert = new Alert(Alert.AlertType.ERROR);

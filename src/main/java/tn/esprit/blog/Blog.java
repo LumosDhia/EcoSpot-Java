@@ -18,6 +18,9 @@ public class Blog {
     private int dislikesCount;
     private int readingTime;
     private int commentsCount;
+    private boolean isPublished = false;
+    private String adminRevisionNote;
+    private List<Comment> comments = new ArrayList<>();
 
     public Blog() {}
 
@@ -68,4 +71,10 @@ public class Blog {
     public void setReadingTime(int readingTime) { this.readingTime = readingTime; }
     public int getCommentsCount() { return commentsCount; }
     public void setCommentsCount(int commentsCount) { this.commentsCount = commentsCount; }
+    public boolean getIsPublished() { return isPublished; }
+    public void setIsPublished(boolean isPublished) { this.isPublished = isPublished; }
+    public String getAdminRevisionNote() { return adminRevisionNote; }
+    public void setAdminRevisionNote(String adminRevisionNote) { this.adminRevisionNote = adminRevisionNote; }
+    public List<Comment> getComments() { return comments; }
+    public void setComments(List<Comment> comments) { this.comments = comments; }
 }

@@ -58,8 +58,13 @@ public class ArticlesManagementController {
                 if (empty) {
                     setGraphic(null);
                 } else {
-                    Button btn = new Button("Published");
-                    btn.setStyle("-fx-background-color: #2d6a4f; -fx-text-fill: white; -fx-font-size: 10; -fx-background-radius: 4;");
+                    Blog b = getTableView().getItems().get(getIndex());
+                    Button btn = new Button(b.getIsPublished() ? "Published" : "Draft");
+                    if (b.getIsPublished()) {
+                        btn.setStyle("-fx-background-color: #2d6a4f; -fx-text-fill: white; -fx-font-size: 10; -fx-background-radius: 4;");
+                    } else {
+                        btn.setStyle("-fx-background-color: #6c757d; -fx-text-fill: white; -fx-font-size: 10; -fx-background-radius: 4;");
+                    }
                     setGraphic(btn);
                 }
             }
@@ -98,8 +103,13 @@ public class ArticlesManagementController {
                 if (empty) {
                     setGraphic(null);
                 } else {
-                    Button btn = new Button("Published");
-                    btn.setStyle("-fx-background-color: #2d6a4f; -fx-text-fill: white; -fx-font-size: 10; -fx-background-radius: 4;");
+                    Blog b = getTableView().getItems().get(getIndex());
+                    Button btn = new Button(b.getIsPublished() ? "Published" : "Draft");
+                    if (b.getIsPublished()) {
+                        btn.setStyle("-fx-background-color: #2d6a4f; -fx-text-fill: white; -fx-font-size: 10; -fx-background-radius: 4;");
+                    } else {
+                        btn.setStyle("-fx-background-color: #6c757d; -fx-text-fill: white; -fx-font-size: 10; -fx-background-radius: 4;");
+                    }
                     setGraphic(btn);
                 }
             }
@@ -154,9 +164,9 @@ public class ArticlesManagementController {
 
     private void handleView(Blog blog) {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/blog/BlogDetail.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/blog/ArticleShow.fxml"));
             Parent root = loader.load();
-            BlogDetailController controller = loader.getController();
+            ArticleShowController controller = loader.getController();
             controller.setArticle(blog);
             Stage stage = (Stage) adminArticlesTable.getScene().getWindow();
             stage.getScene().setRoot(root);

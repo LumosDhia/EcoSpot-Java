@@ -22,28 +22,36 @@ public class BlogService implements GlobalInterface<Blog> {
 
     @Override
     public void add2(Blog blog) {
-        // Implementation for adding blog (PreparedStatement)
-        String req = "INSERT INTO article (title, content, image, created_at, published_at, slug, created_by_id, writer_id, category_id, views) " +
-                     "VALUES (?, ?, ?, NOW(), NOW(), ?, UNHEX(?), UNHEX(?), ?, 0)";
+        String req = "INSERT INTO article (title, content, image, created_at, published_at, slug, created_by_id, writer_id, category_id, views, admin_revision_note) " +
+                     "VALUES (?, ?, ?, NOW(), ?, ?, UNHEX(?), UNHEX(?), ?, 0, ?)";
         try (PreparedStatement ps = cnx.prepareStatement(req, Statement.RETURN_GENERATED_KEYS)) {
             ps.setString(1, blog.getTitle());
             ps.setString(2, blog.getContent());
             ps.setString(3, blog.getImage() != null ? blog.getImage() : "");
             
+            // Handle published_at based on isPublished flag
+            if (blog.getIsPublished()) {
+                ps.setTimestamp(4, Timestamp.valueOf(LocalDateTime.now()));
+            } else {
+                ps.setNull(4, Types.TIMESTAMP);
+            }
+            
             // Slug from title
             String slug = blog.getTitle().toLowerCase().replace(" ", "-").replaceAll("[^a-z0-9-]", "");
-            ps.setString(4, slug + "-" + System.currentTimeMillis() % 1000); // Simple uniqueness
+            ps.setString(5, slug + "-" + System.currentTimeMillis() % 1000); // Simple uniqueness
             
             // Use Admin ID as default for now
             String adminId = "019CA478D1D377B4AE80630614A4A0FD";
-            ps.setString(5, adminId);
             ps.setString(6, adminId);
+            ps.setString(7, adminId);
             
             if (blog.getCategory() != null) {
-                ps.setInt(7, blog.getCategory().getId());
+                ps.setInt(8, blog.getCategory().getId());
             } else {
-                ps.setNull(7, Types.INTEGER);
+                ps.setNull(8, Types.INTEGER);
             }
+            
+            ps.setString(9, blog.getAdminRevisionNote());
             
             ps.executeUpdate();
             
@@ -99,7 +107,7 @@ public class BlogService implements GlobalInterface<Blog> {
 
     @Override
     public void update(Blog blog) {
-        String req = "UPDATE article SET title = ?, content = ?, image = ?, category_id = ? WHERE id = ?";
+        String req = "UPDATE article SET title = ?, content = ?, image = ?, category_id = ?, published_at = ?, admin_revision_note = ? WHERE id = ?";
         try (PreparedStatement ps = cnx.prepareStatement(req)) {
             ps.setString(1, blog.getTitle());
             ps.setString(2, blog.getContent());
@@ -109,7 +117,20 @@ public class BlogService implements GlobalInterface<Blog> {
             } else {
                 ps.setNull(4, java.sql.Types.INTEGER);
             }
-            ps.setInt(5, blog.getId());
+            
+            if (blog.getIsPublished()) {
+                // If it was already published, keep old date or set new if null
+                if (blog.getPublishedAt() != null) {
+                    ps.setTimestamp(5, Timestamp.valueOf(blog.getPublishedAt()));
+                } else {
+                    ps.setTimestamp(5, Timestamp.valueOf(LocalDateTime.now()));
+                }
+            } else {
+                ps.setNull(5, Types.TIMESTAMP);
+            }
+            
+            ps.setString(6, blog.getAdminRevisionNote());
+            ps.setInt(7, blog.getId());
             ps.executeUpdate();
             
             saveTags(blog.getId(), blog.getTags());
@@ -131,11 +152,10 @@ public class BlogService implements GlobalInterface<Blog> {
                      "FROM article a " +
                      "LEFT JOIN category c ON a.category_id = c.id " +
                      "LEFT JOIN app_user u ON a.created_by_id = u.id " +
-                     "WHERE (a.title LIKE ? OR a.content LIKE ?)";
+                     "WHERE a.title LIKE ?";
         
         try (PreparedStatement ps = cnx.prepareStatement(req)) {
             ps.setString(1, "%" + query + "%");
-            ps.setString(2, "%" + query + "%");
             
             ResultSet rs = ps.executeQuery();
             while (rs.next()) {
@@ -160,10 +180,14 @@ public class BlogService implements GlobalInterface<Blog> {
                 Timestamp ts = rs.getTimestamp("published_at");
                 if (ts != null) {
                     b.setPublishedAt(ts.toLocalDateTime());
-                } else if (rs.getTimestamp("created_at") != null) {
-                    b.setPublishedAt(rs.getTimestamp("created_at").toLocalDateTime());
+                    b.setIsPublished(true);
                 } else {
-                    b.setPublishedAt(LocalDateTime.now());
+                    b.setIsPublished(false);
+                    if (rs.getTimestamp("created_at") != null) {
+                        b.setPublishedAt(rs.getTimestamp("created_at").toLocalDateTime());
+                    } else {
+                        b.setPublishedAt(LocalDateTime.now());
+                    }
                 }
                 
                 int catId = rs.getInt("category_id");
@@ -173,9 +197,12 @@ public class BlogService implements GlobalInterface<Blog> {
                 
                 b.setViews(rs.getInt("views"));
                 b.setReadingTime(b.getReadingTime());
+                b.setAdminRevisionNote(rs.getString("admin_revision_note"));
                 
-                // Fetch tags for this blog
+                // Fetch tags and comments for this blog
                 b.setTags(getTagsForArticle(b.getId()));
+                b.setComments(new CommentService().getByArticleId(b.getId()));
+                b.setCommentsCount(b.getComments().size());
                 
                 blogs.add(b);
             }

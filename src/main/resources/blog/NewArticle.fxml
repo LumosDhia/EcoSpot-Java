@@ -61,6 +61,13 @@
                         <!-- MAIN EDITOR SECTION -->
                         <VBox spacing="25.0" HBox.hgrow="ALWAYS">
                             <children>
+                                <!-- ALERT FOR REVISION (if applicable) -->
+                                <VBox fx:id="revisionAlertBox" managed="false" spacing="10.0" style="-fx-background-color: #fff3cd; -fx-padding: 20; -fx-border-color: #ffeeba; -fx-border-radius: 8; -fx-background-radius: 8; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.05), 10, 0, 0, 2);" visible="false">
+                                   <children>
+                                      <Label style="-fx-text-fill: #856404; -fx-font-weight: bold; -fx-font-size: 15;" text="📝 Revision Feedback from Admin" />
+                                      <Label fx:id="revisionNoteLabel" style="-fx-text-fill: #856404; -fx-font-size: 13;" text="Feedback details will appear here..." wrapText="true" />
+                                   </children>
+                                </VBox>
                                 <!-- Article Title Area -->
                                 <VBox spacing="10.0" style="-fx-background-color: white; -fx-padding: 2.0; -fx-background-radius: 8; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.05), 10, 0, 0, 2);">
                                     <children>
@@ -97,7 +104,7 @@
                                                 <ChoiceBox fx:id="publicationChoice" maxWidth="Infinity" styleClass="sort-choice-box" />
                                             </children>
                                         </VBox>
-                                        <Button onAction="#saveArticle" maxWidth="Infinity" styleClass="nav-btn-blog" text="💾 Save Article" style="-fx-background-color: #2d6a4f; -fx-padding: 12;" />
+                                        <Button onAction="#saveArticle" maxWidth="Infinity" styleClass="btn, btn-primary" text="💾 Save Article" />
                                         <Label onMouseClicked="#goToArticles" alignment="CENTER" maxWidth="Infinity" style="-fx-text-fill: #888; -fx-font-size: 13; -fx-cursor: hand;" text="Cancel and go back" />
                                     </children>
                                 </VBox>

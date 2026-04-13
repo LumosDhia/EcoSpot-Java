@@ -85,7 +85,8 @@
                                 </HBox>
                                 
                                 <!-- Placeholder Table (Styling match) -->
-                                <TableView fx:id="adminArticlesTable" prefHeight="250.0" style="-fx-background-color: transparent; -fx-border-color: transparent;">
+                                <TableView fx:id="adminArticlesTable" prefHeight="400.0" style="-fx-background-color: transparent; -fx-border-color: transparent;">
+                                    <columnResizePolicy><TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/></columnResizePolicy>
                                     <columns>
                                         <TableColumn fx:id="colId" prefWidth="40.0" text="Id" />
                                         <TableColumn fx:id="colTitle" prefWidth="400.0" text="Title" />
@@ -110,7 +111,8 @@
                                 </VBox>
                                 
                                 <!-- Placeholder Table (Styling match) -->
-                                <TableView fx:id="ngoArticlesTable" prefHeight="150.0" style="-fx-background-color: transparent; -fx-border-color: transparent;">
+                                <TableView fx:id="ngoArticlesTable" prefHeight="400.0" style="-fx-background-color: transparent; -fx-border-color: transparent;">
+                                    <columnResizePolicy><TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/></columnResizePolicy>
                                     <columns>
                                         <TableColumn fx:id="colNgoId" prefWidth="40.0" text="Id" />
                                         <TableColumn fx:id="colNgoTitle" prefWidth="350.0" text="Title" />

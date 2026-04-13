@@ -457,3 +457,80 @@
 .table-row-cell:even {
     -fx-background-color: #fcfcfc;
 }
+/* ================================
+   MODERN BUTTON TEMPLATES (The "Templates" you asked for)
+   ================================ */
+
+/* Base Button Style (Add 'btn' class to any button) */
+.btn {
+    -fx-cursor: hand;
+    -fx-background-radius: 6;
+    -fx-padding: 10 24;
+    -fx-font-weight: bold;
+    -fx-font-size: 14px;
+    -fx-font-smoothing-type: lcd;
+    /* Subtle scale-up animation on hover would require Java, but we can do shadows */
+}
+
+/* Primary Eco-Green Button */
+.btn-primary {
+    -fx-background-color: #2d6a4f;
+    -fx-text-fill: white;
+}
+.btn-primary:hover {
+    -fx-background-color: #1b4332;
+    -fx-effect: dropshadow(three-pass-box, rgba(45,106,79,0.3), 10, 0, 0, 3);
+}
+
+/* Secondary Amber/Orange Button */
+.btn-secondary {
+    -fx-background-color: #f1933e;
+    -fx-text-fill: white;
+}
+.btn-secondary:hover {
+    -fx-background-color: #d87d2a;
+    -fx-effect: dropshadow(three-pass-box, rgba(241,147,62,0.3), 10, 0, 0, 3);
+}
+
+/* Danger/Red Button */
+.btn-danger {
+    -fx-background-color: #bc4749;
+    -fx-text-fill: white;
+}
+.btn-danger:hover {
+    -fx-background-color: #a33b3d;
+    -fx-effect: dropshadow(three-pass-box, rgba(188,71,73,0.3), 10, 0, 0, 3);
+}
+
+/* Clean Light/Back Button */
+.btn-light {
+    -fx-background-color: #e9ecef;
+    -fx-text-fill: #495057;
+    -fx-border-color: #dee2e6;
+    -fx-border-radius: 6;
+}
+.btn-light:hover {
+    -fx-background-color: #dee2e6;
+}
+
+/* Modern Outline Primary */
+.btn-outline {
+    -fx-background-color: transparent;
+    -fx-border-color: #2d6a4f;
+    -fx-border-width: 1.5;
+    -fx-text-fill: #2d6a4f;
+    -fx-border-radius: 6;
+}
+.btn-outline:hover {
+    -fx-background-color: #f0fdf4;
+}
+
+/* Stylish Gradient Button */
+.btn-grad {
+    -fx-background-color: linear-gradient(to right, #2d6a4f, #40916c);
+    -fx-text-fill: white;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 5, 0, 0, 2);
+}
+.btn-grad:hover {
+    -fx-background-color: linear-gradient(to right, #1b4332, #2d6a4f);
+}

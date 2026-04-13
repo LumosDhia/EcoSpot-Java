@@ -11,16 +11,13 @@ public class CommentService {
     Connection cnx = MyConnection.getInstance().getCnx();
 
     public void add(Comment c) {
-        String req = "INSERT INTO comment (author, content, created_at, article_id, author_id, flagged) " +
-                     "VALUES (?, ?, ?, ?, ?, ?)";
+        String req = "INSERT INTO comment (article_id, content, created_at, author_name) VALUES (?, ?, NOW(), ?)";
         try (PreparedStatement ps = cnx.prepareStatement(req)) {
-            ps.setString(1, c.getAuthor());
+            ps.setInt(1, c.getArticleId());
             ps.setString(2, c.getContent());
-            ps.setTimestamp(3, Timestamp.valueOf(c.getCreatedAt()));
-            ps.setInt(4, c.getArticleId());
-            ps.setInt(5, c.getAuthorId());
-            ps.setBoolean(6, c.isFlagged());
+            ps.setString(3, c.getAuthorName() != null ? c.getAuthorName() : "Anonymous User");
             ps.executeUpdate();
+            System.out.println("Comment added successfully!");
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -33,15 +30,13 @@ public class CommentService {
             ps.setInt(1, articleId);
             ResultSet rs = ps.executeQuery();
             while (rs.next()) {
-                Comment c = new Comment();
-                c.setId(rs.getInt("id"));
-                c.setAuthor(rs.getString("author"));
-                c.setContent(rs.getString("content"));
-                c.setCreatedAt(rs.getTimestamp("created_at").toLocalDateTime());
-                c.setArticleId(rs.getInt("article_id"));
-                c.setAuthorId(rs.getInt("author_id"));
-                c.setFlagged(rs.getBoolean("flagged"));
-                comments.add(c);
+                comments.add(new Comment(
+                    rs.getInt("id"),
+                    rs.getInt("article_id"),
+                    rs.getString("author_name"),
+                    rs.getString("content"),
+                    rs.getTimestamp("created_at").toLocalDateTime()
+                ));
             }
         } catch (SQLException e) {
             e.printStackTrace();

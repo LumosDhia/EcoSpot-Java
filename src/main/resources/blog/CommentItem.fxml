@@ -4,29 +4,15 @@
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
-<?import javafx.scene.text.Font?>
 
-<HBox spacing="15.0" style="-fx-background-color: white; -fx-padding: 15; -fx-background-radius: 8; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.05), 5, 0, 0, 2);" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="tn.esprit.blog.CommentItemController">
+<VBox spacing="5.0" style="-fx-background-color: white; -fx-padding: 15; -fx-background-radius: 8; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.05), 10, 0, 0, 2);" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="tn.esprit.blog.CommentItemController">
    <children>
-      <VBox alignment="TOP_CENTER" minWidth="50.0">
+      <HBox alignment="CENTER_LEFT" spacing="10.0">
          <children>
-            <Label style="-fx-background-color: #e8f5e9; -fx-background-radius: 50; -fx-padding: 10;" text="👤" textFill="#2d6a4f">
-               <font>
-                  <Font size="18.0" />
-               </font>
-            </Label>
+            <Label fx:id="authorLabel" style="-fx-font-weight: bold; -fx-text-fill: #2d6a4f; -fx-font-size: 13;" text="Author Name" />
+            <Label fx:id="dateLabel" style="-fx-text-fill: #999; -fx-font-size: 11;" text="Date" />
          </children>
-      </VBox>
-      <VBox spacing="5.0" HBox.hgrow="ALWAYS">
-         <children>
-            <HBox alignment="CENTER_LEFT" spacing="10.0">
-               <children>
-                  <Label fx:id="authorLabel" style="-fx-font-weight: bold; -fx-text-fill: #1b4332;" text="John Doe" />
-                  <Label fx:id="dateLabel" style="-fx-font-size: 11px; -fx-text-fill: #888;" text="2 hours ago" />
-               </children>
-            </HBox>
-            <Label fx:id="contentLabel" style="-fx-text-fill: #444;" text="This is a great article about recycling! Thanks for sharing." wrapText="true" />
-         </children>
-      </VBox>
+      </HBox>
+      <Label fx:id="contentLabel" style="-fx-text-fill: #444; -fx-font-size: 13;" text="Comment content goes here. This can be multiple lines long." wrapText="true" />
    </children>
-</HBox>
+</VBox>
