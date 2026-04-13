@@ -44,15 +44,15 @@
             </HBox>
 
             <!-- ===== WHITE SECONDARY NAV ===== -->
-            <HBox alignment="CENTER_LEFT" spacing="10.0" styleClass="main-nav">
-                <padding><Insets bottom="12.0" left="20.0" right="20.0" top="12.0" /></padding>
+            <HBox alignment="CENTER_RIGHT" spacing="15.0" styleClass="main-nav">
+                <padding><Insets bottom="15.0" left="40.0" right="40.0" top="15.0" /></padding>
                 <children>
-                    <Label onMouseClicked="#goToHome" style="-fx-cursor: hand;" styleClass="brand-name" text="EcoSpot" />
                     <Region HBox.hgrow="ALWAYS" />
-                    <Button onAction="#goToReportIssue" styleClass="nav-link-btn" text="📢 Report" />
-                    <Button onAction="#goToPublicBoard" styleClass="nav-link-btn" text="🎯 Action Board" />
-                    <Button onAction="#goToAchievements" styleClass="nav-link-btn" text="🏆 Achievements" />
-                    <Button onAction="#goToTickets" styleClass="nav-link-btn" text="🎟 Moderation" />
+                    <Button onAction="#goToHome" styleClass="nav-link-active" text="Home" />
+                    <Button styleClass="nav-link-btn" text="Events" />
+                    <Button styleClass="nav-link-btn" text="📍 Nearby" />
+                    <Button onAction="#goToPublicBoard" styleClass="nav-ticket-bubble" text="🎟 Tickets" />
+                    <Button onAction="#goToAchievements" styleClass="nav-link-btn" text="Achievements" />
                     <Button fx:id="blogBtn" onAction="#goToBlog" styleClass="nav-btn-blog" text="Blog" />
                 </children>
             </HBox>
