@@ -111,8 +111,27 @@ public class HomeController {
 
     @FXML
     private void goToTickets(javafx.event.Event event) {
+        navigate(event, "/ticket/TicketManagement.fxml");
+    }
+
+    @FXML
+    private void goToReportIssue(javafx.event.Event event) {
+        navigate(event, "/ticket/TicketReporting.fxml");
+    }
+
+    @FXML
+    private void goToPublicBoard(javafx.event.Event event) {
+        navigate(event, "/ticket/TicketPublicBoard.fxml");
+    }
+
+    @FXML
+    private void goToAchievements(javafx.event.Event event) {
+        navigate(event, "/ticket/TicketAchievements.fxml");
+    }
+
+    private void navigate(javafx.event.Event event, String path) {
         try {
-            Parent root = FXMLLoader.load(getClass().getResource("/ticket/TicketManagement.fxml"));
+            Parent root = FXMLLoader.load(getClass().getResource(path));
             Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
             stage.getScene().setRoot(root);
         } catch (IOException e) {
