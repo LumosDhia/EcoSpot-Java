@@ -6,18 +6,18 @@ import java.sql.SQLException;
 
 public class MyConnection {
 
-    //DB properties
+    // DB properties
     final String URL = "jdbc:mysql://localhost:3306/projetdev";
     final String USR = "root";
-    final String PWD = "root";
+    final String PWD = "";
 
-    //Attributes
-    //2. static instance
+    // Attributes
+    // 2. static instance
     static MyConnection instance = null;
     Connection cnx;
 
     public static MyConnection getInstance() {
-        //3 verif
+        // 3 verif
         if (instance == null) {
             instance = new MyConnection();
         }
@@ -28,24 +28,17 @@ public class MyConnection {
         return cnx;
     }
 
-    //constructor
-    //1 : Privatisation du constructeur
-    private MyConnection(){
+    // constructor
+    // 1 : Privatisation du constructeur
+    private MyConnection() {
         try {
             cnx = DriverManager.getConnection(URL, USR, PWD);
             System.out.println("Connexion etablie avec succes!");
         } catch (SQLException e) {
-            //System.out.println(e.getMessage());
+            // System.out.println(e.getMessage());
             e.printStackTrace();
         }
 
-
-
-
     }
-
-
-
-
 
 }

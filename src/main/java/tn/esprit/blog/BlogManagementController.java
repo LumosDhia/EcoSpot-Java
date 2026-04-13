@@ -141,4 +141,19 @@ public class BlogManagementController {
             e.printStackTrace();
         }
     }
+
+    @FXML
+    private void handleMinimize() {
+        tn.esprit.util.WindowUtils.minimize(homeBtn);
+    }
+
+    @FXML
+    private void handleMaximize() {
+        tn.esprit.util.WindowUtils.toggleFullScreen(homeBtn);
+    }
+
+    @FXML
+    private void handleClose() {
+        tn.esprit.util.WindowUtils.close(homeBtn);
+    }
 }

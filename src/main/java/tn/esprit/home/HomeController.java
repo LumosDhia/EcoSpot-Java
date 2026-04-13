@@ -7,6 +7,7 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.stage.Stage;
+import javafx.event.ActionEvent;
 import java.io.IOException;
 
 public class HomeController {
@@ -39,5 +40,46 @@ public class HomeController {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    @FXML
+    private void goToEvents() {
+        try {
+            Parent root = FXMLLoader.load(getClass().getResource("/event/EventManagement.fxml"));
+            Stage stage = (Stage) blogBtn.getScene().getWindow();
+            stage.getScene().setRoot(root);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @FXML
+    void goToSponsors(ActionEvent event) {
+        switchScene("/event/SponsorManagement.fxml");
+    }
+
+    private void switchScene(String fxmlPath) {
+        try {
+            Parent root = FXMLLoader.load(getClass().getResource(fxmlPath));
+            Stage stage = (Stage) blogBtn.getScene().getWindow();
+            stage.getScene().setRoot(root);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @FXML
+    private void handleMinimize() {
+        tn.esprit.util.WindowUtils.minimize(blogBtn);
+    }
+
+    @FXML
+    private void handleMaximize() {
+        tn.esprit.util.WindowUtils.toggleFullScreen(blogBtn);
+    }
+
+    @FXML
+    private void handleClose() {
+        tn.esprit.util.WindowUtils.close(blogBtn);
     }
 }

@@ -29,6 +29,11 @@
                     <Button styleClass="top-bar-link" text="🔑 Login" />
                     <Button styleClass="top-bar-link" text="👤 Register" />
                     <Region HBox.hgrow="ALWAYS" />
+                    <HBox alignment="CENTER_RIGHT" spacing="5.0">
+                        <Button onAction="#handleMinimize" styleClass="win-btn" text="—" />
+                        <Button onAction="#handleMaximize" styleClass="win-btn" text="▢" />
+                        <Button onAction="#handleClose" styleClass="win-btn, win-btn-close" text="✕" />
+                    </HBox>
                 </children>
             </HBox>
 
@@ -38,9 +43,9 @@
                 <children>
                     <Label onMouseClicked="#goToHome" style="-fx-cursor: hand;" styleClass="brand-name" text="EcoSpot" />
                     <Region HBox.hgrow="ALWAYS" />
-                    <Button styleClass="nav-link-btn" text="Home" />
-                    <Button styleClass="nav-link-btn" text="Events" />
-                    <Button styleClass="nav-link-btn-active" text="🎟 Tickets" />
+                    <Button styleClass="nav-link-btn-active" text="Home" />
+                    <Button onAction="#goToEvents" styleClass="nav-link-btn" text="Events" />
+                    <Button styleClass="nav-link-btn" text="🎟 Tickets" />
                     <Button styleClass="nav-link-btn" text="Achievements" />
                     <Button fx:id="blogBtn" onAction="#goToBlog" styleClass="nav-btn-blog" text="Blog" />
                 </children>
@@ -64,7 +69,7 @@
                                         <padding><Insets top="10.0" /></padding>
                                         <children>
                                             <Button fx:id="heroBlogBtn" onAction="#goToBlog" styleClass="btn-hero-primary" text="Blog" />
-                                            <Button styleClass="btn-hero-outline" text="Events" />
+                                            <Button onAction="#goToEvents" styleClass="btn-hero-outline" text="Events" />
                                         </children>
                                     </HBox>
                                 </children>
