@@ -28,8 +28,14 @@ public class RegisterController {
     @FXML private Label errorLabel;
 
     @FXML
-    void goToHome(ActionEvent event) {
-        navigate(event, "/home/Home.fxml");
+    void goToHome(javafx.scene.input.MouseEvent event) {
+        try {
+            Parent root = FXMLLoader.load(getClass().getResource("/home/Home.fxml"));
+            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+            stage.getScene().setRoot(root);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     @FXML

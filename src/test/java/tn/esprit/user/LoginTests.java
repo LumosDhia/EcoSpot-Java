@@ -16,14 +16,14 @@ public class LoginTests {
 
     @Test
     public void testSuccessfulLogin() {
-        User user = userService.authenticate("wiem@ecospot.tn", "password123");
+        User user = userService.authenticate("user@mail.com", "user123");
         assertNotNull(user, "User should not be null on successful login");
-        assertEquals("wiem", user.getUsername(), "Username should match");
+        assertEquals("Regular User", user.getUsername(), "Username should match");
     }
 
     @Test
     public void testLoginWithWrongPassword() {
-        User user = userService.authenticate("wiem@ecospot.tn", "wrongpassword");
+        User user = userService.authenticate("user@mail.com", "wrongpassword");
         assertNull(user, "User should be null for incorrect password");
     }
 
@@ -41,7 +41,7 @@ public class LoginTests {
 
     @Test
     public void testAdminLogin() {
-        User user = userService.authenticate("admin@ecospot.tn", "admin123");
+        User user = userService.authenticate("admin@mail.com", "admin123");
         assertNotNull(user, "Admin login should succeed");
         assertEquals("ADMIN", user.getRole(), "Role should be ADMIN");
     }

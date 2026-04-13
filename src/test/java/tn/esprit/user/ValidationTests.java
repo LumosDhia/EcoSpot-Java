@@ -65,7 +65,8 @@ public class ValidationTests {
 
     @Test
     public void testValidFullRegistration() {
-        String res = userService.validateAndRegister("Wiem", "Joe", "wiemJoe@test.tn", "123 Street", "20150", "Tunis", "pass123", "pass123", true);
+        String uniqueEmail = "wiemJoe_" + System.currentTimeMillis() + "@test.tn";
+        String res = userService.validateAndRegister("Wiem", "Joe", uniqueEmail, "123 Street", "20150", "Tunis", "pass123", "pass123", true);
         assertEquals("SUCCESS", res);
     }
 }

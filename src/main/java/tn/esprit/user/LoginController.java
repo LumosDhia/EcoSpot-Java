@@ -22,8 +22,14 @@ public class LoginController {
     private UserService userService = new UserService();
 
     @FXML
-    void goToHome(ActionEvent event) {
-        navigate(event, "/home/Home.fxml");
+    void goToHome(javafx.scene.input.MouseEvent event) {
+        try {
+            Parent root = FXMLLoader.load(getClass().getResource("/home/Home.fxml"));
+            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+            stage.getScene().setRoot(root);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     @FXML
@@ -33,35 +39,33 @@ public class LoginController {
 
     @FXML
     void handleLogin(ActionEvent event) {
-        String email = emailField.getText();
-        String password = passwordField.getText();
+        performLogin(emailField.getText(), passwordField.getText(), event);
+    }
 
+    @FXML
+    void handleQuickAdmin(ActionEvent event) {
+        performLogin("admin@mail.com", "admin123", event);
+    }
+
+    @FXML
+    void handleQuickNGO(ActionEvent event) {
+        performLogin("ngo@mail.com", "ngo123", event);
+    }
+
+    @FXML
+    void handleQuickUser(ActionEvent event) {
+        performLogin("user@mail.com", "user123", event);
+    }
+
+    private void performLogin(String email, String password, ActionEvent event) {
         if (email.isEmpty()) {
             showError("Please enter your email.");
             return;
         }
-        if (password.isEmpty()) {
-            showError("Please enter a password.");
-            return;
-        }
-
         User user = userService.authenticate(email, password);
         if (user != null) {
-            System.out.println("Login successful for: " + user.getUsername());
-            errorLabel.setVisible(false);
-            
-            try {
-                FXMLLoader loader = new FXMLLoader(getClass().getResource("/user/Dashboard.fxml"));
-                Parent root = loader.load();
-                
-                DashboardController controller = loader.getController();
-                controller.setUser(user);
-                
-                Stage stage = (Stage) emailField.getScene().getWindow();
-                stage.getScene().setRoot(root);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            tn.esprit.util.SessionManager.login(user);
+            navigate(event, "/home/Home.fxml");
         } else {
             showError("Invalid email or password.");
         }

@@ -72,11 +72,7 @@
                                     <children>
                                         <Label text="Password" styleClass="field-label" />
                                         <PasswordField fx:id="passwordField" promptText="Enter your password" styleClass="login-input" />
-                                        <HBox alignment="CENTER_RIGHT">
-                                            <children>
-                                                <Label text="Forgot password?" styleClass="forgot-link" />
-                                            </children>
-                                        </HBox>
+
                                     </children>
                                 </VBox>
 
@@ -84,6 +80,20 @@
                                     <children>
                                         <Button fx:id="signInBtn" text="Sign in" styleClass="btn-signin" maxWidth="Infinity" onAction="#handleLogin" />
                                         <Button text="Register" styleClass="btn-register-outline" maxWidth="Infinity" onAction="#goToRegister" />
+                                    </children>
+                                </VBox>
+
+                                <VBox spacing="10.0" alignment="CENTER">
+                                    <padding><Insets top="10.0" /></padding>
+                                    <children>
+                                        <Label text="Quick Demo Access" style="-fx-text-fill: #a0aec0; -fx-font-size: 11px; -fx-font-weight: bold; -fx-text-transform: uppercase;" />
+                                        <HBox spacing="10.0" alignment="CENTER">
+                                            <children>
+                                                <Button text="Admin" onAction="#handleQuickAdmin" style="-fx-background-color: #f7fafc; -fx-border-color: #cbd5e0; -fx-text-fill: #4a5568; -fx-font-size: 11px; -fx-cursor: hand; -fx-background-radius: 4; -fx-border-radius: 4;" />
+                                                <Button text="NGO" onAction="#handleQuickNGO" style="-fx-background-color: #f7fafc; -fx-border-color: #cbd5e0; -fx-text-fill: #4a5568; -fx-font-size: 11px; -fx-cursor: hand; -fx-background-radius: 4; -fx-border-radius: 4;" />
+                                                <Button text="User" onAction="#handleQuickUser" style="-fx-background-color: #f7fafc; -fx-border-color: #cbd5e0; -fx-text-fill: #4a5568; -fx-font-size: 11px; -fx-cursor: hand; -fx-background-radius: 4; -fx-border-radius: 4;" />
+                                            </children>
+                                        </HBox>
                                     </children>
                                 </VBox>
                             </children>

@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.net.URL?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.*?>
+
+<VBox prefHeight="720.0" prefWidth="1280.0" style="-fx-background-color: #f8faf9;" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="tn.esprit.user.CreateUserController">
+    <stylesheets>
+        <URL value="@../style.css" />
+    </stylesheets>
+
+    <children>
+        <!-- TOP NAV -->
+        <HBox alignment="CENTER_LEFT" styleClass="admin-top-bar" spacing="15.0">
+            <padding>
+                <Insets left="20.0" right="20.0" top="10.0" bottom="10.0" />
+            </padding>
+            <children>
+                <Label styleClass="breadcrumb-text" text="Admin  ›  Create user" />
+                <Region HBox.hgrow="ALWAYS" />
+                <HBox alignment="CENTER" spacing="15.0">
+                    <children>
+                        <Label text="🔔" style="-fx-font-size: 20px;" />
+                        <VBox alignment="CENTER_RIGHT">
+                            <children>
+                                <Label styleClass="admin-profile-name" text="Admin" />
+                                <Label styleClass="admin-profile-role" text="Verified Citizen" />
+                            </children>
+                        </VBox>
+                        <Label text="👤" style="-fx-font-size: 32px; -fx-background-color: #fca311; -fx-text-fill: white; -fx-padding: 5; -fx-background-radius: 50;" />
+                    </children>
+                </HBox>
+            </children>
+        </HBox>
+
+        <!-- FORM CARD -->
+        <VBox style="-fx-background-color: white; -fx-background-radius: 10; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.05), 10, 0, 0, 5);" spacing="20.0" VBox.vgrow="NEVER">
+            <VBox.margin>
+                <Insets left="40.0" right="40.0" top="30.0" bottom="20.0" />
+            </VBox.margin>
+            <padding>
+                <Insets top="30.0" bottom="30.0" left="40.0" right="40.0" />
+            </padding>
+            <children>
+                <Label fx:id="errorLabel" style="-fx-text-fill: #e53e3e; -fx-font-size: 14px; -fx-font-weight: bold;" visible="false" managed="false" />
+                
+                <VBox spacing="8.0">
+                    <Label text="Email" style="-fx-text-fill: #718096; -fx-font-size: 14px;" />
+                    <TextField fx:id="emailField" style="-fx-border-color: #cbd5e0; -fx-border-radius: 4; -fx-background-color: white; -fx-padding: 10;" />
+                </VBox>
+
+                <HBox spacing="20.0">
+                    <VBox spacing="8.0" HBox.hgrow="ALWAYS">
+                        <Label text="First name" style="-fx-text-fill: #718096; -fx-font-size: 14px;" />
+                        <TextField fx:id="firstNameField" style="-fx-border-color: #cbd5e0; -fx-border-radius: 4; -fx-background-color: white; -fx-padding: 10;" />
+                    </VBox>
+                    <VBox spacing="8.0" HBox.hgrow="ALWAYS">
+                        <Label text="Last name" style="-fx-text-fill: #718096; -fx-font-size: 14px;" />
+                        <TextField fx:id="lastNameField" style="-fx-border-color: #cbd5e0; -fx-border-radius: 4; -fx-background-color: white; -fx-padding: 10;" />
+                    </VBox>
+                </HBox>
+
+                <VBox spacing="8.0">
+                    <Label text="User type" style="-fx-text-fill: #718096; -fx-font-size: 14px;" />
+                    <ComboBox fx:id="roleComboBox" maxWidth="Infinity" style="-fx-border-color: #cbd5e0; -fx-border-radius: 4; -fx-background-color: white; -fx-padding: 5;" />
+                </VBox>
+
+                <VBox spacing="8.0">
+                    <Label text="Password" style="-fx-text-fill: #718096; -fx-font-size: 14px;" />
+                    <PasswordField fx:id="passwordField" style="-fx-border-color: #cbd5e0; -fx-border-radius: 4; -fx-background-color: white; -fx-padding: 10;" />
+                </VBox>
+
+                <VBox spacing="8.0">
+                    <Label text="Repeat password" style="-fx-text-fill: #718096; -fx-font-size: 14px;" />
+                    <PasswordField fx:id="confirmPasswordField" style="-fx-border-color: #cbd5e0; -fx-border-radius: 4; -fx-background-color: white; -fx-padding: 10;" />
+                </VBox>
+
+                <Region prefHeight="10.0" />
+
+                <HBox spacing="15.0">
+                    <Button onAction="#handleCreateUser" text="Create user" style="-fx-background-color: #f6ad55; -fx-text-fill: black; -fx-font-weight: bold; -fx-padding: 10 20; -fx-cursor: hand;" />
+                    <Button onAction="#handleCancel" text="Cancel" style="-fx-background-color: transparent; -fx-border-color: #fbd38d; -fx-text-fill: #f6ad55; -fx-padding: 9 19; -fx-font-weight: bold; -fx-cursor: hand;" />
+                </HBox>
+            </children>
+        </VBox>
+    </children>
+</VBox>
