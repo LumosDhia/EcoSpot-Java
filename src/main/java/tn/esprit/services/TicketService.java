@@ -30,8 +30,13 @@ public class TicketService implements GlobalInterface<Ticket> {
                 "`longitude` DOUBLE," +
                 "`user_id` INT," +
                 "`assigned_ngo_id` INT," +
+                "`admin_notes` TEXT," +
+                "`completed_by_id` INT," +
+                "`completion_message` TEXT," +
+                "`completion_image` VARCHAR(255)," +
                 "`is_spam` TINYINT(1) DEFAULT 0," +
-                "`created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP" +
+                "`created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP," +
+                "`achieved_at` TIMESTAMP NULL" +
                 ")";
         try (Statement st = cnx.createStatement()) {
             st.execute(req);
@@ -80,7 +85,7 @@ public class TicketService implements GlobalInterface<Ticket> {
 
     @Override
     public void update(Ticket ticket) {
-        String req = "UPDATE `ticket` SET title=?, description=?, location=?, image=?, status=?, priority=?, domain=?, latitude=?, longitude=?, assigned_ngo_id=?, is_spam=? WHERE id=?";
+        String req = "UPDATE `ticket` SET title=?, description=?, location=?, image=?, status=?, priority=?, domain=?, latitude=?, longitude=?, assigned_ngo_id=?, admin_notes=?, completed_by_id=?, completion_message=?, completion_image=?, is_spam=?, achieved_at=? WHERE id=?";
         try (PreparedStatement ps = cnx.prepareStatement(req)) {
             ps.setString(1, ticket.getTitle());
             ps.setString(2, ticket.getDescription());
@@ -91,10 +96,23 @@ public class TicketService implements GlobalInterface<Ticket> {
             ps.setString(7, ticket.getDomain() != null ? ticket.getDomain().name() : null);
             ps.setDouble(8, ticket.getLatitude());
             ps.setDouble(9, ticket.getLongitude());
+            
             if (ticket.getAssignedNgoId() != null) ps.setInt(10, ticket.getAssignedNgoId());
             else ps.setNull(10, Types.INTEGER);
-            ps.setBoolean(11, ticket.isSpam());
-            ps.setInt(12, ticket.getId());
+            
+            ps.setString(11, ticket.getAdminNotes());
+            
+            if (ticket.getCompletedById() != null) ps.setInt(12, ticket.getCompletedById());
+            else ps.setNull(12, Types.INTEGER);
+            
+            ps.setString(13, ticket.getCompletionMessage());
+            ps.setString(14, ticket.getCompletionImage());
+            ps.setBoolean(15, ticket.isSpam());
+            
+            if (ticket.getAchievedAt() != null) ps.setTimestamp(16, Timestamp.valueOf(ticket.getAchievedAt()));
+            else ps.setNull(16, Types.TIMESTAMP);
+            
+            ps.setInt(17, ticket.getId());
             ps.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -120,10 +138,23 @@ public class TicketService implements GlobalInterface<Ticket> {
                 t.setLatitude(rs.getDouble("latitude"));
                 t.setLongitude(rs.getDouble("longitude"));
                 t.setUserId(rs.getInt("user_id"));
+                
                 int ngoId = rs.getInt("assigned_ngo_id");
                 if (!rs.wasNull()) t.setAssignedNgoId(ngoId);
+                
+                t.setAdminNotes(rs.getString("admin_notes"));
+                
+                int completedById = rs.getInt("completed_by_id");
+                if (!rs.wasNull()) t.setCompletedById(completedById);
+                
+                t.setCompletionMessage(rs.getString("completion_message"));
+                t.setCompletionImage(rs.getString("completion_image"));
                 t.setSpam(rs.getBoolean("is_spam"));
                 t.setCreatedAt(rs.getTimestamp("created_at").toLocalDateTime());
+                
+                Timestamp ach = rs.getTimestamp("achieved_at");
+                if (ach != null) t.setAchievedAt(ach.toLocalDateTime());
+                
                 tickets.add(t);
             }
         } catch (SQLException e) {
