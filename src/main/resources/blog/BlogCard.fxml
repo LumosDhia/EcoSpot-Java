@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+
+<VBox fx:id="cardContainer" prefWidth="280.0" spacing="0" styleClass="article-card" stylesheets="@../style.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="tn.esprit.blog.BlogCardController">
+   <children>
+      <StackPane prefHeight="180.0">
+         <children>
+            <ImageView fx:id="articleImage" fitHeight="180.0" fitWidth="280.0" pickOnBounds="true" preserveRatio="false">
+               <image>
+                  <Image url="https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=800" />
+               </image>
+            </ImageView>
+         </children>
+      </StackPane>
+      <VBox spacing="10" style="-fx-padding: 15;">
+         <children>
+            <HBox alignment="CENTER_LEFT" spacing="10">
+               <children>
+                  <Label fx:id="categoryLabel" styleClass="category-tag" text="Waste Management" />
+                  <Region HBox.hgrow="ALWAYS" />
+                  <Label fx:id="dateLabel" styleClass="article-date" text="7 days ago">
+                     <graphic>
+                        <Label text="📅" />
+                     </graphic>
+                  </Label>
+               </children>
+            </HBox>
+            <Label fx:id="titleLabel" styleClass="article-title" text="Innovating the Recycling Process..." wrapText="true">
+               <font>
+                  <Font name="System Bold" size="16.0" />
+               </font>
+            </Label>
+            <HBox spacing="10" styleClass="article-stats-container">
+               <children>
+                  <Label fx:id="viewsLabel" styleClass="stat-label" text="👁 962" />
+                  <Label fx:id="likesLabel" styleClass="stat-label" text="👍 3" />
+                  <Label fx:id="readTimeLabel" styleClass="stat-label" text="📖 1m" />
+               </children>
+            </HBox>
+            <Label fx:id="authorLabel" styleClass="article-author" text="👤 Admin User" />
+            <TextFlow prefHeight="60.0">
+               <children>
+                  <Text fx:id="excerptText" styleClass="article-excerpt" text="Transitioning to a circular economy requires a fundamental change in how we perceive and handle wast..." />
+               </children>
+            </TextFlow>
+            <Button fx:id="readMoreBtn" maxWidth="1.7976931348623157E308" styleClass="read-more-btn" text="Read more" />
+         </children>
+      </VBox>
+   </children>
+</VBox>
