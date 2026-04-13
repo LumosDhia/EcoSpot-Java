@@ -96,15 +96,7 @@
                                     </columns>
                                 </TableView>
 
-                                <!-- Pagination Placeholder -->
-                                <HBox alignment="CENTER" spacing="5.0" style="-fx-padding: 15 20; -fx-border-color: #e0e0e0 transparent transparent transparent; -fx-border-width: 1 0 0 0;">
-                                    <children>
-                                        <Button styleClass="page-btn" text="« Previous" />
-                                        <Button styleClass="page-btn-active" text="1" />
-                                        <Button styleClass="page-btn" text="2" />
-                                        <Button styleClass="page-btn" text="Next »" />
-                                    </children>
-                                </HBox>
+                                </TableView>
                             </children>
                         </VBox>
 
