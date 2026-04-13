@@ -29,6 +29,9 @@ public class CreateUserController {
 
     @FXML
     public void initialize() {
+        if (!isAdminUser()) {
+            return;
+        }
         roleComboBox.setItems(FXCollections.observableArrayList(
                 "Normal user",
                 "Administrator",
@@ -39,6 +42,10 @@ public class CreateUserController {
 
     @FXML
     void handleCreateUser(ActionEvent event) {
+        if (!isAdminUser()) {
+            navigateToUserManagement(event);
+            return;
+        }
         String email = emailField.getText();
         String firstName = firstNameField.getText();
         String lastName = lastNameField.getText();
@@ -82,5 +89,10 @@ public class CreateUserController {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    private boolean isAdminUser() {
+        User current = tn.esprit.util.SessionManager.getCurrentUser();
+        return current != null && "ADMIN".equalsIgnoreCase(current.getRole());
     }
 }

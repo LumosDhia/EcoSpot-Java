@@ -26,11 +26,33 @@ public class UserManagementController {
 
     @FXML
     public void initialize() {
+        if (!isAdminUser()) {
+            javafx.application.Platform.runLater(() -> {
+                if (userListContainer != null && userListContainer.getScene() != null) {
+                    try {
+                        FXMLLoader loader = new FXMLLoader(getClass().getResource("/user/Dashboard.fxml"));
+                        Parent root = loader.load();
+                        DashboardController controller = loader.getController();
+                        if (controller != null && tn.esprit.util.SessionManager.getCurrentUser() != null) {
+                            controller.setUser(tn.esprit.util.SessionManager.getCurrentUser());
+                        }
+                        Stage stage = (Stage) userListContainer.getScene().getWindow();
+                        stage.getScene().setRoot(root);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            });
+            return;
+        }
         System.out.println("UserManagementController Initialized");
         refreshUserList();
     }
 
     private void refreshUserList() {
+        if (!isAdminUser()) {
+            return;
+        }
         System.out.println("Refreshing user list...");
         userListContainer.getChildren().clear();
         List<User> users = userService.getAllUsers();
@@ -102,6 +124,7 @@ public class UserManagementController {
         deleteBtn.setStyle("-fx-background-color: #fff5f5; -fx-text-fill: #e53e3e; -fx-font-size: 14px; -fx-cursor: hand; -fx-padding: 5 10; -fx-background-radius: 5;");
         if (user.getId() < 0) deleteBtn.setDisable(true);
         deleteBtn.setOnAction(e -> {
+            if (!isAdminUser()) return;
             userService.removeUser(user.getId());
             refreshUserList();
         });
@@ -136,6 +159,10 @@ public class UserManagementController {
 
     @FXML
     void goToCreateUser(ActionEvent event) {
+        if (!isAdminUser()) {
+            goToDashboard(event);
+            return;
+        }
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/user/CreateUser.fxml"));
             Parent root = loader.load();
@@ -158,5 +185,10 @@ public class UserManagementController {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    private boolean isAdminUser() {
+        User current = tn.esprit.util.SessionManager.getCurrentUser();
+        return current != null && "ADMIN".equalsIgnoreCase(current.getRole());
     }
 }

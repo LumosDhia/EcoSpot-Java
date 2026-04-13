@@ -51,7 +51,7 @@ public class TicketService implements GlobalInterface<Ticket> {
     public void add(Ticket ticket) {
         boolean hasCreatedById = hasColumn("ticket", "created_by_id");
         boolean hasUpdatedById = hasColumn("ticket", "updated_by_id");
-        byte[] currentAppUserId = (hasCreatedById || hasUpdatedById) ? resolveCurrentAppUserId() : null;
+        byte[] currentAppUserId = (hasCreatedById || hasUpdatedById) ? resolveCurrentAppUserIdStrict() : null;
         boolean userIdIsBinary = isBinaryColumn("ticket", "user_id");
 
         StringJoiner columns = new StringJoiner(", ");
@@ -309,23 +309,6 @@ public class TicketService implements GlobalInterface<Ticket> {
         }
     }
 
-    private byte[] resolveCurrentAppUserId() {
-        if (SessionManager.isLoggedIn() && SessionManager.getCurrentUser() != null) {
-            String email = SessionManager.getCurrentUser().getEmail();
-            if (email != null && !email.isBlank()) {
-                byte[] byEmail = findAppUserIdByEmail(email);
-                if (byEmail != null) return byEmail;
-
-                String mapped = mapDemoEmail(email);
-                if (mapped != null) {
-                    byte[] byMapped = findAppUserIdByEmail(mapped);
-                    if (byMapped != null) return byMapped;
-                }
-            }
-        }
-        return findAnyAppUserId();
-    }
-
     private byte[] resolveCurrentAppUserIdStrict() {
         if (SessionManager.isLoggedIn() && SessionManager.getCurrentUser() != null) {
             String email = SessionManager.getCurrentUser().getEmail();
@@ -350,16 +333,6 @@ public class TicketService implements GlobalInterface<Ticket> {
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) return rs.getBytes("id");
             }
-        } catch (SQLException ignored) {
-        }
-        return null;
-    }
-
-    private byte[] findAnyAppUserId() {
-        String req = "SELECT id FROM app_user LIMIT 1";
-        try (PreparedStatement ps = cnx.prepareStatement(req);
-             ResultSet rs = ps.executeQuery()) {
-            if (rs.next()) return rs.getBytes("id");
         } catch (SQLException ignored) {
         }
         return null;

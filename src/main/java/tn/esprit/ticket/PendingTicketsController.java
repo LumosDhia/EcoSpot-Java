@@ -33,6 +33,10 @@ public class PendingTicketsController {
 
     @FXML
     public void initialize() {
+        if (!isAdminUser()) {
+            redirectToDashboard();
+            return;
+        }
         if (SessionManager.isLoggedIn()) {
             userNameLabel.setText(SessionManager.getCurrentUser().getUsername());
         }
@@ -169,6 +173,10 @@ public class PendingTicketsController {
     }
 
     private void handleAction(Ticket t, TicketStatus newStatus, String adminNote) {
+        if (!isAdminUser()) {
+            redirectToDashboard();
+            return;
+        }
         t.setStatus(newStatus);
         if (adminNote != null) {
             t.setAdminNotes(adminNote);
@@ -225,6 +233,30 @@ public class PendingTicketsController {
     void goBack(ActionEvent event) {
         if (!tn.esprit.util.NavigationHistory.goBack(event)) {
             goToDashboard(event);
+        }
+    }
+
+    private boolean isAdminUser() {
+        return SessionManager.isLoggedIn()
+                && SessionManager.getCurrentUser() != null
+                && "ADMIN".equalsIgnoreCase(SessionManager.getCurrentUser().getRole());
+    }
+
+    private void redirectToDashboard() {
+        if (ticketsListContainer == null || ticketsListContainer.getScene() == null) {
+            return;
+        }
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/user/Dashboard.fxml"));
+            Parent root = loader.load();
+            tn.esprit.user.DashboardController controller = loader.getController();
+            if (controller != null && SessionManager.isLoggedIn()) {
+                controller.setUser(SessionManager.getCurrentUser());
+            }
+            Stage stage = (Stage) ticketsListContainer.getScene().getWindow();
+            stage.getScene().setRoot(root);
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 }

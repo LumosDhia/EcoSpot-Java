@@ -142,8 +142,12 @@ public class NewArticleController {
         String title = titleField.getText();
         String content = contentEditor.getHtmlText();
         
-        createCategoryFromInputIfNeeded();
-        createTagsFromInputIfNeeded();
+        if (!createCategoryFromInputIfNeeded()) {
+            return;
+        }
+        if (!createTagsFromInputIfNeeded()) {
+            return;
+        }
 
         // Validation Logic (Controle de Saisir)
         RadioButton selectedCat = (RadioButton) categoryGroup.getSelectedToggle();
@@ -183,13 +187,16 @@ public class NewArticleController {
         goToArticles();
     }
 
-    private void createCategoryFromInputIfNeeded() {
-        if (newCategoryField == null) return;
+    private boolean createCategoryFromInputIfNeeded() {
+        if (newCategoryField == null) return true;
         String value = newCategoryField.getText();
-        if (value == null || value.trim().isEmpty()) return;
+        if (value == null || value.trim().isEmpty()) return true;
 
         Category created = categoryService.createIfMissing(value);
-        if (created == null) return;
+        if (created == null) {
+            showAlert("Validation Error", "Invalid category. It must be 2-40 characters and start with a letter.");
+            return false;
+        }
 
         loadCategories();
         categoryGroup.getToggles().stream()
@@ -200,20 +207,34 @@ public class NewArticleController {
                 .findFirst()
                 .ifPresent(t -> t.setSelected(true));
         newCategoryField.clear();
+        return true;
     }
 
-    private void createTagsFromInputIfNeeded() {
-        if (newTagField == null) return;
+    private boolean createTagsFromInputIfNeeded() {
+        if (newTagField == null) return true;
         String raw = newTagField.getText();
-        if (raw == null || raw.trim().isEmpty()) return;
+        if (raw == null || raw.trim().isEmpty()) return true;
 
         String[] parts = raw.split(",");
         List<Integer> createdOrMatchedIds = new ArrayList<>();
+        List<String> invalidTags = new ArrayList<>();
         for (String p : parts) {
-            Tag t = tagService.createIfMissing(p);
+            String token = p == null ? "" : p.trim();
+            if (token.isEmpty()) continue;
+            Tag t = tagService.createIfMissing(token);
             if (t != null) {
                 createdOrMatchedIds.add(t.getId());
+            } else {
+                invalidTags.add(token);
             }
+        }
+        if (!invalidTags.isEmpty()) {
+            showAlert(
+                    "Validation Error",
+                    "Invalid tag(s): " + String.join(", ", invalidTags) +
+                            ". Each tag must be 2-30 characters and start with a letter."
+            );
+            return false;
         }
 
         loadTags();
@@ -230,6 +251,7 @@ public class NewArticleController {
             }
         }
         newTagField.clear();
+        return true;
     }
 
 

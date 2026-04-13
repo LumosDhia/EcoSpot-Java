@@ -24,6 +24,9 @@ public class EditUserController {
 
     @FXML
     public void initialize() {
+        if (!isAdminUser()) {
+            return;
+        }
         roleComboBox.setItems(FXCollections.observableArrayList(
                 "Normal user",
                 "Administrator",
@@ -32,6 +35,9 @@ public class EditUserController {
     }
 
     public void setUserToEdit(User user) {
+        if (!isAdminUser()) {
+            return;
+        }
         this.userToEdit = user;
         
         // Setup header text: "email -- Username"
@@ -50,6 +56,10 @@ public class EditUserController {
 
     @FXML
     void handleSave(ActionEvent event) {
+        if (!isAdminUser()) {
+            navigateToUserManagement(event);
+            return;
+        }
         if (userToEdit == null) {
             showError("No user loaded to edit.");
             return;
@@ -61,9 +71,17 @@ public class EditUserController {
         }
 
         String selectedValue = roleComboBox.getValue();
+        if (selectedValue == null || selectedValue.trim().isEmpty()) {
+            showError("Please select a role.");
+            return;
+        }
         String systemRole = "USER";
         if ("Administrator".equals(selectedValue)) systemRole = "ADMIN";
         else if ("NGO Partner".equals(selectedValue)) systemRole = "NGO";
+        else if (!"Normal user".equals(selectedValue)) {
+            showError("Invalid role selected.");
+            return;
+        }
 
         // Update User Role directly via DB method
         userService.updateUserRoleDirectly(userToEdit.getId(), systemRole);
@@ -92,5 +110,10 @@ public class EditUserController {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    private boolean isAdminUser() {
+        User current = tn.esprit.util.SessionManager.getCurrentUser();
+        return current != null && "ADMIN".equalsIgnoreCase(current.getRole());
     }
 }

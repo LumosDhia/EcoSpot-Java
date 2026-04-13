@@ -71,8 +71,12 @@ public class LoginController {
     }
 
     private void performLogin(String email, String password, ActionEvent event) {
-        if (email.isEmpty()) {
+        if (email == null || email.trim().isEmpty()) {
             showError("Please enter your email.");
+            return;
+        }
+        if (password == null || password.trim().isEmpty()) {
+            showError("Please enter your password.");
             return;
         }
         User user = userService.authenticate(email, password);

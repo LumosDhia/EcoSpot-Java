@@ -43,6 +43,9 @@ public class BlogService implements GlobalInterface<Blog> {
             ps.setString(5, slug + "-" + System.currentTimeMillis() % 1000); // Simple uniqueness
             
             String appUserIdHex = resolveCurrentAppUserIdHex();
+            if (appUserIdHex == null || appUserIdHex.isBlank()) {
+                throw new IllegalStateException("No valid app_user ID found for the current session user.");
+            }
             ps.setString(6, appUserIdHex);
             ps.setString(7, appUserIdHex);
             
@@ -255,16 +258,13 @@ public class BlogService implements GlobalInterface<Blog> {
             if (byEmail != null) {
                 return byEmail;
             }
-        }
 
-        if (currentUser != null && currentUser.getRole() != null) {
-            String byRole = findAppUserIdHexByRole(currentUser.getRole());
-            if (byRole != null) {
-                return byRole;
+            String mappedEmail = mapDemoEmailToAppUserEmail(currentUser.getEmail());
+            if (mappedEmail != null) {
+                return findAppUserIdHexByEmail(mappedEmail);
             }
         }
-
-        return "019CA478D1D377B4AE80630614A4A0FD";
+        return null;
     }
 
     private String findAppUserIdHexByEmail(String email) {
@@ -281,38 +281,10 @@ public class BlogService implements GlobalInterface<Blog> {
         return null;
     }
 
-    private String findAppUserIdHexByRole(String role) {
-        String req = "SELECT HEX(id) AS id_hex FROM app_user WHERE roles LIKE ? LIMIT 1";
-        try (PreparedStatement ps = cnx.prepareStatement(req)) {
-            ps.setString(1, "%ROLE_" + role.toUpperCase() + "%");
-            ResultSet rs = ps.executeQuery();
-            if (rs.next()) {
-                return rs.getString("id_hex");
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-
     private String findAppUserEmailByEmail(String email) {
         String req = "SELECT email FROM app_user WHERE email = ? LIMIT 1";
         try (PreparedStatement ps = cnx.prepareStatement(req)) {
             ps.setString(1, email);
-            ResultSet rs = ps.executeQuery();
-            if (rs.next()) {
-                return rs.getString("email");
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-
-    private String findAppUserEmailByRole(String role) {
-        String req = "SELECT email FROM app_user WHERE roles LIKE ? LIMIT 1";
-        try (PreparedStatement ps = cnx.prepareStatement(req)) {
-            ps.setString(1, "%ROLE_" + role.toUpperCase() + "%");
             ResultSet rs = ps.executeQuery();
             if (rs.next()) {
                 return rs.getString("email");

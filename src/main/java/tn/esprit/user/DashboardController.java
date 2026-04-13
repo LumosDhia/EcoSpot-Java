@@ -72,7 +72,7 @@ public class DashboardController {
         } else if (role.equalsIgnoreCase("NGO")) {
             sidebarRoleLabel.setText("NGO");
             userSubRoleLabel.setText("Verified Citizen");
-            breadcrumbLabel.setText("Admin  ›  NGO Dashboard");
+            breadcrumbLabel.setText("NGO  ›  Dashboard");
             dashboardInstructionLabel.setText("Manage your publications and community events.");
             notificationBadge.setText("4");
 
@@ -161,7 +161,11 @@ public class DashboardController {
 
     @FXML
     void goToPendingTickets(ActionEvent event) {
-        navigate(event, "/ticket/PendingTickets.fxml");
+        if (isAdminUser()) {
+            navigate(event, "/ticket/PendingTickets.fxml");
+        } else {
+            navigate(event, "/ticket/TicketManagement.fxml");
+        }
     }
 
     @FXML
@@ -171,13 +175,14 @@ public class DashboardController {
 
     @FXML
     void goToCompletions(ActionEvent event) {
-        navigate(event, "/ticket/PendingTickets.fxml");
+        navigate(event, "/ticket/Achievements.fxml");
     }
 
     @FXML
     void goToPendingTicketsGrid(MouseEvent event) {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/ticket/PendingTickets.fxml"));
+            String target = isAdminUser() ? "/ticket/PendingTickets.fxml" : "/ticket/TicketManagement.fxml";
+            FXMLLoader loader = new FXMLLoader(getClass().getResource(target));
             Parent root = loader.load();
             Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
             stage.getScene().setRoot(root);
@@ -189,7 +194,7 @@ public class DashboardController {
     @FXML
     void goToCompletionsGrid(MouseEvent event) {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/ticket/PendingTickets.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/ticket/Achievements.fxml"));
             Parent root = loader.load();
             Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
             stage.getScene().setRoot(root);
@@ -403,5 +408,10 @@ public class DashboardController {
             System.err.println("Navigation failed for " + fxmlPath);
             e.printStackTrace();
         }
+    }
+
+    private boolean isAdminUser() {
+        User current = tn.esprit.util.SessionManager.getCurrentUser();
+        return current != null && "ADMIN".equalsIgnoreCase(current.getRole());
     }
 }

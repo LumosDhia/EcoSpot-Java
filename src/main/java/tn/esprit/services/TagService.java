@@ -10,6 +10,8 @@ import java.util.List;
 public class TagService {
 
     Connection cnx = MyConnection.getInstance().getCnx();
+    private static final int MIN_NAME_LENGTH = 2;
+    private static final int MAX_NAME_LENGTH = 30;
 
     public List<Tag> getAll() {
         List<Tag> tags = new ArrayList<>();
@@ -26,9 +28,8 @@ public class TagService {
     }
 
     public Tag createIfMissing(String name) {
-        if (name == null) return null;
-        String trimmed = name.trim();
-        if (trimmed.isEmpty()) return null;
+        String trimmed = normalizeTagName(name);
+        if (!isValidTagName(trimmed)) return null;
 
         String selectReq = "SELECT id, name FROM tag WHERE LOWER(name) = LOWER(?) LIMIT 1";
         try (PreparedStatement ps = cnx.prepareStatement(selectReq)) {
@@ -90,9 +91,13 @@ public class TagService {
     }
 
     public boolean renameTag(int tagId, String newName) {
+        String normalized = normalizeTagName(newName);
+        if (!isValidTagName(normalized)) {
+            return false;
+        }
         String req = "UPDATE tag SET name = ? WHERE id = ?";
         try (PreparedStatement ps = cnx.prepareStatement(req)) {
-            ps.setString(1, newName);
+            ps.setString(1, normalized);
             ps.setInt(2, tagId);
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
@@ -131,5 +136,16 @@ public class TagService {
             } catch (SQLException ignored) {
             }
         }
+    }
+
+    private String normalizeTagName(String input) {
+        return input == null ? "" : input.trim().replaceAll("\\s+", " ");
+    }
+
+    private boolean isValidTagName(String name) {
+        if (name.isEmpty()) return false;
+        if (name.length() < MIN_NAME_LENGTH || name.length() > MAX_NAME_LENGTH) return false;
+        if (!name.matches("^[A-Za-z].*")) return false;
+        return name.matches("^[A-Za-z][A-Za-z0-9\\s\\-_#&]*$");
     }
 }

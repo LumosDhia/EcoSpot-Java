@@ -10,6 +10,8 @@ import java.util.List;
 public class CategoryService {
 
     Connection cnx = MyConnection.getInstance().getCnx();
+    private static final int MIN_NAME_LENGTH = 2;
+    private static final int MAX_NAME_LENGTH = 40;
 
     public List<Category> getAll() {
         List<Category> categories = new ArrayList<>();
@@ -26,9 +28,8 @@ public class CategoryService {
     }
 
     public Category createIfMissing(String name) {
-        if (name == null) return null;
-        String trimmed = name.trim();
-        if (trimmed.isEmpty()) return null;
+        String trimmed = normalizeCategoryName(name);
+        if (!isValidCategoryName(trimmed)) return null;
 
         String selectReq = "SELECT id, name FROM category WHERE LOWER(name) = LOWER(?) LIMIT 1";
         try (PreparedStatement ps = cnx.prepareStatement(selectReq)) {
@@ -90,9 +91,13 @@ public class CategoryService {
     }
 
     public boolean renameCategory(int categoryId, String newName) {
+        String normalized = normalizeCategoryName(newName);
+        if (!isValidCategoryName(normalized)) {
+            return false;
+        }
         String req = "UPDATE category SET name = ? WHERE id = ?";
         try (PreparedStatement ps = cnx.prepareStatement(req)) {
-            ps.setString(1, newName);
+            ps.setString(1, normalized);
             ps.setInt(2, categoryId);
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
@@ -131,5 +136,16 @@ public class CategoryService {
             } catch (SQLException ignored) {
             }
         }
+    }
+
+    private String normalizeCategoryName(String input) {
+        return input == null ? "" : input.trim().replaceAll("\\s+", " ");
+    }
+
+    private boolean isValidCategoryName(String name) {
+        if (name.isEmpty()) return false;
+        if (name.length() < MIN_NAME_LENGTH || name.length() > MAX_NAME_LENGTH) return false;
+        if (!name.matches("^[A-Za-z].*")) return false;
+        return name.matches("^[A-Za-z][A-Za-z0-9\\s\\-_/&()]*$");
     }
 }

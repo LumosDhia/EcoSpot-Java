@@ -78,6 +78,8 @@ public class CategoriesManagementController {
         if (newName.isEmpty()) return;
         if (categoryService.renameCategory(category.getId(), newName)) {
             refreshData();
+        } else {
+            showValidationError("Invalid category name. Use 2-40 chars and start with a letter.");
         }
     }
 
@@ -97,6 +99,14 @@ public class CategoriesManagementController {
     private void refreshData() {
         categoriesTable.setItems(FXCollections.observableArrayList(categoryService.getAll()));
         categoryArticlesList.setItems(FXCollections.emptyObservableList());
+    }
+
+    private void showValidationError(String message) {
+        Alert alert = new Alert(Alert.AlertType.WARNING);
+        alert.setTitle("Validation error");
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
     }
 
     @FXML

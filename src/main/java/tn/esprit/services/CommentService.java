@@ -111,7 +111,7 @@ public class CommentService {
                 ps.setString(idx++, c.getAuthorName() != null ? c.getAuthorName() : "Anonymous User");
             }
             if (hasAuthorUserId) {
-                byte[] appUserId = resolveAppUserIdForComment(conn, c.getArticleId(), currentUser);
+                byte[] appUserId = resolveAppUserIdForComment(conn, currentUser);
                 if (appUserId == null) {
                     lastErrorMessage = "No valid app_user UUID found for comment author.";
                     return false;
@@ -490,14 +490,19 @@ public class CommentService {
         }
     }
 
-    private byte[] resolveAppUserIdForComment(Connection conn, int articleId, User currentUser) {
+    private byte[] resolveAppUserIdForComment(Connection conn, User currentUser) {
         if (currentUser != null && currentUser.getEmail() != null && !currentUser.getEmail().isBlank()) {
             byte[] byEmail = findAppUserIdByEmail(conn, currentUser.getEmail());
             if (byEmail != null) {
                 return byEmail;
             }
+
+            String mappedEmail = mapDemoEmailToAppUserEmail(conn, currentUser.getEmail());
+            if (mappedEmail != null) {
+                return findAppUserIdByEmail(conn, mappedEmail);
+            }
         }
-        return findArticleCreatorAppUserId(conn, articleId);
+        return null;
     }
 
     private byte[] findAppUserIdByEmail(Connection conn, String email) {
@@ -514,17 +519,4 @@ public class CommentService {
         return null;
     }
 
-    private byte[] findArticleCreatorAppUserId(Connection conn, int articleId) {
-        String req = "SELECT created_by_id FROM article WHERE id = ? LIMIT 1";
-        try (PreparedStatement ps = conn.prepareStatement(req)) {
-            ps.setInt(1, articleId);
-            try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) {
-                    return rs.getBytes("created_by_id");
-                }
-            }
-        } catch (SQLException ignored) {
-        }
-        return null;
-    }
 }

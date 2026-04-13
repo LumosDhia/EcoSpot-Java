@@ -5,17 +5,18 @@ public final class ArticleInputValidator {
     private ArticleInputValidator() {}
 
     public static String validate(String title, String htmlContent, boolean hasSelectedCategory) {
-        if (title == null || title.trim().isEmpty()) {
+        String safeTitle = title == null ? "" : title.trim();
+        if (safeTitle.isEmpty()) {
             return "Title is required.";
         }
-        if (title.length() < 5 || title.length() > 100) {
+        if (safeTitle.length() < 5 || safeTitle.length() > 100) {
             return "Title must be between 5 and 100 characters.";
         }
-        if (!title.matches(".*[a-zA-Z].*[a-zA-Z].*[a-zA-Z].*[a-zA-Z].*[a-zA-Z].*")) {
+        if (!safeTitle.matches(".*[a-zA-Z].*[a-zA-Z].*[a-zA-Z].*[a-zA-Z].*[a-zA-Z].*")) {
             return "Title must contain at least 5 letters.";
         }
-        if (!title.substring(0, 1).matches("[a-zA-Z]")) {
-            return "Title must start with a letter.";
+        if (!safeTitle.substring(0, 1).matches("[a-zA-Z]")) {
+            return "Title must start with a letter (not a number or symbol).";
         }
 
         String content = htmlContent == null ? "" : htmlContent;
@@ -28,6 +29,9 @@ public final class ArticleInputValidator {
         }
         if (!plainText.matches(".*[a-zA-Z].*[a-zA-Z].*[a-zA-Z].*[a-zA-Z].*[a-zA-Z].*")) {
             return "The article content must contain at least 5 letters.";
+        }
+        if (!plainText.substring(0, 1).matches("[a-zA-Z]")) {
+            return "The article content must start with a letter (not a number or symbol).";
         }
 
         if (!hasSelectedCategory) {
