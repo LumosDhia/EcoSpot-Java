@@ -48,7 +48,11 @@ public class EventCardController {
         }
         
         nameLabel.setText(event.getName());
-        capacityLabel.setText("👥 " + event.getCapacity() + " max");
+        if (event.getCapacity() <= 0) {
+            capacityLabel.setText("✅ Completed");
+        } else {
+            capacityLabel.setText("👥 " + event.getCapacity() + " spots left");
+        }
         
         String desc = event.getDescription();
         if (desc != null && desc.length() > 100) {

@@ -23,10 +23,8 @@ public class DashboardController {
 
     @FXML private Label sidebarRoleLabel;
     @FXML private Label userNameLabel;
-    @FXML private Label userSubRoleLabel;
     @FXML private Label breadcrumbLabel;
     @FXML private Label dashboardInstructionLabel;
-    @FXML private Label notificationBadge;
 
     @FXML private VBox adminSidebarLinks;
     @FXML private VBox ngoSidebarLinks;
@@ -59,10 +57,8 @@ public class DashboardController {
 
         if (role.equalsIgnoreCase("ADMIN")) {
             sidebarRoleLabel.setText("ADMIN PANEL");
-            userSubRoleLabel.setText("Verified Administrator");
             breadcrumbLabel.setText("Admin  ›  Dashboard");
             dashboardInstructionLabel.setText("Manage content, users, and community tickets.");
-            notificationBadge.setText("2");
 
             adminSidebarLinks.setVisible(true);
             adminSidebarLinks.setManaged(true);
@@ -71,10 +67,8 @@ public class DashboardController {
             enableCardHoverAnimation(adminCardsGrid);
         } else if (role.equalsIgnoreCase("NGO")) {
             sidebarRoleLabel.setText("NGO");
-            userSubRoleLabel.setText("Verified Citizen");
             breadcrumbLabel.setText("NGO  ›  Dashboard");
             dashboardInstructionLabel.setText("Manage your publications and community events.");
-            notificationBadge.setText("4");
 
             ngoSidebarLinks.setVisible(true);
             ngoSidebarLinks.setManaged(true);
@@ -83,10 +77,8 @@ public class DashboardController {
             enableCardHoverAnimation(ngoCardsGrid);
         } else {
             sidebarRoleLabel.setText("DASHBOARD");
-            userSubRoleLabel.setText("Verified Citizen");
             breadcrumbLabel.setText("User  ›  Dashboard");
             dashboardInstructionLabel.setText("Submit reports, browse community tickets and track impact.");
-            notificationBadge.setText("24");
 
             userSidebarLinks.setVisible(true);
             userSidebarLinks.setManaged(true);
@@ -170,7 +162,11 @@ public class DashboardController {
 
     @FXML
     void goToAllTickets(ActionEvent event) {
-        navigate(event, "/ticket/TicketManagement.fxml");
+        if (isAdminUser()) {
+            navigate(event, "/ticket/AdminAllTickets.fxml");
+        } else {
+            navigate(event, "/ticket/TicketManagement.fxml");
+        }
     }
 
     @FXML

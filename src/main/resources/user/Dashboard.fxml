@@ -79,20 +79,9 @@
                         <Region HBox.hgrow="ALWAYS" />
                         <HBox alignment="CENTER" spacing="15.0">
                             <children>
-                                <StackPane>
-                                    <children>
-                                        <Label text="🔔" style="-fx-font-size: 20px;" />
-                                        <Label fx:id="notificationBadge" style="-fx-background-color: #e74c3c; -fx-text-fill: white; -fx-font-size: 9px; -fx-padding: 1 4; -fx-background-radius: 10;" text="0" StackPane.alignment="TOP_RIGHT">
-                                            <StackPane.margin>
-                                                <Insets top="-5.0" right="-5.0" />
-                                            </StackPane.margin>
-                                        </Label>
-                                    </children>
-                                </StackPane>
                                 <VBox alignment="CENTER_RIGHT">
                                     <children>
                                         <Label fx:id="userNameLabel" styleClass="admin-profile-name" text="User" />
-                                        <Label fx:id="userSubRoleLabel" styleClass="admin-profile-role" text="Verified Citizen" />
                                     </children>
                                 </VBox>
                                 <Label text="👤" style="-fx-font-size: 32px; -fx-background-color: #fca311; -fx-text-fill: white; -fx-padding: 5; -fx-background-radius: 50;" />
@@ -144,7 +133,6 @@
                                             <children>
                                                 <StackPane alignment="TOP_RIGHT">
                                                     <children>
-                                                        <Label styleClass="stat-badge" text="12" />
                                                         <VBox alignment="CENTER" spacing="15.0">
                                                             <children>
                                                                 <StackPane styleClass="dashboard-icon-container">
@@ -179,7 +167,6 @@
                                             <children>
                                                 <StackPane alignment="TOP_RIGHT">
                                                     <children>
-                                                        <Label styleClass="stat-badge" text="5" />
                                                         <VBox alignment="CENTER" spacing="15.0">
                                                             <children>
                                                                 <StackPane styleClass="dashboard-icon-container">
@@ -199,7 +186,6 @@
                                             <children>
                                                 <StackPane alignment="TOP_RIGHT">
                                                     <children>
-                                                        <Label styleClass="stat-badge" text="187" />
                                                         <VBox alignment="CENTER" spacing="15.0">
                                                             <children>
                                                                 <StackPane styleClass="dashboard-icon-container">
@@ -271,7 +257,6 @@
                                             <children>
                                                 <StackPane alignment="TOP_RIGHT">
                                                     <children>
-                                                        <Label styleClass="stat-badge" text="12" />
                                                         <VBox alignment="CENTER" spacing="15.0">
                                                             <children>
                                                                 <StackPane styleClass="dashboard-icon-container">
@@ -327,7 +312,6 @@
                                             <children>
                                                 <StackPane alignment="TOP_RIGHT">
                                                     <children>
-                                                        <Label styleClass="stat-badge" text="5" />
                                                         <VBox alignment="CENTER" spacing="15.0">
                                                             <children>
                                                                 <StackPane styleClass="dashboard-icon-container">
@@ -370,7 +354,6 @@
                                             <children>
                                                 <StackPane alignment="TOP_RIGHT">
                                                     <children>
-                                                        <Label styleClass="stat-badge" text="9" />
                                                         <VBox alignment="CENTER" spacing="15.0">
                                                             <children>
                                                                 <StackPane styleClass="dashboard-icon-container">

@@ -21,7 +21,6 @@ import tn.esprit.util.SessionManager;
 import java.io.IOException;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class PendingTicketsController {
 
@@ -47,9 +46,7 @@ public class PendingTicketsController {
     private void loadPendingTickets() {
         ticketsListContainer.getChildren().clear();
 
-        List<Ticket> pending = ticketService.getAll().stream()
-                .filter(t -> t.getStatus() == TicketStatus.PENDING || t.getStatus() == TicketStatus.IN_PROGRESS)
-                .collect(Collectors.toList());
+        List<Ticket> pending = ticketService.getPendingForAdminReview();
 
         if (pending.isEmpty()) {
             Label emptyLbl = new Label("No pending tickets to review.");

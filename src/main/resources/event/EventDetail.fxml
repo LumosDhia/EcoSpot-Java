@@ -84,13 +84,23 @@
                                         </FlowPane>
                                     </children>
                                 </VBox>
+                                <VBox spacing="8.0">
+                                    <children>
+                                        <Label style="-fx-font-weight: bold; -fx-text-fill: #2d6a4f; -fx-font-size: 14;" text="Participants" />
+                                        <VBox fx:id="participantContainer" spacing="4.0">
+                                            <children>
+                                                <Label style="-fx-text-fill: gray; -fx-font-style: italic;" text="No participants yet." />
+                                            </children>
+                                        </VBox>
+                                    </children>
+                                </VBox>
                                 <Separator />
                                 
                                 <HBox spacing="15.0">
                                     <children>
-                                        
+                                        <Button onAction="#goBack" prefHeight="45.0" prefWidth="180.0" styleClass="nav-link-btn" text="← Back to previous" />
                                         <Region HBox.hgrow="ALWAYS" />
-                                        <Button onAction="#handleJoinEvent" prefHeight="45.0" prefWidth="150.0" styleClass="btn-hero-primary" text="Join Event" />
+                                        <Button fx:id="joinBtn" onAction="#handleJoinEvent" prefHeight="45.0" prefWidth="150.0" styleClass="btn-hero-primary" text="Join Event" />
                                     </children>
                                 </HBox>
                             </children>

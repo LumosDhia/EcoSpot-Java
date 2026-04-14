@@ -10,6 +10,8 @@ import javafx.scene.Parent;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
+import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonType;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
@@ -160,8 +162,8 @@ public class MyTicketsController {
             }
         });
 
-        if (t.getStatus() == TicketStatus.SENT_BACK) {
-            Button btnEdit = new Button("Edit & Resubmit");
+        if (canModifyTicket(t)) {
+            Button btnEdit = new Button(t.getStatus() == TicketStatus.SENT_BACK ? "Edit & Resubmit" : "Edit");
             btnEdit.getStyleClass().add("ticket-btn-complete");
             btnEdit.setOnAction(e -> {
                 try {
@@ -175,7 +177,12 @@ public class MyTicketsController {
                     ex.printStackTrace();
                 }
             });
-            footer.getChildren().addAll(dateLab, footSpacer, btnEdit, btnView);
+
+            Button btnDelete = new Button("Delete");
+            btnDelete.getStyleClass().add("ticket-btn-view");
+            btnDelete.setOnAction(e -> handleDeleteTicket(t));
+
+            footer.getChildren().addAll(dateLab, footSpacer, btnDelete, btnEdit, btnView);
             card.getChildren().addAll(content, footer);
             return card;
         }
@@ -205,6 +212,21 @@ public class MyTicketsController {
         if (status == TicketStatus.REFUSED) return "REJECTED";
         if (status == TicketStatus.SENT_BACK) return "NEEDS REVISION";
         return status.name();
+    }
+
+    private boolean canModifyTicket(Ticket t) {
+        return t != null && t.getStatus() != TicketStatus.PUBLISHED;
+    }
+
+    private void handleDeleteTicket(Ticket t) {
+        Alert confirm = new Alert(Alert.AlertType.CONFIRMATION, "Delete this ticket?");
+        confirm.showAndWait().ifPresent(result -> {
+            if (result == ButtonType.OK) {
+                ticketService.delete(t);
+                userTickets = ticketService.getByUserId(tn.esprit.util.SessionManager.getCurrentUser().getId());
+                filterAndDisplay();
+            }
+        });
     }
 
     private void applyStatusClass(Label statusLabel, TicketStatus status) {

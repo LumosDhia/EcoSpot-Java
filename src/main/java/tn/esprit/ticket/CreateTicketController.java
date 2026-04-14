@@ -112,10 +112,19 @@ public class CreateTicketController {
         }
 
         Ticket t = editingTicket != null ? editingTicket : new Ticket();
+        if (editingTicket != null && editingTicket.getStatus() == TicketStatus.PUBLISHED) {
+            showError("Accepted tickets can no longer be edited.");
+            return;
+        }
         t.setTitle(title);
         t.setDescription(desc);
         t.setLocation(loc);
-        t.setStatus(TicketStatus.PENDING);
+        if (editingTicket != null) {
+            // Any user edit is treated as a new admin review cycle.
+            t.setStatus(TicketStatus.PENDING);
+        } else {
+            t.setStatus(TicketStatus.PENDING);
+        }
         if (t.getPriority() == null) t.setPriority(TicketPriority.MEDIUM);
         if (t.getDomain() == null) t.setDomain(ActionDomain.OTHER);
         t.setAdminNotes(null); // reset revision notes on resubmission
@@ -147,7 +156,7 @@ public class CreateTicketController {
     }
 
     public void setTicketForEdit(Ticket ticket) {
-        if (ticket == null || ticket.getStatus() != TicketStatus.SENT_BACK) {
+        if (ticket == null || ticket.getStatus() == TicketStatus.PUBLISHED) {
             return;
         }
         this.editingTicket = ticketService.getById(ticket.getId());

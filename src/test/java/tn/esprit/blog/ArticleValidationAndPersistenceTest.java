@@ -1,10 +1,19 @@
 package tn.esprit.blog;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.AfterEach;
 import tn.esprit.services.BlogService;
 import tn.esprit.services.CategoryService;
 import tn.esprit.services.TagService;
+import tn.esprit.user.User;
+import tn.esprit.util.MyConnection;
+import tn.esprit.util.SessionManager;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.List;
 import java.util.Optional;
 
@@ -12,11 +21,24 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class ArticleValidationAndPersistenceTest {
 
+    @BeforeEach
+    void loginAsDbBackedUserForWriteOperations() {
+        String adminEmail = findEmailForRole("ROLE_ADMIN");
+        if (adminEmail != null) {
+            SessionManager.login(new User(0, "admin-test", adminEmail, "", "ADMIN"));
+        }
+    }
+
+    @AfterEach
+    void clearSessionAfterEachTest() {
+        SessionManager.logout();
+    }
+
     @Test
     void validationRejectsInvalidTitleAndContent() {
         assertEquals("Title is required.", ArticleInputValidator.validate("", "<p>valid content with enough letters</p>", true));
         assertEquals("Title must be between 5 and 100 characters.", ArticleInputValidator.validate("Abc", "<p>valid content with enough letters</p>", true));
-        assertEquals("Title must start with a letter.", ArticleInputValidator.validate("1Valid title", "<p>valid content with enough letters</p>", true));
+        assertEquals("Title must start with a letter (not a number or symbol).", ArticleInputValidator.validate("1Valid title", "<p>valid content with enough letters</p>", true));
         assertEquals("Content is required.", ArticleInputValidator.validate("Valid Title", "<p>   </p>", true));
         assertEquals("The article content must be more detailed (at least 20 characters).", ArticleInputValidator.validate("Valid Title", "<p>short text</p>", true));
         assertEquals("Please select a category.", ArticleInputValidator.validate("Valid Title", "<p>This is long enough content with letters.</p>", false));
@@ -113,5 +135,140 @@ public class ArticleValidationAndPersistenceTest {
         assertTrue(loaded.getTags().stream().anyMatch(t -> newTagB.equals(t.getName())), "Article should include second new tag");
 
         blogService.delete(loaded);
+    }
+
+    @Test
+    void articleOwnerAndRevisionWorkflowPersistsInDatabase() {
+        BlogService blogService = new BlogService();
+        CategoryService categoryService = new CategoryService();
+
+        String ngoEmail = findEmailForRole("ROLE_NGO");
+        String adminEmail = findEmailForRole("ROLE_ADMIN");
+        assertNotNull(ngoEmail, "DB must contain at least one NGO app_user");
+        assertNotNull(adminEmail, "DB must contain at least one ADMIN app_user");
+
+        SessionManager.login(new User(0, "ngo-test", ngoEmail, "", "NGO"));
+        assertEquals(ngoEmail, blogService.resolveCurrentOwnerEmail(), "Owner email resolution should match logged-in NGO");
+
+        List<Category> categories = categoryService.getAll();
+        Category category = categories.isEmpty() ? null : categories.get(0);
+
+        String title = "Workflow Owner Revision " + System.currentTimeMillis();
+        Blog blog = new Blog();
+        blog.setTitle(title);
+        blog.setContent("<p>Workflow test content long enough to validate persistence and role ownership behavior.</p>");
+        blog.setImage("https://upload.wikimedia.org/wikipedia/commons/thumb/a/a9/Example.jpg/640px-Example.jpg");
+        blog.setCategory(category);
+        blog.setIsPublished(false);
+
+        blogService.add2(blog);
+
+        Blog created = blogService.search(title).stream()
+                .filter(b -> title.equals(b.getTitle()))
+                .findFirst()
+                .orElseThrow(() -> new AssertionError("Created workflow article should be found"));
+
+        assertEquals(ngoEmail, created.getCreatedByEmail(), "Article should be owned by the currently logged-in NGO user");
+
+        SessionManager.login(new User(0, "admin-test", adminEmail, "", "ADMIN"));
+        created.setAdminRevisionNote("Please expand impact metrics and evidence.");
+        created.setIsPublished(false);
+        blogService.update(created);
+
+        Blog revised = blogService.search(title).stream()
+                .filter(b -> b.getId() == created.getId())
+                .findFirst()
+                .orElseThrow(() -> new AssertionError("Revised article should still be found"));
+
+        assertNotNull(revised.getAdminRevisionNote(), "Revision note should be persisted");
+        assertTrue(revised.getAdminRevisionNote().contains("impact metrics"), "Revision note content should match update");
+        assertFalse(revised.getIsPublished(), "Revision-requested article must remain unpublished");
+
+        blogService.delete(revised);
+        SessionManager.logout();
+    }
+
+    @Test
+    void taxonomyRenameAndUnlinkOperationsAffectArticlesInDatabase() {
+        CategoryService categoryService = new CategoryService();
+        TagService tagService = new TagService();
+        BlogService blogService = new BlogService();
+
+        String adminEmail = findEmailForRole("ROLE_ADMIN");
+        assertNotNull(adminEmail, "DB must contain at least one ADMIN app_user");
+        SessionManager.login(new User(0, "admin-test", adminEmail, "", "ADMIN"));
+
+        String categoryName = "TaxFlowCat_" + System.currentTimeMillis();
+        String tagName = "TaxTag_" + (System.currentTimeMillis() % 100000);
+        Category category = categoryService.createIfMissing(categoryName);
+        Tag tag = tagService.createIfMissing(tagName);
+
+        assertNotNull(category, "Category creation should succeed");
+        assertNotNull(tag, "Tag creation should succeed");
+
+        String title = "Taxonomy Flow " + System.currentTimeMillis();
+        Blog blog = new Blog();
+        blog.setTitle(title);
+        blog.setContent("<p>Taxonomy flow test verifies rename and unlink behavior on persistent article rows.</p>");
+        blog.setImage("https://upload.wikimedia.org/wikipedia/commons/thumb/a/a9/Example.jpg/640px-Example.jpg");
+        blog.setCategory(category);
+        blog.setTags(List.of(tag));
+        blog.setIsPublished(false);
+        blogService.add2(blog);
+
+        Blog created = blogService.search(title).stream()
+                .filter(b -> title.equals(b.getTitle()))
+                .findFirst()
+                .orElseThrow(() -> new AssertionError("Taxonomy test article should be found"));
+
+        String renamedCategory = "TaxFlowCatRenamed_" + System.currentTimeMillis();
+        String renamedTag = "TaxTagRen_" + (System.currentTimeMillis() % 100000);
+
+        assertTrue(categoryService.renameCategory(category.getId(), renamedCategory), "Category rename should succeed");
+        assertTrue(tagService.renameTag(tag.getId(), renamedTag), "Tag rename should succeed");
+
+        Blog afterRename = blogService.search(title).stream()
+                .filter(b -> b.getId() == created.getId())
+                .findFirst()
+                .orElseThrow(() -> new AssertionError("Article should still exist after taxonomy rename"));
+
+        assertNotNull(afterRename.getCategory(), "Category should still be linked after rename");
+        assertEquals(renamedCategory, afterRename.getCategory().getName(), "Article category label should reflect renamed category");
+        assertTrue(afterRename.getTags().stream().anyMatch(t -> renamedTag.equals(t.getName())), "Article tag label should reflect renamed tag");
+
+        assertTrue(tagService.deleteTagAndUnlinkArticles(tag.getId()), "Tag delete/unlink should succeed");
+        Blog afterTagDelete = blogService.search(title).stream()
+                .filter(b -> b.getId() == created.getId())
+                .findFirst()
+                .orElseThrow(() -> new AssertionError("Article should still exist after tag delete"));
+        assertFalse(afterTagDelete.getTags().stream().anyMatch(t -> renamedTag.equals(t.getName())), "Deleted tag should be unlinked from article");
+
+        assertTrue(categoryService.deleteCategoryAndUnlinkArticles(category.getId()), "Category delete/unlink should succeed");
+        Blog afterCategoryDelete = blogService.search(title).stream()
+                .filter(b -> b.getId() == created.getId())
+                .findFirst()
+                .orElseThrow(() -> new AssertionError("Article should still exist after category delete"));
+        assertNull(afterCategoryDelete.getCategory(), "Deleted category should be unlinked from article");
+
+        blogService.delete(afterCategoryDelete);
+        SessionManager.logout();
+    }
+
+    private String findEmailForRole(String roleKeyword) {
+        String sql = "SELECT email FROM app_user WHERE roles LIKE ? LIMIT 1";
+        try {
+            Connection cnx = MyConnection.getInstance().getCnx();
+            try (PreparedStatement ps = cnx.prepareStatement(sql)) {
+                ps.setString(1, "%" + roleKeyword + "%");
+                try (ResultSet rs = ps.executeQuery()) {
+                    if (rs.next()) {
+                        return rs.getString("email");
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            fail("Unable to query app_user role data: " + e.getMessage());
+        }
+        return null;
     }
 }

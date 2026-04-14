@@ -1,5 +1,6 @@
 package tn.esprit.event;
 
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -26,6 +27,11 @@ public class SponsorFormController {
     private Sponsor currentSponsor;
     private boolean isEdit = false;
     private File selectedImageFile;
+
+    @FXML
+    public void initialize() {
+        tn.esprit.util.NavigationHistory.track(saveBtn, "/event/SponsorForm.fxml");
+    }
 
     public void setSponsor(Sponsor sponsor) {
         this.currentSponsor = sponsor;
@@ -72,7 +78,7 @@ public class SponsorFormController {
                 sponsorService.add(currentSponsor);
             }
 
-            goBack();
+            goBack(null);
         }
     }
 
@@ -148,9 +154,15 @@ public class SponsorFormController {
         alert.show();
     }
 
-    @FXML private void cancel() { goBack(); }
+    @FXML private void cancel() { goBack(null); }
 
-    private void goBack() { switchScene("/event/SponsorManagement.fxml"); }
+    @FXML
+    private void goBack(ActionEvent event) {
+        if (event != null && tn.esprit.util.NavigationHistory.goBack(event)) {
+            return;
+        }
+        switchScene("/event/SponsorManagement.fxml");
+    }
 
     @FXML private void goToHome() { switchScene("/home/Home.fxml"); }
 

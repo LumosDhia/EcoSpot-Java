@@ -160,7 +160,14 @@ public class ArticlesManagementController {
                     revisionBtn.setManaged(false);
                 }
 
-                viewBtn.setOnAction(e -> handleView(getTableView().getItems().get(getIndex())));
+                viewBtn.setOnAction(e -> {
+                    Blog selected = getTableView().getItems().get(getIndex());
+                    if (allowNgoEdit) {
+                        handleViewNgo(selected);
+                    } else {
+                        handleView(selected);
+                    }
+                });
                 editBtn.setOnAction(e -> handleEdit(getTableView().getItems().get(getIndex())));
                 deleteBtn.setOnAction(e -> handleDelete(getTableView().getItems().get(getIndex())));
                 revisionBtn.setOnAction(e -> handleReturnToRevision(getTableView().getItems().get(getIndex())));
@@ -202,6 +209,19 @@ public class ArticlesManagementController {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/blog/ArticleShow.fxml"));
             Parent root = loader.load();
             ArticleShowController controller = loader.getController();
+            controller.setArticle(blog);
+            Stage stage = (Stage) adminArticlesTable.getScene().getWindow();
+            stage.getScene().setRoot(root);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void handleViewNgo(Blog blog) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/blog/ArticleShowNgo.fxml"));
+            Parent root = loader.load();
+            ArticleShowNgoController controller = loader.getController();
             controller.setArticle(blog);
             Stage stage = (Stage) adminArticlesTable.getScene().getWindow();
             stage.getScene().setRoot(root);

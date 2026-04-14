@@ -113,9 +113,12 @@ public class EventManagementController {
 
     private void filterAndDisplay() {
         if (searchField == null || sortChoice == null || eventsGrid == null) return;
-        String query = searchField.getText().toLowerCase();
+        String query = searchField.getText() == null ? "" : searchField.getText().trim().toLowerCase();
         List<Event> filtered = allEvents.stream()
-                .filter(e -> e.getName().toLowerCase().contains(query) || e.getLocation().toLowerCase().contains(query))
+                .filter(e -> {
+                    String name = e.getName() == null ? "" : e.getName().toLowerCase();
+                    return name.contains(query);
+                })
                 .collect(Collectors.toList());
 
         String sort = sortChoice.getValue();

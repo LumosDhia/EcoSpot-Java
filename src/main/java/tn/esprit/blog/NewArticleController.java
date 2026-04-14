@@ -12,6 +12,7 @@ import javafx.stage.Stage;
 import tn.esprit.services.BlogService;
 import tn.esprit.services.CategoryService;
 import tn.esprit.services.TagService;
+import tn.esprit.user.User;
 
 import java.io.File;
 import java.io.IOException;
@@ -38,6 +39,7 @@ public class NewArticleController {
     private ToggleGroup categoryGroup = new ToggleGroup();
     private Blog editArticle = null;
     private TagService tagService = new TagService();
+    private boolean ngoRevisionResubmission = false;
 
     @FXML
     public void initialize() {
@@ -68,7 +70,14 @@ public class NewArticleController {
             } catch (Exception e) {}
         }
         
-        publicationChoice.setValue(blog.getIsPublished() ? "Publish immediately" : "Save as draft");
+        ngoRevisionResubmission = isNgoRevisionResubmission(blog);
+        if (ngoRevisionResubmission) {
+            publicationChoice.setValue("Save as draft");
+            publicationChoice.setDisable(true);
+        } else {
+            publicationChoice.setDisable(false);
+            publicationChoice.setValue(blog.getIsPublished() ? "Publish immediately" : "Save as draft");
+        }
         
         if (blog.getAdminRevisionNote() != null && !blog.getAdminRevisionNote().trim().isEmpty()) {
             revisionAlertBox.setVisible(true);
@@ -141,13 +150,6 @@ public class NewArticleController {
     private void saveArticle() {
         String title = titleField.getText();
         String content = contentEditor.getHtmlText();
-        
-        if (!createCategoryFromInputIfNeeded()) {
-            return;
-        }
-        if (!createTagsFromInputIfNeeded()) {
-            return;
-        }
 
         // Validation Logic (Controle de Saisir)
         RadioButton selectedCat = (RadioButton) categoryGroup.getSelectedToggle();
@@ -164,7 +166,18 @@ public class NewArticleController {
         blog.setCategory((Category) selectedCat.getUserData());
         
         // Set publication status
-        blog.setIsPublished("Publish immediately".equals(publicationChoice.getValue()));
+        boolean publishRequested = "Publish immediately".equals(publicationChoice.getValue());
+        if (publishRequested && (selectedImagePath == null || selectedImagePath.trim().isEmpty())) {
+            showAlert("Validation Error", "An image is required before publishing an article.");
+            return;
+        }
+        if (ngoRevisionResubmission) {
+            // NGO resubmission after revision request must return to admin review queue.
+            blog.setIsPublished(false);
+            blog.setAdminRevisionNote(null);
+        } else {
+            blog.setIsPublished(publishRequested);
+        }
 
         // Extract Tags
         List<Tag> selectedTags = new ArrayList<>();
@@ -185,6 +198,16 @@ public class NewArticleController {
         }
         
         goToArticles();
+    }
+
+    @FXML
+    private void addCategoryFromInput() {
+        createCategoryFromInputIfNeeded();
+    }
+
+    @FXML
+    private void addTagsFromInput() {
+        createTagsFromInputIfNeeded();
     }
 
     private boolean createCategoryFromInputIfNeeded() {
@@ -261,6 +284,14 @@ public class NewArticleController {
         alert.setHeaderText(null);
         alert.setContentText(message);
         alert.showAndWait();
+    }
+
+    private boolean isNgoRevisionResubmission(Blog blog) {
+        if (blog == null) return false;
+        User currentUser = tn.esprit.util.SessionManager.getCurrentUser();
+        boolean isNgo = currentUser != null && "NGO".equalsIgnoreCase(currentUser.getRole());
+        boolean hasRevisionNote = blog.getAdminRevisionNote() != null && !blog.getAdminRevisionNote().trim().isEmpty();
+        return isNgo && hasRevisionNote;
     }
 
     @FXML

@@ -1,0 +1,62 @@
+========================================================================
+             ECOSPOT PROJECT - TECHNICAL CONCEPTS SUMMARY
+========================================================================
+
+1. WHY USE MAVEN?
+-----------------
+Maven is a build automation and project management tool. We use it to:
+- Dependency Management: It automatically downloads and includes libraries (like JavaFX, MySQL Connector) so you don't have to manually add .jar files.
+- Project Structure: It enforces a standard folder layout (src/main/java, src/main/resources).
+- Build Automation: It handles compiling, testing, and packaging with simple commands (e.g., mvn clean install).
+
+2. CONTROLE DE SAISIE (INPUT VALIDATION)
+----------------------------------------
+This is the process of verifying that user input meets specific criteria before processing it.
+- Prevents errors (like NullPointerExceptions).
+- Ensures data integrity (e.g., checking if an email has an '@' symbol).
+- Enhances UX by providing immediate feedback (error messages) when the user types something invalid.
+
+3. SCENEBUILDER
+---------------
+SceneBuilder is a visual layout tool for JavaFX.
+- It allows you to design User Interfaces (UI) by dragging and dropping components (Buttons, Labels, VBoxes) without writing XML by hand.
+- It generates .fxml files that define the structure of the UI.
+
+4. FXMLLOADER
+-------------
+The FXMLLoader is a class in JavaFX responsible for loading FXML files.
+- It "parses" the XML and creates the corresponding Java objects.
+- It automatically connects the FXML elements to the @FXML fields in your Controller class.
+
+5. METHOD: load()
+-----------------
+This method is called on an FXMLLoader instance to actually perform the loading.
+- It returns the "Root" element of the FXML hierarchy (usually a Parent like BorderPane or VBox).
+- Once called, it also instantiates the Controller associated with that FXML file.
+
+6. ROLE OF STAGE
+----------------
+In JavaFX, the Stage is the "Window."
+- It represents the top-level container (the actual window with a border, title bar, and close/minimize buttons).
+- You set a 'Scene' on a 'Stage' to show content.
+
+7. PARENT
+---------
+Parent is the base class for all nodes that can have children in a Scene Graph.
+- When you load an FXML file, it returns a Parent object.
+- It is the intermediate step between your FXML layout and the Scene that gets displayed in the Stage.
+
+8. SINGLETON PATTERN
+--------------------
+A design pattern used to ensure that a class has only ONE instance and provides a global point of access to it.
+- In this project, we use it for MyConnection.
+- Why? To avoid opening multiple database connections, which saves system resources and maintains a single state for the DB link.
+
+9. EXECUTEQUERY()
+-----------------
+This is a method of the Statement (or PreparedStatement) interface in JDBC.
+- Use it: For SELECT statements.
+- Return: It returns a 'ResultSet' containing the data retrieved from the database.
+- (In contrast, executeUpdate() is used for INSERT, UPDATE, or DELETE).
+
+========================================================================

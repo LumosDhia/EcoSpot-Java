@@ -150,7 +150,12 @@
                                                 <VBox spacing="5.0" fx:id="categoriesContainer">
                                                     <!-- Dynamic Category Radio Buttons -->
                                                 </VBox>
-                                                <TextField fx:id="newCategoryField" promptText="+ New category..." style="-fx-background-color: transparent; -fx-border-color: #ddd; -fx-border-width: 0 0 1 0; -fx-padding: 5 0;" />
+                                                <HBox alignment="CENTER_LEFT" spacing="8.0">
+                                                    <children>
+                                                        <TextField fx:id="newCategoryField" promptText="+ New category..." style="-fx-background-color: transparent; -fx-border-color: #ddd; -fx-border-width: 0 0 1 0; -fx-padding: 5 0;" HBox.hgrow="ALWAYS" />
+                                                        <Button onAction="#addCategoryFromInput" text="Add" styleClass="btn-outline" />
+                                                    </children>
+                                                </HBox>
                                             </children>
                                         </VBox>
 
@@ -161,7 +166,12 @@
                                                 <VBox spacing="5.0" fx:id="tagsContainer">
                                                     <!-- Dynamic Tags Checkboxes -->
                                                 </VBox>
-                                                <TextField fx:id="newTagField" promptText="+ Add tags (comma separated)..." style="-fx-background-color: transparent; -fx-border-color: #ddd; -fx-border-width: 0 0 1 0; -fx-padding: 5 0;" />
+                                                <HBox alignment="CENTER_LEFT" spacing="8.0">
+                                                    <children>
+                                                        <TextField fx:id="newTagField" promptText="+ Add tags (comma separated)..." style="-fx-background-color: transparent; -fx-border-color: #ddd; -fx-border-width: 0 0 1 0; -fx-padding: 5 0;" HBox.hgrow="ALWAYS" />
+                                                        <Button onAction="#addTagsFromInput" text="Add" styleClass="btn-outline" />
+                                                    </children>
+                                                </HBox>
                                             </children>
                                         </VBox>
                                     </children>

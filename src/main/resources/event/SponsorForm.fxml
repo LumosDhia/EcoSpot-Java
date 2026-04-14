@@ -71,6 +71,7 @@
 
                         <HBox alignment="CENTER_RIGHT" spacing="15.0">
                             <children>
+                                <Button onAction="#goBack" styleClass="nav-link-btn" text="← Back to previous" />
                                 <Button onAction="#cancel" styleClass="nav-link-btn" text="Cancel" />
                                 <Button fx:id="saveBtn" onAction="#save" prefWidth="120.0" styleClass="btn-hero-primary" text="Save Sponsor" />
                             </children>

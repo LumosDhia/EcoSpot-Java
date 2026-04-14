@@ -5,6 +5,7 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 
 public class MyConnection {
+    // Singleton: one shared database connection manager instance in the app.
 
     // DB properties
     final String URL = "jdbc:mysql://localhost:3306/projetdev";

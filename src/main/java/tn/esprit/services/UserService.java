@@ -2,6 +2,7 @@ package tn.esprit.services;
 
 import tn.esprit.user.User;
 import tn.esprit.util.MyConnection;
+import tn.esprit.util.SessionManager;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -279,12 +280,28 @@ public class UserService {
 
     public void updateUserRoleDirectly(int id, String newRole) {
         if (id < 0) return;
+        String normalizedRole = normalizeRole(newRole);
         String req = "UPDATE `user` SET role = ? WHERE id = ?";
         try {
             PreparedStatement ps = cnx.prepareStatement(req);
-            ps.setString(1, newRole);
+            ps.setString(1, normalizedRole);
             ps.setInt(2, id);
             ps.executeUpdate();
+
+            // Keep in-memory list and active session in sync with DB role changes.
+            loadUsersFromDb();
+            User updated = findUserById(id);
+            if (updated != null) {
+                upsertAppUserRoleByEmail(updated.getEmail(), toAppUserRole(normalizedRole));
+                User current = SessionManager.getCurrentUser();
+                if (current != null && (current.getId() == id || updated.getEmail().equalsIgnoreCase(current.getEmail()))) {
+                    current.setRole(normalizedRole);
+                    if (current.getUsername() == null || current.getUsername().isEmpty()) {
+                        current.setUsername(updated.getUsername());
+                    }
+                    SessionManager.login(current);
+                }
+            }
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -293,11 +310,24 @@ public class UserService {
     public String validateAndRegister(String firstName, String lastName, String email, 
                                      String address, String zipCode, String city, 
                                      String password, String confirmPassword, boolean termsAccepted) {
-        
+        email = email == null ? "" : email.trim();
+        firstName = firstName == null ? "" : firstName.trim();
+        lastName = lastName == null ? "" : lastName.trim();
+        address = address == null ? "" : address.trim();
+        zipCode = zipCode == null ? "" : zipCode.trim();
+        city = city == null ? "" : city.trim();
+        password = password == null ? "" : password.trim();
+        confirmPassword = confirmPassword == null ? "" : confirmPassword.trim();
+
         // 1. Basic Fields Presence
-        if (email == null || email.isEmpty()) return "Please enter your email.";
-        if (firstName == null || firstName.isEmpty()) return "Please enter your first name.";
-        if (lastName == null || lastName.isEmpty()) return "Please enter your last name.";
+        if (email.isEmpty()) return "Please enter your email.";
+        if (firstName.isEmpty()) return "Please enter your first name.";
+        if (lastName.isEmpty()) return "Please enter your last name.";
+        if (address.isEmpty()) return "Please enter your address.";
+        if (zipCode.isEmpty()) return "Please enter your postal code.";
+        if (city.isEmpty()) return "Please enter your city.";
+        if (password.isEmpty()) return "Please enter a password.";
+        if (confirmPassword.isEmpty()) return "Please repeat your password.";
 
         // 2. Email Validation
         if (!EMAIL_PATTERN.matcher(email).matches()) return "Please enter a valid email address.";
@@ -308,17 +338,12 @@ public class UserService {
         if (!ALPHA_PATTERN.matcher(lastName).matches()) return "Last name can only contain letters and spaces.";
         
         // 4. Address & City Validation
-        if (address != null && address.length() > 255) return "Address cannot be longer than 255 characters.";
-        if (zipCode != null && !zipCode.isEmpty()) {
-            if (!ZIP_PATTERN.matcher(zipCode).matches()) return "Postal code must be exactly 5 digits.";
-        }
-        if (city != null && !city.isEmpty()) {
-            if (!ALPHA_PATTERN.matcher(city).matches()) return "City can only contain letters and spaces.";
-            if (city.length() > 150) return "City cannot be longer than 150 characters.";
-        }
+        if (address.length() > 255) return "Address cannot be longer than 255 characters.";
+        if (!ZIP_PATTERN.matcher(zipCode).matches()) return "Postal code must be exactly 5 digits.";
+        if (!ALPHA_PATTERN.matcher(city).matches()) return "City can only contain letters and spaces.";
+        if (city.length() > 150) return "City cannot be longer than 150 characters.";
 
         // 5. Password Validation
-        if (password == null || password.isEmpty()) return "Please enter a password.";
         if (password.length() < 6) return "Your password should be at least 6 characters.";
         if (!password.equals(confirmPassword)) return "The password fields must match.";
 
@@ -339,6 +364,8 @@ public class UserService {
             ps.setString(3, password);
             ps.setString(4, "USER");
             ps.executeUpdate();
+            upsertAppUserRoleByEmail(email, "ROLE_USER");
+            loadUsersFromDb();
             return "SUCCESS";
         } catch (SQLException e) {
             // e.printStackTrace();
@@ -386,9 +413,76 @@ public class UserService {
             ps.setString(3, password);
             ps.setString(4, role);
             ps.executeUpdate();
+            upsertAppUserRoleByEmail(email, toAppUserRole(role));
+            loadUsersFromDb();
             return "SUCCESS";
         } catch (SQLException e) {
             return "Database Error: " + e.getMessage();
         }
+    }
+
+    private User findUserById(int id) {
+        for (User u : users) {
+            if (u.getId() == id) return u;
+        }
+        return null;
+    }
+
+    private String normalizeRole(String role) {
+        if (role == null) return "USER";
+        String normalized = role.trim().toUpperCase();
+        if ("ADMIN".equals(normalized) || "NGO".equals(normalized) || "USER".equals(normalized)) {
+            return normalized;
+        }
+        return "USER";
+    }
+
+    private String toAppUserRole(String userRole) {
+        String normalized = normalizeRole(userRole);
+        if ("ADMIN".equals(normalized)) return "ROLE_ADMIN";
+        if ("NGO".equals(normalized)) return "ROLE_NGO";
+        return "ROLE_USER";
+    }
+
+    private void upsertAppUserRoleByEmail(String email, String role) {
+        if (email == null || email.trim().isEmpty() || !hasTable("app_user")) return;
+
+        String trimmedEmail = email.trim();
+        String selectReq = "SELECT 1 FROM app_user WHERE email = ? LIMIT 1";
+        try (PreparedStatement ps = cnx.prepareStatement(selectReq)) {
+            ps.setString(1, trimmedEmail);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    if (hasColumn("app_user", "roles")) {
+                        try (PreparedStatement updatePs = cnx.prepareStatement("UPDATE app_user SET roles = ? WHERE email = ?")) {
+                            updatePs.setString(1, role);
+                            updatePs.setString(2, trimmedEmail);
+                            updatePs.executeUpdate();
+                        }
+                    }
+                    return;
+                }
+            }
+        } catch (SQLException e) {
+            return;
+        }
+
+        String firstName = "User";
+        String lastName = "Account";
+        User known = null;
+        for (User u : users) {
+            if (u.getEmail() != null && u.getEmail().equalsIgnoreCase(trimmedEmail)) {
+                known = u;
+                break;
+            }
+        }
+        if (known != null && known.getUsername() != null && !known.getUsername().trim().isEmpty()) {
+            String[] parts = known.getUsername().trim().split("\\s+", 2);
+            firstName = parts[0];
+            if (parts.length > 1) {
+                lastName = parts[1];
+            }
+        }
+        ensureQuickAppUser(trimmedEmail, firstName, lastName, role);
     }
 }

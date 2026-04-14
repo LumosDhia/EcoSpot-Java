@@ -1,5 +1,6 @@
 package tn.esprit.event;
 
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -18,6 +19,7 @@ public class EventAdminController {
 
     @FXML
     public void initialize() {
+        tn.esprit.util.NavigationHistory.track(eventContainer, "/event/EventAdmin.fxml");
         refreshData();
     }
 
@@ -43,6 +45,13 @@ public class EventAdminController {
     @FXML
     private void openAddEvent() {
         switchScene("/event/EventForm.fxml");
+    }
+
+    @FXML
+    private void goBack(ActionEvent event) {
+        if (!tn.esprit.util.NavigationHistory.goBack(event)) {
+            switchScene("/event/EventManagement.fxml");
+        }
     }
 
     @FXML

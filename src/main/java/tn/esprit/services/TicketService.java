@@ -214,6 +214,20 @@ public class TicketService implements GlobalInterface<Ticket> {
         return tickets;
     }
 
+    public List<Ticket> getPendingForAdminReview() {
+        List<Ticket> tickets = new ArrayList<>();
+        String req = "SELECT * FROM `ticket` WHERE UPPER(status) IN ('PENDING','IN_PROGRESS') ORDER BY created_at DESC";
+        try (PreparedStatement ps = cnx.prepareStatement(req);
+             ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                tickets.add(mapTicket(rs));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return tickets;
+    }
+
     public Ticket getById(int id) {
         String req = "SELECT * FROM `ticket` WHERE id = ? LIMIT 1";
         try (PreparedStatement ps = cnx.prepareStatement(req)) {
@@ -236,7 +250,12 @@ public class TicketService implements GlobalInterface<Ticket> {
         t.setDescription(rs.getString("description"));
         t.setLocation(rs.getString("location"));
         t.setImage(rs.getString("image"));
-        t.setStatus(TicketStatus.valueOf(rs.getString("status")));
+        String statusRaw = rs.getString("status");
+        try {
+            t.setStatus(TicketStatus.valueOf(statusRaw == null ? "PENDING" : statusRaw.trim().toUpperCase()));
+        } catch (IllegalArgumentException ex) {
+            t.setStatus(TicketStatus.PENDING);
+        }
         t.setPriority(TicketPriority.valueOf(rs.getString("priority")));
         String domain = rs.getString("domain");
         if (domain != null) t.setDomain(ActionDomain.valueOf(domain));

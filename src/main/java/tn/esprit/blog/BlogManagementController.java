@@ -83,9 +83,13 @@ public class BlogManagementController {
     }
 
     private void filterAndDisplay() {
-        String query = searchField.getText().toLowerCase();
+        String query = searchField.getText() == null ? "" : searchField.getText().trim().toLowerCase();
         List<Blog> filtered = allBlogs.stream()
-                .filter(b -> b.getTitle().toLowerCase().contains(query) || b.getContent().toLowerCase().contains(query))
+                .filter(this::hasPicture)
+                .filter(b -> {
+                    String title = b.getTitle() == null ? "" : b.getTitle().toLowerCase();
+                    return title.contains(query);
+                })
                 .collect(Collectors.toList());
 
         // Sorting
@@ -99,6 +103,14 @@ public class BlogManagementController {
         }
 
         displayBlogs(filtered);
+    }
+
+    private boolean hasPicture(Blog blog) {
+        if (blog == null || blog.getImage() == null) {
+            return false;
+        }
+        String image = blog.getImage().trim();
+        return !image.isEmpty();
     }
 
     private void displayBlogs(List<Blog> blogs) {
