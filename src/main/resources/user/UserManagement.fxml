@@ -37,7 +37,7 @@
         </HBox>
 
         <!-- HEADER SECTION -->
-        <VBox style="-fx-background-color: white; -fx-background-radius: 15;">
+        <VBox styleClass="section-card">
             <VBox.margin>
                 <Insets left="40.0" right="40.0" top="30.0" bottom="20.0" />
             </VBox.margin>
@@ -49,12 +49,12 @@
                     <children>
                         <VBox spacing="5.0">
                             <children>
-                                <Label style="-fx-font-size: 28px; -fx-font-weight: bold;" text="User Directory" />
-                                <Label style="-fx-font-size: 14px;" text="Manage roles, set restrictions, and organize platform members." />
+                                <Label styleClass="page-title" text="User Directory" />
+                                <Label styleClass="section-hint" text="Manage roles, set restrictions, and organize platform members." />
                             </children>
                         </VBox>
                         <Region HBox.hgrow="ALWAYS" />
-                        <Button onAction="#goToCreateUser" style="-fx-background-color: #e6f8f1; -fx-text-fill: #2d6a4f; -fx-border-color: #2d6a4f; -fx-border-radius: 20; -fx-background-radius: 20; -fx-font-weight: bold; -fx-padding: 8 15; -fx-cursor: hand;" text="✚ Create New User" />
+                        <Button onAction="#goToCreateUser" styleClass="btn-create-user" text="✚ Create New User" />
                     </children>
                 </HBox>
 
@@ -83,7 +83,7 @@
                 <Insets left="40.0" bottom="20.0" />
             </padding>
             <children>
-                <Button onAction="#goToDashboard" text="⬅ Back to Dashboard" />
+                <Button onAction="#goToDashboard" styleClass="btn-outline" text="⬅ Back to Dashboard" />
             </children>
         </HBox>
     </children>

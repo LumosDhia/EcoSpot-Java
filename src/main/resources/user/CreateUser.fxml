@@ -39,7 +39,7 @@
         </HBox>
 
         <!-- FORM CARD -->
-        <VBox style="-fx-background-color: white; -fx-background-radius: 10; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.05), 10, 0, 0, 5);" spacing="20.0" VBox.vgrow="NEVER">
+        <VBox styleClass="section-card" spacing="20.0" VBox.vgrow="NEVER">
             <VBox.margin>
                 <Insets left="40.0" right="40.0" top="30.0" bottom="20.0" />
             </VBox.margin>
@@ -48,43 +48,43 @@
             </padding>
             <children>
                 <Label fx:id="errorLabel" style="-fx-text-fill: #e53e3e; -fx-font-size: 14px; -fx-font-weight: bold;" visible="false" managed="false" />
-                
+
                 <VBox spacing="8.0">
-                    <Label text="Email" style="-fx-text-fill: #718096; -fx-font-size: 14px;" />
-                    <TextField fx:id="emailField" style="-fx-border-color: #cbd5e0; -fx-border-radius: 4; -fx-background-color: white; -fx-padding: 10;" />
+                    <Label styleClass="field-label" text="Email" />
+                    <TextField fx:id="emailField" styleClass="form-input" />
                 </VBox>
 
                 <HBox spacing="20.0">
                     <VBox spacing="8.0" HBox.hgrow="ALWAYS">
-                        <Label text="First name" style="-fx-text-fill: #718096; -fx-font-size: 14px;" />
-                        <TextField fx:id="firstNameField" style="-fx-border-color: #cbd5e0; -fx-border-radius: 4; -fx-background-color: white; -fx-padding: 10;" />
+                        <Label styleClass="field-label" text="First name" />
+                        <TextField fx:id="firstNameField" styleClass="form-input" />
                     </VBox>
                     <VBox spacing="8.0" HBox.hgrow="ALWAYS">
-                        <Label text="Last name" style="-fx-text-fill: #718096; -fx-font-size: 14px;" />
-                        <TextField fx:id="lastNameField" style="-fx-border-color: #cbd5e0; -fx-border-radius: 4; -fx-background-color: white; -fx-padding: 10;" />
+                        <Label styleClass="field-label" text="Last name" />
+                        <TextField fx:id="lastNameField" styleClass="form-input" />
                     </VBox>
                 </HBox>
 
                 <VBox spacing="8.0">
-                    <Label text="User type" style="-fx-text-fill: #718096; -fx-font-size: 14px;" />
-                    <ComboBox fx:id="roleComboBox" maxWidth="Infinity" style="-fx-border-color: #cbd5e0; -fx-border-radius: 4; -fx-background-color: white; -fx-padding: 5;" />
+                    <Label styleClass="field-label" text="User type" />
+                    <ComboBox fx:id="roleComboBox" maxWidth="Infinity" styleClass="form-input" />
                 </VBox>
 
                 <VBox spacing="8.0">
-                    <Label text="Password" style="-fx-text-fill: #718096; -fx-font-size: 14px;" />
-                    <PasswordField fx:id="passwordField" style="-fx-border-color: #cbd5e0; -fx-border-radius: 4; -fx-background-color: white; -fx-padding: 10;" />
+                    <Label styleClass="field-label" text="Password" />
+                    <PasswordField fx:id="passwordField" styleClass="form-input" />
                 </VBox>
 
                 <VBox spacing="8.0">
-                    <Label text="Repeat password" style="-fx-text-fill: #718096; -fx-font-size: 14px;" />
-                    <PasswordField fx:id="confirmPasswordField" style="-fx-border-color: #cbd5e0; -fx-border-radius: 4; -fx-background-color: white; -fx-padding: 10;" />
+                    <Label styleClass="field-label" text="Repeat password" />
+                    <PasswordField fx:id="confirmPasswordField" styleClass="form-input" />
                 </VBox>
 
                 <Region prefHeight="10.0" />
 
                 <HBox spacing="15.0">
-                    <Button onAction="#handleCreateUser" text="Create user" style="-fx-background-color: #f6ad55; -fx-text-fill: black; -fx-font-weight: bold; -fx-padding: 10 20; -fx-cursor: hand;" />
-                    <Button onAction="#handleCancel" text="Cancel" style="-fx-background-color: transparent; -fx-border-color: #fbd38d; -fx-text-fill: #f6ad55; -fx-padding: 9 19; -fx-font-weight: bold; -fx-cursor: hand;" />
+                    <Button onAction="#handleCreateUser" styleClass="btn,btn-secondary" text="Create user" />
+                    <Button onAction="#handleCancel" styleClass="btn-outline" text="Cancel" />
                 </HBox>
             </children>
         </VBox>

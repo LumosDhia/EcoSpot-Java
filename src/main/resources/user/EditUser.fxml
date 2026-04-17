@@ -42,33 +42,33 @@
             </VBox.margin>
 
             <!-- USER INFO CARD -->
-            <VBox style="-fx-background-color: white; -fx-border-color: #e2e8f0; -fx-border-radius: 8; -fx-background-radius: 8;">
+            <VBox styleClass="section-card">
                 <padding>
                     <Insets top="20.0" bottom="20.0" left="25.0" right="25.0" />
                 </padding>
                 <children>
-                    <Label fx:id="userInfoLabel" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #4a5568;" text="user@example.com — Name" />
+                    <Label fx:id="userInfoLabel" styleClass="section-heading" text="user@example.com — Name" />
                 </children>
             </VBox>
 
             <!-- ROLE EDIT CARD -->
-            <VBox style="-fx-background-color: white; -fx-border-color: #e2e8f0; -fx-border-radius: 8; -fx-background-radius: 8;" spacing="20.0">
+            <VBox styleClass="section-card" spacing="20.0">
                 <padding>
                     <Insets top="30.0" bottom="30.0" left="25.0" right="25.0" />
                 </padding>
                 <children>
                     <Label fx:id="errorLabel" style="-fx-text-fill: #e53e3e; -fx-font-size: 14px; -fx-font-weight: bold;" visible="false" managed="false" />
-                    
+
                     <VBox spacing="8.0">
-                        <Label text="User type" style="-fx-text-fill: #718096; -fx-font-size: 14px;" />
-                        <ComboBox fx:id="roleComboBox" maxWidth="Infinity" style="-fx-border-color: #cbd5e0; -fx-border-radius: 4; -fx-background-color: white; -fx-padding: 8;" />
+                        <Label styleClass="field-label" text="User type" />
+                        <ComboBox fx:id="roleComboBox" maxWidth="Infinity" styleClass="form-input" />
                     </VBox>
 
                     <Region prefHeight="5.0" />
 
                     <HBox spacing="15.0">
-                        <Button onAction="#handleSave" text="Save" style="-fx-background-color: #f6ad55; -fx-text-fill: black; -fx-font-weight: bold; -fx-padding: 10 20; -fx-cursor: hand;" />
-                        <Button onAction="#handleCancel" text="Cancel" style="-fx-background-color: transparent; -fx-border-color: #fbd38d; -fx-text-fill: #f6ad55; -fx-padding: 9 19; -fx-font-weight: bold; -fx-cursor: hand;" />
+                        <Button onAction="#handleSave" styleClass="btn,btn-secondary" text="Save" />
+                        <Button onAction="#handleCancel" styleClass="btn-outline" text="Cancel" />
                     </HBox>
                 </children>
             </VBox>
