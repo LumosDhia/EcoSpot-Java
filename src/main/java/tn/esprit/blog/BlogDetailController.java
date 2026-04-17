@@ -21,6 +21,7 @@ import java.nio.file.Files;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.List;
+import tn.esprit.util.TimeUtils;
 
 public class BlogDetailController {
 
@@ -129,7 +130,7 @@ public class BlogDetailController {
         if (blog.getPublishedAt() != null) {
             String dateFormatted = blog.getPublishedAt().format(DateTimeFormatter.ofPattern("dd MMMM yyyy"));
             heroDate.setText("Published on " + dateFormatted);
-            dateLabel.setText("🕒 " + blog.getPublishedAt().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
+            dateLabel.setText("🕒 " + TimeUtils.formatRelativeTime(blog.getPublishedAt()));
         }
 
         if (blog.getImage() != null && !blog.getImage().isEmpty()) {

@@ -15,6 +15,7 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 import java.io.IOException;
 import java.time.format.DateTimeFormatter;
+import tn.esprit.util.TimeUtils;
 
 public class BlogCardController {
 
@@ -51,7 +52,7 @@ public class BlogCardController {
         });
         
         if (blog.getPublishedAt() != null) {
-            dateLabel.setText(blog.getPublishedAt().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
+            dateLabel.setText(TimeUtils.formatRelativeTime(blog.getPublishedAt()));
         }
         
         titleLabel.setText(blog.getTitle());
