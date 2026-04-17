@@ -72,6 +72,13 @@
                                       <Label fx:id="revisionNoteLabel" style="-fx-text-fill: #856404; -fx-font-size: 13;" text="Feedback details will appear here..." wrapText="true" />
                                    </children>
                                 </VBox>
+                                 <!-- BACK BUTTON -->
+                                <Button onAction="#goBackToArticles" styleClass="btn-back" text="Back to Articles">
+                                    <graphic>
+                                        <SVGPath content="M20,11V13H8L13.5,18.5L12.08,19.92L4.16,12L12.08,4.08L13.5,5.5L8,11H20Z" scaleX="0.8" scaleY="0.8" styleClass="article-author" />
+                                    </graphic>
+                                </Button>
+
                                 <!-- Article Title Area -->
                                 <VBox spacing="10.0" style="-fx-background-color: white; -fx-padding: 2.0; -fx-background-radius: 8; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.05), 10, 0, 0, 2);">
                                     <children>
@@ -120,7 +127,6 @@
                                             </children>
                                         </VBox>
                                         <Button onAction="#saveArticle" maxWidth="Infinity" styleClass="btn  btn-primary" text="💾 Save Article" />
-                                        <Button onAction="#goBackToArticles" maxWidth="Infinity" styleClass="btn-outline" text="← Back to My articles" />
                                     </children>
                                 </VBox>
 

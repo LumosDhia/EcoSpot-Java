@@ -366,6 +366,22 @@ public class ArticlesManagementController {
     }
 
     @FXML
+    private void goToDashboard(ActionEvent event) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/user/Dashboard.fxml"));
+            Parent root = loader.load();
+            tn.esprit.user.DashboardController controller = loader.getController();
+            if (controller != null) {
+                controller.setUser(tn.esprit.util.SessionManager.getCurrentUser());
+            }
+            Stage stage = (Stage) ((javafx.scene.Node) event.getSource()).getScene().getWindow();
+            stage.getScene().setRoot(root);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @FXML
     private void goToHomeMouse(javafx.scene.input.MouseEvent event) {
         try {
             Parent root = FXMLLoader.load(getClass().getResource("/home/Home.fxml"));

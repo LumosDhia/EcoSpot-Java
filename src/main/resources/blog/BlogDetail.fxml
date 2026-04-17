@@ -79,6 +79,15 @@
                         <VBox alignment="CENTER" spacing="30.0">
                            <padding><Insets bottom="40.0" left="100.0" right="100.0" top="40.0" /></padding>
                            <children>
+                               <HBox alignment="CENTER_LEFT">
+                                   <children>
+                                       <Button onAction="#goToBlog" styleClass="btn-back" text="Back to Articles">
+                                           <graphic>
+                                               <SVGPath content="M20,11V13H8L13.5,18.5L12.08,19.92L4.16,12L12.08,4.08L13.5,5.5L8,11H20Z" scaleX="0.8" scaleY="0.8" styleClass="article-author" />
+                                           </graphic>
+                                       </Button>
+                                   </children>
+                               </HBox>
                                <ImageView fx:id="articleImg" fitHeight="400.0" fitWidth="700.0" pickOnBounds="true" preserveRatio="false" styleClass="detail-main-img" />
                                
                                <VBox spacing="15.0">
