@@ -74,7 +74,13 @@
                                 <!-- Article Title Area -->
                                 <VBox spacing="10.0" style="-fx-background-color: white; -fx-padding: 2.0; -fx-background-radius: 8; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.05), 10, 0, 0, 2);">
                                     <children>
-                                        <Label style="-fx-font-size: 11; -fx-text-fill: #333; -fx-font-weight: bold; -fx-padding: 10 20 0 20;" text="ARTICLE TITLE" />
+                                        <HBox alignment="CENTER_LEFT" spacing="10">
+                                            <children>
+                                                <Label style="-fx-font-size: 11; -fx-text-fill: #333; -fx-font-weight: bold; -fx-padding: 10 20 0 20;" text="ARTICLE TITLE" />
+                                                <Region HBox.hgrow="ALWAYS" />
+                                                <Button onAction="#showTitleIdeas" style="-fx-background-color: transparent; -fx-text-fill: #2d6a4f; -fx-cursor: hand; -fx-font-size: 11; -fx-padding: 0 20 0 0;" text="🪄 AI Ideas" />
+                                            </children>
+                                        </HBox>
                                         <TextField fx:id="titleField" promptText="Article title" style="-fx-font-size: 24; -fx-background-color: transparent; -fx-padding: 10 20 20 20; -fx-prompt-text-fill: #ccc; -fx-font-weight: bold;" />
                                     </children>
                                 </VBox>

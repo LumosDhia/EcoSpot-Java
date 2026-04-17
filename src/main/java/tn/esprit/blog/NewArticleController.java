@@ -110,6 +110,35 @@ public class NewArticleController {
     }
 
     @FXML
+    private void showTitleIdeas() {
+        String currentTitle = titleField.getText();
+        String content = contentEditor.getHtmlText();
+
+        if (content.length() < 50) {
+            showAlert("Error", "Please write some content first so AI can brainstorm titles.", Alert.AlertType.WARNING);
+            return;
+        }
+
+        aiSeoService.generateTitleIdeas(currentTitle, content)
+                .thenAccept(titles -> {
+                    javafx.application.Platform.runLater(() -> {
+                        if (titles != null && !titles.isEmpty()) {
+                            ChoiceDialog<String> dialog = new ChoiceDialog<>(titles.get(0), titles);
+                            dialog.setTitle("AI Title Ideas");
+                            dialog.setHeaderText("Choose a catchy title for your article:");
+                            dialog.setContentText("Suggested Titles:");
+                            
+                            dialog.showAndWait().ifPresent(selectedTitle -> {
+                                titleField.setText(selectedTitle);
+                            });
+                        } else {
+                            showAlert("AI Error", "Failed to generate title ideas.", Alert.AlertType.ERROR);
+                        }
+                    });
+                });
+    }
+
+    @FXML
     private void generateSeoWithAi() {
         String title = titleField.getText();
         String content = contentEditor.getHtmlText();
