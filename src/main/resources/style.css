@@ -1187,3 +1187,23 @@
     -fx-font-size: 13px;
     -fx-padding: 15 0 0 0;
 }
+
+/* ================================
+   SCROLLPANE & TRACKPAD OPTIMIZATIONS
+   ================================ */
+.scroll-pane {
+    -fx-background-color: transparent;
+}
+
+.scroll-pane > .viewport {
+    -fx-background-color: transparent;
+}
+
+.scroll-pane:pannable {
+    -fx-cursor: default;
+}
+
+/* Ensure empty areas in the scroll content still bubble events */
+.scroll-pane > .viewport > .container {
+    -fx-background-color: transparent;
+}

@@ -103,7 +103,7 @@
 
                 <Label fx:id="dashboardInstructionLabel" styleClass="admin-dashboard-title" text="..." />
 
-                <ScrollPane fitToWidth="true" style="-fx-background-color: transparent; -fx-background: transparent;" VBox.vgrow="ALWAYS">
+                <ScrollPane fitToWidth="true" focusTraversable="false" pannable="true" style="-fx-background-color: transparent; -fx-background: transparent;" VBox.vgrow="ALWAYS">
                     <content>
                         <StackPane>
                             <children>

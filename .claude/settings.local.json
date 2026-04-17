@@ -1,0 +1,18 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(find *)",
+      "Bash(mvn dependency:resolve -q)",
+      "Bash(mvn javafx:run)",
+      "Bash(mvn compile *)",
+      "Bash(wsl -d Debian find /home/lumosdhia/EcoSpot-Web -type f)",
+      "Bash(wsl -d Debian ls /home/lumosdhia/)",
+      "Bash(wsl -d Debian ls /home/lumosdhia/EcoSpot-Web/)",
+      "Bash(wsl --list)",
+      "Bash(wsl -l)",
+      "Bash(wsl ls *)",
+      "Bash(wsl -- ls /home/lumosdhia/EcoSpot-Web/)",
+      "Bash(powershell *)"
+    ]
+  }
+}

@@ -53,7 +53,7 @@
     </top>
 
     <center>
-        <ScrollPane focusTraversable="false" fitToWidth="true" style="-fx-background-color: transparent; -fx-background: transparent; -fx-border-color: transparent;">
+        <ScrollPane focusTraversable="false" pannable="true" fitToWidth="true" style="-fx-background-color: transparent; -fx-background: transparent; -fx-border-color: transparent;">
             <content>
                 <HBox spacing="30.0">
                     <padding><Insets bottom="40.0" left="40.0" right="40.0" top="40.0" /></padding>

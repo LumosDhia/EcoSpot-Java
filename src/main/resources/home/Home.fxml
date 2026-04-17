@@ -60,7 +60,7 @@
     </top>
 
     <center>
-        <ScrollPane fitToWidth="true" style="-fx-background-color: #f0f7f4; -fx-background: #f0f7f4;">
+        <ScrollPane fitToWidth="true" focusTraversable="false" pannable="true" style="-fx-background-color: #f0f7f4; -fx-background: #f0f7f4;">
             <content>
                 <VBox spacing="0.0">
                     <!-- ===== HERO SECTION ===== -->
