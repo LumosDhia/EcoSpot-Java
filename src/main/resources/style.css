@@ -429,6 +429,15 @@
     -fx-font-size: 13px;
 }
 
+.tag-badge {
+    -fx-background-color: #f1f5f9;
+    -fx-text-fill: #475569;
+    -fx-padding: 3 8;
+    -fx-background-radius: 4;
+    -fx-font-size: 10px;
+    -fx-font-weight: bold;
+}
+
 .footer-brand-mini {
     -fx-text-fill: #2d6a4f;
     -fx-font-weight: bold;

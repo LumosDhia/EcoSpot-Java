@@ -36,6 +36,8 @@ public class BlogManagementController {
     @FXML private Button nextBtn;
     @FXML private HBox pageButtonsBox;
     @FXML private Label pageInfoLabel;
+    @FXML private HBox activeFiltersBox;
+    @FXML private HBox filterPillsContainer;
 
     private static final int PAGE_SIZE = 8;
 
@@ -43,6 +45,9 @@ public class BlogManagementController {
     private List<Blog> allBlogs = new ArrayList<>();
     private List<Blog> filteredBlogs = new ArrayList<>();
     private int currentPage = 0;
+
+    public static Category selectedCategory = null;
+    public static Tag selectedTag = null;
 
     @FXML
     public void initialize() {
@@ -91,9 +96,20 @@ public class BlogManagementController {
 
     private void filterAndDisplay() {
         String query = searchField.getText().toLowerCase();
+        
         filteredBlogs = allBlogs.stream()
-                .filter(b -> b.getTitle().toLowerCase().contains(query)
-                          || b.getContent().toLowerCase().contains(query))
+                .filter(b -> {
+                    boolean matchesQuery = b.getTitle().toLowerCase().contains(query)
+                                        || b.getContent().toLowerCase().contains(query);
+                    
+                    if (selectedCategory != null) {
+                        return matchesQuery && b.getCategory() != null && b.getCategory().getId() == selectedCategory.getId();
+                    }
+                    if (selectedTag != null) {
+                        return matchesQuery && b.getTags() != null && b.getTags().stream().anyMatch(t -> t.getId() == selectedTag.getId());
+                    }
+                    return matchesQuery;
+                })
                 .collect(Collectors.toList());
 
         String sort = sortChoice.getValue();
@@ -106,6 +122,55 @@ public class BlogManagementController {
         }
 
         displayCurrentPage();
+        updateActiveFiltersUI();
+    }
+
+    private void updateActiveFiltersUI() {
+        if (selectedCategory == null && selectedTag == null) {
+            activeFiltersBox.setVisible(false);
+            activeFiltersBox.setManaged(false);
+            return;
+        }
+
+        activeFiltersBox.setVisible(true);
+        activeFiltersBox.setManaged(true);
+        filterPillsContainer.getChildren().clear();
+
+        if (selectedCategory != null) {
+            addFilterPill(selectedCategory.getName(), () -> {
+                selectedCategory = null;
+                filterAndDisplay();
+            });
+        }
+        if (selectedTag != null) {
+            addFilterPill("#" + selectedTag.getName(), () -> {
+                selectedTag = null;
+                filterAndDisplay();
+            });
+        }
+    }
+
+    private void addFilterPill(String text, Runnable onRemove) {
+        HBox pill = new HBox(5);
+        pill.getStyleClass().add("tag-badge");
+        pill.setStyle("-fx-background-color: #e2e8f0; -fx-padding: 5 10; -fx-alignment: center;");
+        
+        Label label = new Label(text);
+        label.setStyle("-fx-font-size: 11; -fx-text-fill: #475569;");
+        
+        Button removeBtn = new Button("×");
+        removeBtn.setStyle("-fx-background-color: transparent; -fx-padding: 0; -fx-text-fill: #64748b; -fx-font-weight: bold; -fx-cursor: hand;");
+        removeBtn.setOnAction(e -> onRemove.run());
+        
+        pill.getChildren().addAll(label, removeBtn);
+        filterPillsContainer.getChildren().add(pill);
+    }
+
+    @FXML
+    private void clearFilters() {
+        selectedCategory = null;
+        selectedTag = null;
+        filterAndDisplay();
     }
 
     private void displayCurrentPage() {
@@ -216,7 +281,11 @@ public class BlogManagementController {
     @FXML private void goToEvents(javafx.event.ActionEvent e) { navigate(e, "/event/EventManagement.fxml"); }
     @FXML private void goToTickets(javafx.event.ActionEvent e) { navigate(e, "/ticket/TicketManagement.fxml"); }
     @FXML private void goToArticles(javafx.event.ActionEvent e) { navigate(e, "/blog/ArticlesManagement.fxml"); }
-    @FXML private void goToBlog(javafx.event.ActionEvent e) { navigate(e, "/blog/BlogManagement.fxml"); }
+    @FXML private void goToBlog(javafx.event.ActionEvent e) { 
+        selectedCategory = null;
+        selectedTag = null;
+        navigate(e, "/blog/BlogManagement.fxml"); 
+    }
 
     @FXML
     private void goToHome() {

@@ -5,6 +5,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 
@@ -26,6 +27,7 @@ public class BlogCardController {
     @FXML private Label authorLabel;
     @FXML private Text excerptText;
     @FXML private Button readMoreBtn;
+    @FXML private FlowPane tagsFlowPane;
 
     public void setData(Blog blog) {
         if (blog.getImage() != null && !blog.getImage().isEmpty()) {
@@ -37,6 +39,12 @@ public class BlogCardController {
         }
         
         categoryLabel.setText(blog.getCategory() != null ? blog.getCategory().getName() : "General");
+        categoryLabel.setStyle("-fx-cursor: hand;");
+        categoryLabel.setOnMouseClicked(e -> {
+            BlogManagementController.selectedTag = null;
+            BlogManagementController.selectedCategory = blog.getCategory();
+            refreshBlogList();
+        });
         
         if (blog.getPublishedAt() != null) {
             dateLabel.setText(blog.getPublishedAt().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
@@ -57,8 +65,35 @@ public class BlogCardController {
             }
         }
 
+        // Populate Tags
+        tagsFlowPane.getChildren().clear();
+        if (blog.getTags() != null) {
+            for (Tag tag : blog.getTags()) {
+                Label tagLabel = new Label("#" + tag.getName());
+                tagLabel.getStyleClass().add("tag-badge");
+                tagLabel.setStyle("-fx-cursor: hand;");
+                tagLabel.setOnMouseClicked(e -> {
+                    BlogManagementController.selectedCategory = null;
+                    BlogManagementController.selectedTag = tag;
+                    refreshBlogList();
+                    e.consume(); // Prevent card click
+                });
+                tagsFlowPane.getChildren().add(tagLabel);
+            }
+        }
+
         readMoreBtn.setOnAction(event -> openDetail(blog));
         cardContainer.setOnMouseClicked(event -> openDetail(blog));
+    }
+
+    private void refreshBlogList() {
+        try {
+            Parent root = FXMLLoader.load(getClass().getResource("/blog/BlogManagement.fxml"));
+            Stage stage = (Stage) cardContainer.getScene().getWindow();
+            stage.getScene().setRoot(root);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     private void openDetail(Blog blog) {

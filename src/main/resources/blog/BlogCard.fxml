@@ -28,6 +28,9 @@
                   </Label>
                </children>
             </HBox>
+            <FlowPane fx:id="tagsFlowPane" hgap="5.0" vgap="5.0">
+                <!-- Tags will be injected here -->
+            </FlowPane>
             <Label fx:id="titleLabel" styleClass="article-title" text="Innovating the Recycling Process..." wrapText="true">
                <font>
                   <Font name="System Bold" size="16.0" />

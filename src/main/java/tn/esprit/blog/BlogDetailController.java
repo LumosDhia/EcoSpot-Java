@@ -9,6 +9,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.web.WebView;
@@ -34,6 +35,7 @@ public class BlogDetailController {
     @FXML private Label authorLabel;
     @FXML private Label viewsLabel;
     @FXML private WebView contentWebView;
+    @FXML private FlowPane tagsFlowPane;
 
     // Comments
     @FXML private VBox commentsContainer;
@@ -135,6 +137,12 @@ public class BlogDetailController {
         }
 
         categoryLabel.setText(blog.getCategory() != null ? blog.getCategory().getName() : "General");
+        categoryLabel.setStyle("-fx-cursor: hand;");
+        categoryLabel.setOnMouseClicked(e -> {
+            BlogManagementController.selectedTag = null;
+            BlogManagementController.selectedCategory = blog.getCategory();
+            goToBlog();
+        });
         readTimeLabel.setText("📖 " + blog.getReadingTime() + " min read");
         authorLabel.setText("👤 Writer: " + (blog.getAuthor() != null ? blog.getAuthor() : "Admin User"));
         
@@ -146,6 +154,22 @@ public class BlogDetailController {
         boolean incremented = blogService.incrementViews(blog.getId(), viewerId);
         int displayViews = incremented ? blog.getViews() + 1 : blog.getViews();
         viewsLabel.setText("👁 " + displayViews + " views");
+
+        // Populate Tags
+        tagsFlowPane.getChildren().clear();
+        if (blog.getTags() != null) {
+            for (Tag tag : blog.getTags()) {
+                Label tagLabel = new Label("#" + tag.getName());
+                tagLabel.getStyleClass().add("tag-badge");
+                tagLabel.setStyle("-fx-cursor: hand;");
+                tagLabel.setOnMouseClicked(e -> {
+                    BlogManagementController.selectedCategory = null;
+                    BlogManagementController.selectedTag = tag;
+                    goToBlog();
+                });
+                tagsFlowPane.getChildren().add(tagLabel);
+            }
+        }
 
         contentWebView.getEngine().loadContent(blog.getContent());
         loadComments();

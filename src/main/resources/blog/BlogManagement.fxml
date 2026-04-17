@@ -86,6 +86,14 @@
                     </children>
                 </HBox>
 
+                <HBox fx:id="activeFiltersBox" alignment="CENTER_LEFT" managed="false" spacing="10.0" visible="false">
+                    <children>
+                        <Label style="-fx-text-fill: #666; -fx-font-weight: bold;" text="Filtering by:" />
+                        <HBox fx:id="filterPillsContainer" spacing="8.0" />
+                        <Button onAction="#clearFilters" style="-fx-background-color: transparent; -fx-text-fill: #bc4749; -fx-cursor: hand; -fx-font-size: 11; -fx-underline: true;" text="Clear all" />
+                    </children>
+                </HBox>
+
                 <ScrollPane fitToWidth="true" focusTraversable="false" pannable="true" style="-fx-background-color: transparent; -fx-background: transparent; -fx-border-color: transparent;" VBox.vgrow="ALWAYS">
                     <content>
                         <FlowPane fx:id="articlesGrid" alignment="CENTER" hgap="20.0" vgap="20.0">
