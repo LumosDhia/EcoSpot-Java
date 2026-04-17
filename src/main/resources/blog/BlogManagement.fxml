@@ -12,6 +12,7 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.control.ScrollPane?>
 
 <BorderPane style="-fx-background-color: #f8fbf9;" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="tn.esprit.blog.BlogManagementController">
     <stylesheets>
@@ -92,6 +93,16 @@
                         </FlowPane>
                     </content>
                 </ScrollPane>
+
+                <!-- Pagination Bar -->
+                <HBox alignment="CENTER" spacing="12.0" style="-fx-background-color: white; -fx-background-radius: 10; -fx-padding: 14 20; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.05), 10, 0, 0, 2);">
+                    <children>
+                        <Button fx:id="prevBtn" onAction="#goToPrevPage" styleClass="page-btn" text="← Prev" />
+                        <HBox fx:id="pageButtonsBox" alignment="CENTER" spacing="6.0" />
+                        <Button fx:id="nextBtn" onAction="#goToNextPage" styleClass="page-btn" text="Next →" />
+                        <Label fx:id="pageInfoLabel" styleClass="article-date" text="" />
+                    </children>
+                </HBox>
             </children>
         </VBox>
     </center>
