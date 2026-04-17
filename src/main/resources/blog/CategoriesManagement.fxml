@@ -25,15 +25,15 @@
             <children>
                 <Button onAction="#goBack" styleClass="btn-outline" text="← Back" />
                 <Button onAction="#goToDashboard" styleClass="btn-outline" text="Dashboard" />
-                <Label style="-fx-font-size: 22; -fx-font-weight: bold; -fx-text-fill: #2d6a4f;" text="Categories Management" />
+                <Label styleClass="page-title" text="Categories Management" />
                 <Region HBox.hgrow="ALWAYS" />
             </children>
         </HBox>
 
-        <VBox spacing="10.0" style="-fx-background-color: white; -fx-background-radius: 8; -fx-padding: 14; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.05), 10, 0, 0, 2);" VBox.vgrow="ALWAYS">
+        <VBox spacing="10.0" styleClass="section-card" VBox.vgrow="ALWAYS">
             <children>
-                <Label style="-fx-font-size: 16; -fx-font-weight: bold; -fx-text-fill: #333;" text="Categories" />
-                <Label style="-fx-text-fill: #666;" text="Edit applies globally. Delete removes the category from all related articles." wrapText="true" />
+                <Label styleClass="section-heading" text="Categories" />
+                <Label styleClass="section-hint" text="Edit applies globally. Delete removes the category from all related articles." wrapText="true" />
                 <TableView fx:id="categoriesTable" VBox.vgrow="ALWAYS">
                     <columnResizePolicy>
                         <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
@@ -44,7 +44,7 @@
                         <TableColumn fx:id="colCategoryActions" text="Actions" />
                     </columns>
                 </TableView>
-                <Label style="-fx-font-weight: bold; -fx-text-fill: #333;" text="Articles in selected category" />
+                <Label styleClass="section-heading" text="Articles in selected category" />
                 <ListView fx:id="categoryArticlesList" prefHeight="180.0" />
             </children>
         </VBox>

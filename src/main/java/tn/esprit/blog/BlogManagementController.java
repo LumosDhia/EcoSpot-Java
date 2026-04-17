@@ -1,26 +1,25 @@
 package tn.esprit.blog;
 
 import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
+import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
+import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.HBox;
-import tn.esprit.services.BlogService;
-
-import javafx.concurrent.Task;
-import javafx.application.Platform;
-import java.io.IOException;
-import java.util.List;
-import java.util.stream.Collectors;
-
-import javafx.scene.control.Button;
-import javafx.scene.Scene;
 import javafx.scene.Parent;
 import javafx.stage.Stage;
+import tn.esprit.services.BlogService;
+
+import javafx.application.Platform;
+import javafx.concurrent.Task;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class BlogManagementController {
 
@@ -32,18 +31,33 @@ public class BlogManagementController {
     @FXML private HBox userLinks;
     @FXML private Button dashboardTopBtn;
 
-    private BlogService blogService = new BlogService();
-    private List<Blog> allBlogs;
+    // Pagination controls
+    @FXML private Button prevBtn;
+    @FXML private Button nextBtn;
+    @FXML private HBox pageButtonsBox;
+    @FXML private Label pageInfoLabel;
+    @FXML private HBox activeFiltersBox;
+    @FXML private HBox filterPillsContainer;
+
+    private static final int PAGE_SIZE = 8;
+
+    private final BlogService blogService = new BlogService();
+    private List<Blog> allBlogs = new ArrayList<>();
+    private List<Blog> filteredBlogs = new ArrayList<>();
+    private int currentPage = 0;
+
+    public static Category selectedCategory = null;
+    public static Tag selectedTag = null;
+    public static String selectedAuthor = null;
 
     @FXML
     public void initialize() {
-        // Session Management
         if (tn.esprit.util.SessionManager.isLoggedIn()) {
             authLinks.setVisible(false);
             authLinks.setManaged(false);
             userLinks.setVisible(true);
             userLinks.setManaged(true);
-            
+
             tn.esprit.user.User user = tn.esprit.util.SessionManager.getCurrentUser();
             if (user.getRole().equalsIgnoreCase("ADMIN")) {
                 dashboardTopBtn.setText("📊 Admin Dashboard");
@@ -59,84 +73,189 @@ public class BlogManagementController {
             userLinks.setManaged(false);
         }
 
-        // Init sort choices
         sortChoice.setItems(FXCollections.observableArrayList("Newest", "Oldest", "Most Viewed"));
         sortChoice.setValue("Newest");
 
-        // Load data
         refreshData();
 
-        // Listen for search changes
-        searchField.textProperty().addListener((observable, oldValue, newValue) -> {
+        searchField.textProperty().addListener((obs, old, val) -> {
+            currentPage = 0;
             filterAndDisplay();
         });
 
-        // Listen for sort changes
-        sortChoice.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
+        sortChoice.getSelectionModel().selectedItemProperty().addListener((obs, old, val) -> {
+            currentPage = 0;
             filterAndDisplay();
         });
     }
 
     private void refreshData() {
         allBlogs = blogService.getAll();
+        currentPage = 0;
         filterAndDisplay();
     }
 
     private void filterAndDisplay() {
-        String query = searchField.getText() == null ? "" : searchField.getText().trim().toLowerCase();
-        List<Blog> filtered = allBlogs.stream()
-                .filter(this::hasPicture)
+        String query = searchField.getText().toLowerCase();
+        
+        filteredBlogs = allBlogs.stream()
                 .filter(b -> {
-                    String title = b.getTitle() == null ? "" : b.getTitle().toLowerCase();
-                    return title.contains(query);
+                    boolean matchesQuery = b.getTitle().toLowerCase().contains(query)
+                                        || b.getContent().toLowerCase().contains(query);
+                    
+                    if (selectedCategory != null) {
+                        return matchesQuery && b.getCategory() != null && b.getCategory().getId() == selectedCategory.getId();
+                    }
+                    if (selectedTag != null) {
+                        return matchesQuery && b.getTags() != null && b.getTags().stream().anyMatch(t -> t.getId() == selectedTag.getId());
+                    }
+                    if (selectedAuthor != null) {
+                        return matchesQuery && b.getAuthor() != null && b.getAuthor().equals(selectedAuthor);
+                    }
+                    return matchesQuery;
                 })
                 .collect(Collectors.toList());
 
-        // Sorting
         String sort = sortChoice.getValue();
         if ("Newest".equals(sort)) {
-            filtered.sort((b1, b2) -> b2.getPublishedAt().compareTo(b1.getPublishedAt()));
+            filteredBlogs.sort((a, b) -> b.getPublishedAt().compareTo(a.getPublishedAt()));
         } else if ("Oldest".equals(sort)) {
-            filtered.sort((b1, b2) -> b1.getPublishedAt().compareTo(b2.getPublishedAt()));
+            filteredBlogs.sort((a, b) -> a.getPublishedAt().compareTo(b.getPublishedAt()));
         } else if ("Most Viewed".equals(sort)) {
-            filtered.sort((b1, b2) -> Integer.compare(b2.getViews(), b1.getViews()));
+            filteredBlogs.sort((a, b) -> Integer.compare(b.getViews(), a.getViews()));
         }
 
-        displayBlogs(filtered);
+        displayCurrentPage();
+        updateActiveFiltersUI();
     }
 
-    private boolean hasPicture(Blog blog) {
-        if (blog == null || blog.getImage() == null) {
-            return false;
+    private void updateActiveFiltersUI() {
+        if (selectedCategory == null && selectedTag == null && selectedAuthor == null) {
+            activeFiltersBox.setVisible(false);
+            activeFiltersBox.setManaged(false);
+            return;
         }
-        String image = blog.getImage().trim();
-        return !image.isEmpty();
+
+        activeFiltersBox.setVisible(true);
+        activeFiltersBox.setManaged(true);
+        filterPillsContainer.getChildren().clear();
+
+        if (selectedCategory != null) {
+            addFilterPill(selectedCategory.getName(), () -> {
+                selectedCategory = null;
+                filterAndDisplay();
+            });
+        }
+        if (selectedTag != null) {
+            addFilterPill("#" + selectedTag.getName(), () -> {
+                selectedTag = null;
+                filterAndDisplay();
+            });
+        }
+        if (selectedAuthor != null) {
+            addFilterPill("Writer: " + selectedAuthor, () -> {
+                selectedAuthor = null;
+                filterAndDisplay();
+            });
+        }
     }
 
-    private void displayBlogs(List<Blog> blogs) {
-        articlesGrid.getChildren().clear();
+    private void addFilterPill(String text, Runnable onRemove) {
+        HBox pill = new HBox(5);
+        pill.getStyleClass().add("tag-badge");
+        pill.setStyle("-fx-background-color: #e2e8f0; -fx-padding: 5 10; -fx-alignment: center;");
         
-        // Use a Task to avoid freezing the UI thread while loading multiple FXML files
+        Label label = new Label(text);
+        label.setStyle("-fx-font-size: 11; -fx-text-fill: #475569;");
+        
+        Button removeBtn = new Button("×");
+        removeBtn.setStyle("-fx-background-color: transparent; -fx-padding: 0; -fx-text-fill: #64748b; -fx-font-weight: bold; -fx-cursor: hand;");
+        removeBtn.setOnAction(e -> onRemove.run());
+        
+        pill.getChildren().addAll(label, removeBtn);
+        filterPillsContainer.getChildren().add(pill);
+    }
+
+    @FXML
+    private void clearFilters() {
+        selectedCategory = null;
+        selectedTag = null;
+        selectedAuthor = null;
+        filterAndDisplay();
+    }
+
+    private void displayCurrentPage() {
+        int totalPages = getTotalPages();
+        if (currentPage >= totalPages && totalPages > 0) currentPage = totalPages - 1;
+
+        int from = currentPage * PAGE_SIZE;
+        int to = Math.min(from + PAGE_SIZE, filteredBlogs.size());
+        List<Blog> pageBlogs = filteredBlogs.subList(from, to);
+
+        articlesGrid.getChildren().clear();
+
         Task<Void> loadTask = new Task<>() {
             @Override
             protected Void call() throws Exception {
-                for (Blog b : blogs) {
+                for (Blog b : pageBlogs) {
                     FXMLLoader loader = new FXMLLoader(getClass().getResource("/blog/BlogCard.fxml"));
                     Node card = loader.load();
                     BlogCardController controller = loader.getController();
-                    // Update UI and initialize listeners on the FX Thread
                     Platform.runLater(() -> {
                         controller.setData(b);
                         articlesGrid.getChildren().add(card);
                     });
-                    
-                    Thread.sleep(5); 
+                    Thread.sleep(5);
                 }
                 return null;
             }
         };
-
         new Thread(loadTask).start();
+
+        updatePaginationControls(totalPages);
+    }
+
+    private void updatePaginationControls(int totalPages) {
+        prevBtn.setDisable(currentPage == 0);
+        nextBtn.setDisable(currentPage >= totalPages - 1);
+
+        int shown = Math.min((currentPage + 1) * PAGE_SIZE, filteredBlogs.size());
+        int from = filteredBlogs.isEmpty() ? 0 : currentPage * PAGE_SIZE + 1;
+        pageInfoLabel.setText(filteredBlogs.isEmpty()
+                ? "No articles found"
+                : String.format("Showing %d–%d of %d", from, shown, filteredBlogs.size()));
+
+        pageButtonsBox.getChildren().clear();
+        for (int i = 0; i < totalPages; i++) {
+            final int page = i;
+            Button btn = new Button(String.valueOf(i + 1));
+            btn.getStyleClass().add(i == currentPage ? "page-btn-active" : "page-btn");
+            btn.setOnAction(e -> {
+                currentPage = page;
+                displayCurrentPage();
+            });
+            pageButtonsBox.getChildren().add(btn);
+        }
+    }
+
+    private int getTotalPages() {
+        return (int) Math.ceil((double) filteredBlogs.size() / PAGE_SIZE);
+    }
+
+    @FXML
+    private void goToPrevPage() {
+        if (currentPage > 0) {
+            currentPage--;
+            displayCurrentPage();
+        }
+    }
+
+    @FXML
+    private void goToNextPage() {
+        if (currentPage < getTotalPages() - 1) {
+            currentPage++;
+            displayCurrentPage();
+        }
     }
 
     @FXML
@@ -167,14 +286,17 @@ public class BlogManagementController {
         }
     }
 
-    @FXML
-    private void goToLogin(javafx.event.ActionEvent event) {
-        navigate(event, "/user/Login.fxml");
-    }
-
-    @FXML
-    private void goToRegister(javafx.event.ActionEvent event) {
-        navigate(event, "/user/Register.fxml");
+    @FXML private void goToLogin(javafx.event.ActionEvent e) { navigate(e, "/user/Login.fxml"); }
+    @FXML private void goToRegister(javafx.event.ActionEvent e) { navigate(e, "/user/Register.fxml"); }
+    @FXML private void goToAchievements(javafx.event.ActionEvent e) { navigate(e, "/ticket/Achievements.fxml"); }
+    @FXML private void goToEvents(javafx.event.ActionEvent e) { navigate(e, "/event/EventManagement.fxml"); }
+    @FXML private void goToTickets(javafx.event.ActionEvent e) { navigate(e, "/ticket/TicketManagement.fxml"); }
+    @FXML private void goToArticles(javafx.event.ActionEvent e) { navigate(e, "/blog/ArticlesManagement.fxml"); }
+    @FXML private void goToBlog(javafx.event.ActionEvent e) { 
+        selectedCategory = null;
+        selectedTag = null;
+        selectedAuthor = null;
+        navigate(e, "/blog/BlogManagement.fxml"); 
     }
 
     @FXML
@@ -188,31 +310,6 @@ public class BlogManagementController {
         }
     }
 
-    @FXML
-    private void goToAchievements(javafx.event.ActionEvent event) {
-        navigate(event, "/ticket/Achievements.fxml");
-    }
-
-    @FXML
-    private void goToEvents(javafx.event.ActionEvent event) {
-        navigate(event, "/event/EventManagement.fxml");
-    }
-
-    @FXML
-    private void goToTickets(javafx.event.ActionEvent event) {
-        navigate(event, "/ticket/TicketManagement.fxml");
-    }
-
-    @FXML
-    private void goToArticles(javafx.event.ActionEvent event) {
-        navigate(event, "/blog/ArticlesManagement.fxml");
-    }
-
-    @FXML
-    private void goToBlog(javafx.event.ActionEvent event) {
-        navigate(event, "/blog/BlogManagement.fxml");
-    }
-
     private void navigate(javafx.event.ActionEvent event, String fxmlPath) {
         try {
             Parent root = FXMLLoader.load(getClass().getResource(fxmlPath));
@@ -223,18 +320,7 @@ public class BlogManagementController {
         }
     }
 
-    @FXML
-    private void handleMinimize() {
-        tn.esprit.util.WindowUtils.minimize(homeBtn);
-    }
-
-    @FXML
-    private void handleMaximize() {
-        tn.esprit.util.WindowUtils.toggleFullScreen(homeBtn);
-    }
-
-    @FXML
-    private void handleClose() {
-        tn.esprit.util.WindowUtils.close(homeBtn);
-    }
+    @FXML private void handleMinimize() { tn.esprit.util.WindowUtils.minimize(homeBtn); }
+    @FXML private void handleMaximize() { tn.esprit.util.WindowUtils.toggleFullScreen(homeBtn); }
+    @FXML private void handleClose() { tn.esprit.util.WindowUtils.close(homeBtn); }
 }

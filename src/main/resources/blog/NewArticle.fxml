@@ -12,10 +12,13 @@
 <?import javafx.scene.control.ToggleGroup?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.FlowPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.shape.Circle?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.shape.SVGPath?>
 <?import javafx.scene.web.HTMLEditor?>
 
 <BorderPane style="-fx-background-color: #f0f7f4;" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="tn.esprit.blog.NewArticleController">
@@ -53,7 +56,7 @@
     </top>
 
     <center>
-        <ScrollPane focusTraversable="false" fitToWidth="true" style="-fx-background-color: transparent; -fx-background: transparent; -fx-border-color: transparent;">
+        <ScrollPane focusTraversable="false" pannable="true" fitToWidth="true" style="-fx-background-color: transparent; -fx-background: transparent; -fx-border-color: transparent;">
             <content>
                 <HBox spacing="30.0">
                     <padding><Insets bottom="40.0" left="40.0" right="40.0" top="40.0" /></padding>
@@ -69,10 +72,27 @@
                                       <Label fx:id="revisionNoteLabel" style="-fx-text-fill: #856404; -fx-font-size: 13;" text="Feedback details will appear here..." wrapText="true" />
                                    </children>
                                 </VBox>
+                                 <!-- BACK BUTTON -->
+                                <Button onAction="#goBackToArticles" styleClass="btn-back" text="Back to Articles">
+                                    <graphic>
+                                        <SVGPath content="M20,11V13H8L13.5,18.5L12.08,19.92L4.16,12L12.08,4.08L13.5,5.5L8,11H20Z" scaleX="0.8" scaleY="0.8" styleClass="article-author" />
+                                    </graphic>
+                                </Button>
+
                                 <!-- Article Title Area -->
                                 <VBox spacing="10.0" style="-fx-background-color: white; -fx-padding: 2.0; -fx-background-radius: 8; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.05), 10, 0, 0, 2);">
                                     <children>
-                                        <Label style="-fx-font-size: 11; -fx-text-fill: #333; -fx-font-weight: bold; -fx-padding: 10 20 0 20;" text="ARTICLE TITLE" />
+                                        <HBox alignment="CENTER_LEFT" spacing="10">
+                                            <children>
+                                                <Label style="-fx-font-size: 11; -fx-text-fill: #333; -fx-font-weight: bold; -fx-padding: 10 20 0 20;" text="ARTICLE TITLE" />
+                                                <Region HBox.hgrow="ALWAYS" />
+                                                <Button onAction="#showTitleIdeas" style="-fx-background-color: transparent; -fx-text-fill: #2d6a4f; -fx-cursor: hand; -fx-font-size: 11; -fx-padding: 0 20 0 0;" text=" AI Ideas">
+                                                    <graphic>
+                                                        <SVGPath content="M7.5,5.6L10,7L8.6,4.5L10,2L7.5,3.4L5,2L6.4,4.5L5,7L7.5,5.6M19.5,15.4L22,16.8L20.6,14.3L22,11.8L19.5,13.2L17,11.8L18.4,14.3L17,16.8L19.5,15.4M22,2L19.5,3.4L17,2L18.4,4.5L17,7L19.5,5.6L22,7L20.6,4.5L22,2Z" scaleX="0.6" scaleY="0.6" styleClass="svg-icon-green" />
+                                                    </graphic>
+                                                </Button>
+                                            </children>
+                                        </HBox>
                                         <TextField fx:id="titleField" promptText="Article title" style="-fx-font-size: 24; -fx-background-color: transparent; -fx-padding: 10 20 20 20; -fx-prompt-text-fill: #ccc; -fx-font-weight: bold;" />
                                     </children>
                                 </VBox>
@@ -96,7 +116,8 @@
                                     <children>
                                         <HBox alignment="CENTER_LEFT" spacing="10.0">
                                             <children>
-                                                <Label style="-fx-font-size: 16; -fx-font-weight: bold; -fx-text-fill: #f1933e;" text="🚀 Publishing" />
+                                                <SVGPath content="M9,21L12.5,17L11,15.5L7,19L9,21M12,14.5C14.8,11.7 18.5,4 18.5,4C18.5,4 10.8,7.7 8,10.5C5.2,13.3 5.3,16.2 5.3,16.2L7.8,18.7C7.8,18.7 10.7,18.8 13.5,16L12,14.5M14,10.5C14,9.67 14.67,9 15.5,9C16.33,9 17,9.67 17,10.5C17,11.33 16.33,12 15.5,12C14.67,12 14,11.33 14,10.5Z" scaleX="1.2" scaleY="1.2" styleClass="svg-icon" />
+                                                <Label style="-fx-font-size: 16; -fx-font-weight: bold; -fx-text-fill: #f1933e;" text="Publishing" />
                                             </children>
                                         </HBox>
                                         <VBox spacing="8.0">
@@ -105,19 +126,47 @@
                                                 <ChoiceBox fx:id="publicationChoice" maxWidth="Infinity" styleClass="sort-choice-box" />
                                             </children>
                                         </VBox>
-                                        <Button onAction="#saveArticle" maxWidth="Infinity" styleClass="btn, btn-primary" text="💾 Save Article" />
-                                        <Button onAction="#goBackToArticles" maxWidth="Infinity" styleClass="btn-outline" text="← Back to My articles" />
+                                        <Button onAction="#saveArticle" maxWidth="Infinity" styleClass="btn  btn-primary" text="💾 Save Article" />
                                     </children>
                                 </VBox>
 
-                                <!-- Hero Image (No Unsplash) -->
+                                <!-- Hero Image (Unsplash & Upload) -->
                                 <VBox spacing="15.0" style="-fx-background-color: white; -fx-padding: 20; -fx-background-radius: 8; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.05), 10, 0, 0, 2);">
                                     <children>
                                         <HBox alignment="CENTER_LEFT" spacing="10.0">
                                             <children>
-                                                <Label style="-fx-font-size: 16; -fx-font-weight: bold; -fx-text-fill: #f1933e;" text="🖼 Hero Image" />
+                                                <SVGPath content="M21,19V5C21,3.9 20.1,3 19,3H5C3.9,3 3,3.9 3,5V19C3,20.1 3.9,21 5,21H19C20.1,21 21,20.1 21,19M8.5,13.5L11,16.5L14.5,12L19,18H5L8.5,13.5Z" scaleX="1.2" scaleY="1.2" styleClass="svg-icon" />
+                                                <Label style="-fx-font-size: 16; -fx-font-weight: bold; -fx-text-fill: #f1933e;" text="Hero Image" />
                                             </children>
                                         </HBox>
+                                        
+                                        <!-- Unsplash Search -->
+                                        <VBox spacing="10.0" style="-fx-background-color: #f8f9fa; -fx-padding: 15; -fx-background-radius: 8;">
+                                            <children>
+                                                <Label style="-fx-font-size: 12; -fx-font-weight: bold; -fx-text-fill: #555;" text="Search Unsplash" />
+                                                <HBox spacing="5.0">
+                                                    <children>
+                                                        <TextField fx:id="unsplashSearchField" promptText="Nature, Forest..." HBox.hgrow="ALWAYS" />
+                                                        <Button onAction="#searchUnsplash" style="-fx-background-color: #f1933e; -fx-text-fill: white;">
+                                                           <graphic>
+                                                               <SVGPath content="M15.5,14H14.71L14.43,13.72C15.41,12.59 16,11.11 16,9.5A6.5,6.5 0 0,0 9.5,3A6.5,6.5 0 0,0 3,9.5A6.5,6.5 0 0,0 9.5,16C11.11,16 12.59,15.41 13.72,14.43L14,14.71V15.5L19,20.5L20.5,19L15.5,14M9.5,14C7,14 5,12 5,9.5C5,7 7,5 9.5,5C12,5 14,7 14,9.5C14,12 12,14 9.5,14Z" scaleX="0.8" scaleY="0.8" styleClass="svg-icon-white" />
+                                                           </graphic>
+                                                        </Button>
+                                                    </children>
+                                                </HBox>
+                                                <ScrollPane fitToHeight="true" minHeight="120.0" style="-fx-background-color: transparent; -fx-background: transparent;">
+                                                    <content>
+                                                        <HBox fx:id="unsplashResults" spacing="10.0">
+                                                            <!-- Unsplash results will appear here -->
+                                                        </HBox>
+                                                    </content>
+                                                </ScrollPane>
+                                            </children>
+                                        </VBox>
+
+                                        <Separator />
+
+                                        <!-- Local Upload -->
                                         <VBox spacing="10.0">
                                             <children>
                                                 <Label style="-fx-font-size: 13; -fx-font-weight: bold; -fx-text-fill: #555;" text="Thumbnail / hero image (upload)" />
@@ -127,8 +176,59 @@
                                                         <Label fx:id="fileNameLabel" text="No file chosen" style="-fx-text-fill: #888;" />
                                                     </children>
                                                 </HBox>
-                                                <ImageView fx:id="imagePreview" fitHeight="120.0" fitWidth="260.0" pickOnBounds="true" preserveRatio="true" style="-fx-border-color: #eee; -fx-border-width: 1;" />
-                                                <Label style="-fx-font-size: 11; -fx-text-fill: #888;" text="Click to upload image." />
+                                                <ImageView fx:id="imagePreview" fitHeight="150.0" fitWidth="260.0" pickOnBounds="true" preserveRatio="true" style="-fx-border-color: #eee; -fx-border-width: 1;" />
+                                                <Label style="-fx-font-size: 11; -fx-text-fill: #888;" text="Click to upload or select from Unsplash." />
+                                            </children>
+                                        </VBox>
+                                    </children>
+                                </VBox>
+
+                                 <!-- AI SEO Optimization -->
+                                <VBox spacing="15.0" style="-fx-background-color: white; -fx-padding: 20; -fx-background-radius: 8; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.05), 10, 0, 0, 2);">
+                                    <children>
+                                        <HBox alignment="CENTER_LEFT" spacing="10.0">
+                                            <children>
+                                                <SVGPath content="M7,2V13H10V22L17,10H13L17,2H7Z" scaleX="1.2" scaleY="1.2" styleClass="svg-icon" />
+                                                <Label style="-fx-font-size: 16; -fx-font-weight: bold; -fx-text-fill: #f1933e;" text="AI SEO Optimization" />
+                                                <Region HBox.hgrow="ALWAYS" />
+                                                <Button onAction="#generateSeoWithAi" style="-fx-background-color: #2d6a4f; -fx-text-fill: white; -fx-padding: 4 10; -fx-font-size: 11; -fx-background-radius: 4; -fx-cursor: hand;" text="Generate">
+                                                    <graphic>
+                                                        <SVGPath content="M7.5,5.6L10,7L8.6,4.5L10,2L7.5,3.4L5,2L6.4,4.5L5,7L7.5,5.6" scaleX="0.8" scaleY="0.8" styleClass="svg-icon-white" />
+                                                    </graphic>
+                                                </Button>
+                                            </children>
+                                        </HBox>
+                                        
+                                        <VBox spacing="12.0">
+                                            <children>
+                                                <VBox spacing="5.0">
+                                                    <children>
+                                                        <HBox alignment="CENTER_LEFT" spacing="5.0">
+                                                            <children>
+                                                                <Label style="-fx-font-size: 11; -fx-font-weight: bold; -fx-text-fill: #666;" text="SEO TITLE" />
+                                                                <Region HBox.hgrow="ALWAYS" />
+                                                                <Button onAction="#showSeoTitleIdeas" style="-fx-background-color: transparent; -fx-text-fill: #2d6a4f; -fx-cursor: hand; -fx-font-size: 10; -fx-padding: 0;" text=" Ideas">
+                                                                    <graphic>
+                                                                        <SVGPath content="M12,2C8.13,2,5,5.13,5,9c0,2.38,1.19,4.47,3,5.74V17c0,0.55,0.45,1,1,1h6c0.55,0,1,0.45,1-1v-2.26 c1.81-1.27,3-3.36,3-5.74C19,5.13,15.87,2,12,2z" scaleX="0.5" scaleY="0.5" styleClass="svg-icon-green" />
+                                                                    </graphic>
+                                                                </Button>
+                                                            </children>
+                                                        </HBox>
+                                                        <TextField fx:id="seoTitleField" promptText="Catchy SEO title" styleClass="form-input" />
+                                                    </children>
+                                                </VBox>
+                                                <VBox spacing="5.0">
+                                                    <children>
+                                                        <Label style="-fx-font-size: 11; -fx-font-weight: bold; -fx-text-fill: #666;" text="SEO DESCRIPTION" />
+                                                        <TextArea fx:id="seoDescriptionArea" prefHeight="80.0" promptText="Compelling meta description" styleClass="form-input" wrapText="true" />
+                                                    </children>
+                                                </VBox>
+                                                <VBox spacing="5.0">
+                                                    <children>
+                                                        <Label style="-fx-font-size: 11; -fx-font-weight: bold; -fx-text-fill: #666;" text="SEO KEYWORDS" />
+                                                        <TextField fx:id="seoKeywordsField" promptText="eco, sustainability, solar..." styleClass="form-input" />
+                                                    </children>
+                                                </VBox>
                                             </children>
                                         </VBox>
                                     </children>
@@ -139,7 +239,8 @@
                                     <children>
                                         <HBox alignment="CENTER_LEFT" spacing="10.0">
                                             <children>
-                                                <Label style="-fx-font-size: 16; -fx-font-weight: bold; -fx-text-fill: #f1933e;" text="🔖 Organization" />
+                                                <SVGPath content="M17,3H7C5.9,3 5,3.9 5,5V21L12,18L19,21V5C19,3.9 18.1,3 17,3Z" scaleX="1.2" scaleY="1.2" styleClass="svg-icon" />
+                                                <Label style="-fx-font-size: 16; -fx-font-weight: bold; -fx-text-fill: #f1933e;" text="Organization" />
                                             </children>
                                         </HBox>
                                         
@@ -184,3 +285,4 @@
         </ScrollPane>
     </center>
 </BorderPane>
+

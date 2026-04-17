@@ -5,6 +5,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 
@@ -14,6 +15,7 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 import java.io.IOException;
 import java.time.format.DateTimeFormatter;
+import tn.esprit.util.TimeUtils;
 
 public class BlogCardController {
 
@@ -24,8 +26,13 @@ public class BlogCardController {
     @FXML private Label titleLabel;
     @FXML private Label readTimeLabel;
     @FXML private Label authorLabel;
+    @FXML private Label viewsLabel;
+    @FXML private Label likesLabel;
+    @FXML private Label dislikesLabel;
+    @FXML private Label commentsLabel;
     @FXML private Text excerptText;
     @FXML private Button readMoreBtn;
+    @FXML private FlowPane tagsFlowPane;
 
     public void setData(Blog blog) {
         if (blog.getImage() != null && !blog.getImage().isEmpty()) {
@@ -37,14 +44,33 @@ public class BlogCardController {
         }
         
         categoryLabel.setText(blog.getCategory() != null ? blog.getCategory().getName() : "General");
+        categoryLabel.setStyle("-fx-cursor: hand;");
+        categoryLabel.setOnMouseClicked(e -> {
+            BlogManagementController.selectedTag = null;
+            BlogManagementController.selectedCategory = blog.getCategory();
+            refreshBlogList();
+        });
         
         if (blog.getPublishedAt() != null) {
-            dateLabel.setText(blog.getPublishedAt().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
+            dateLabel.setText(TimeUtils.formatRelativeTime(blog.getPublishedAt()));
         }
         
         titleLabel.setText(blog.getTitle());
-        readTimeLabel.setText("📖 " + blog.getReadingTime() + "m");
-        authorLabel.setText("👤 " + (blog.getAuthor() != null ? blog.getAuthor() : "Anonymous"));
+        viewsLabel.setText("👁 " + blog.getViews());
+        likesLabel.setText("👍 " + blog.getLikesCount());
+        dislikesLabel.setText("👎 " + blog.getDislikesCount());
+        readTimeLabel.setText("👤 " + blog.getReadingTime() + "m");
+        commentsLabel.setText("💬 " + blog.getCommentsCount());
+        
+        authorLabel.setText(blog.getAuthor() != null ? blog.getAuthor() : "Anonymous");
+        authorLabel.setStyle("-fx-cursor: hand;");
+        authorLabel.setOnMouseClicked(e -> {
+            BlogManagementController.selectedCategory = null;
+            BlogManagementController.selectedTag = null;
+            BlogManagementController.selectedAuthor = blog.getAuthor();
+            refreshBlogList();
+            e.consume();
+        });
         
         String content = blog.getContent();
         if (content != null) {
@@ -57,8 +83,35 @@ public class BlogCardController {
             }
         }
 
+        // Populate Tags
+        tagsFlowPane.getChildren().clear();
+        if (blog.getTags() != null) {
+            for (Tag tag : blog.getTags()) {
+                Label tagLabel = new Label("#" + tag.getName());
+                tagLabel.getStyleClass().add("tag-badge");
+                tagLabel.setStyle("-fx-cursor: hand;");
+                tagLabel.setOnMouseClicked(e -> {
+                    BlogManagementController.selectedCategory = null;
+                    BlogManagementController.selectedTag = tag;
+                    refreshBlogList();
+                    e.consume(); // Prevent card click
+                });
+                tagsFlowPane.getChildren().add(tagLabel);
+            }
+        }
+
         readMoreBtn.setOnAction(event -> openDetail(blog));
         cardContainer.setOnMouseClicked(event -> openDetail(blog));
+    }
+
+    private void refreshBlogList() {
+        try {
+            Parent root = FXMLLoader.load(getClass().getResource("/blog/BlogManagement.fxml"));
+            Stage stage = (Stage) cardContainer.getScene().getWindow();
+            stage.getScene().setRoot(root);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     private void openDetail(Blog blog) {

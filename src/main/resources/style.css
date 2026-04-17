@@ -188,71 +188,166 @@
 }
 
 /* ================================
+   UTILITY: PAGE HEADER & SECTION CARD
+================================ */
+
+/* Page-level title used on management screens */
+.page-title {
+    -fx-font-size: 22px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #2d6a4f;
+}
+
+/* White card panel used on management screens */
+.section-card {
+    -fx-background-color: white;
+    -fx-background-radius: 10;
+    -fx-padding: 16;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.05), 10, 0, 0, 2);
+}
+
+.section-heading {
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #333;
+}
+
+.section-hint {
+    -fx-text-fill: #666;
+}
+
+/* Green bold label used on event/sponsor forms */
+.form-label {
+    -fx-font-weight: bold;
+    -fx-text-fill: #2d6a4f;
+    -fx-font-size: 14px;
+}
+
+/* Standard form input for management forms */
+.form-input {
+    -fx-background-color: white;
+    -fx-border-color: #ddd;
+    -fx-border-radius: 6;
+    -fx-background-radius: 6;
+    -fx-padding: 8 12;
+    -fx-font-size: 14px;
+}
+
+.form-input:focused {
+    -fx-border-color: #2d6a4f;
+    -fx-border-width: 1.5;
+}
+
+.svg-icon {
+    -fx-fill: #f1933e;
+}
+
+.svg-icon-white {
+    -fx-fill: white;
+}
+
+.svg-icon-green {
+    -fx-fill: #2d6a4f;
+}
+
+.btn-back {
+    -fx-background-color: #f1f5f9;
+    -fx-text-fill: #475569;
+    -fx-font-weight: bold;
+    -fx-background-radius: 20;
+    -fx-padding: 8 16;
+    -fx-font-size: 13px;
+    -fx-cursor: hand;
+    -fx-border-color: #e2e8f0;
+    -fx-border-radius: 20;
+    -fx-border-width: 1;
+}
+
+.btn-back:hover {
+    -fx-background-color: #e2e8f0;
+    -fx-text-fill: #1e293b;
+}
+
+.btn-back:pressed {
+    -fx-background-color: #cbd5e1;
+}
+
+/* ================================
    BLOG SPECIFIC STYLES
    ================================ */
 .article-card {
     -fx-background-color: white;
-    -fx-background-radius: 12;
-    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 10, 0, 0, 5);
+    -fx-background-radius: 4;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 10, 0, 0, 2);
     -fx-cursor: hand;
-    -fx-transition: all 0.3s ease;
+    -fx-border-color: #eee;
+    -fx-border-width: 0.5;
 }
 
 .article-card:hover {
-    -fx-effect: dropshadow(three-pass-box, rgba(45, 106, 79, 0.2), 15, 0, 0, 8);
-    -fx-translate-y: -5;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.2), 15, 0, 0, 4);
 }
 
 .category-tag {
-    -fx-background-color: #ffb703;
+    -fx-background-color: #fca311;
     -fx-text-fill: white;
     -fx-font-weight: bold;
     -fx-font-size: 11px;
-    -fx-padding: 4 10;
+    -fx-padding: 4 12;
     -fx-background-radius: 4;
 }
 
 .article-date {
-    -fx-text-fill: #888;
+    -fx-text-fill: #64748b;
     -fx-font-size: 12px;
 }
 
 .article-title {
-    -fx-text-fill: #1b4332;
-    -fx-font-smoothing-type: lcd;
-    -fx-line-spacing: 2;
+    -fx-text-fill: #1e293b;
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+    -fx-line-spacing: 1.2;
 }
 
-.stat-label {
-    -fx-text-fill: #666;
-    -fx-font-size: 11px;
+.article-stats-bar {
+    -fx-background-color: #f1f5f9;
+    -fx-background-radius: 2;
+    -fx-padding: 8 12;
+}
+
+.stat-item {
+    -fx-text-fill: #64748b;
+    -fx-font-size: 12px;
 }
 
 .article-author {
-    -fx-text-fill: #555;
+    -fx-text-fill: #475569;
     -fx-font-size: 13px;
-    -fx-font-style: italic;
+    -fx-font-weight: normal;
 }
 
 .article-excerpt {
-    -fx-fill: #666;
+    -fx-fill: #64748b;
     -fx-font-size: 13px;
+    -fx-line-height: 1.4;
 }
 
 .read-more-btn {
-    -fx-background-color: #2d6a4f;
+    -fx-background-color: #264d3e;
     -fx-text-fill: white;
     -fx-font-weight: bold;
-    -fx-background-radius: 6;
+    -fx-background-radius: 4;
     -fx-padding: 10 20;
+    -fx-font-size: 14px;
+    -fx-alignment: center;
 }
 
 .read-more-btn:hover {
-    -fx-background-color: #40916c;
+    -fx-background-color: #1b4332;
 }
 
 .read-more-btn:pressed {
-    -fx-background-color: #1b4332;
+    -fx-background-color: #0b1f17;
 }
 
 .search-field {
@@ -275,6 +370,7 @@
     -fx-background-radius: 6;
     -fx-padding: 5 10;
 }
+
 /* ================================
    BLOG DETAIL PAGE
    ================================ */
@@ -366,42 +462,31 @@
 }
 
 /* ================================
-   FOOTER
+   MINIMALIST FOOTER
    ================================ */
 .eco-footer {
-    -fx-background-color: white;
-}
-
-.footer-brand {
-    -fx-text-fill: white;
-    -fx-font-size: 24px;
-    -fx-font-weight: bold;
-}
-
-.footer-desc {
-    -fx-text-fill: #95d5b2;
-    -fx-font-size: 13px;
-}
-
-.footer-heading {
-    -fx-text-fill: white;
-    -fx-font-size: 14px;
-    -fx-font-weight: bold;
-}
-
-.footer-link {
-    -fx-text-fill: #95d5b2;
-    -fx-font-size: 13px;
-    -fx-cursor: hand;
-}
-
-.footer-link:hover {
-    -fx-text-fill: white;
+    -fx-background-color: transparent;
+    -fx-padding: 30 60;
 }
 
 .footer-copyright {
-    -fx-text-fill: #52b788;
-    -fx-font-size: 12px;
+    -fx-text-fill: #6b7280;
+    -fx-font-size: 13px;
+}
+
+.tag-badge {
+    -fx-background-color: #f1f5f9;
+    -fx-text-fill: #475569;
+    -fx-padding: 3 8;
+    -fx-background-radius: 4;
+    -fx-font-size: 10px;
+    -fx-font-weight: bold;
+}
+
+.footer-brand-mini {
+    -fx-text-fill: #2d6a4f;
+    -fx-font-weight: bold;
+    -fx-font-size: 14px;
 }
 
 /* ================================
@@ -442,7 +527,7 @@
     -fx-padding: 5 10;
 }
 
-/* Table styling approx */
+/* Table styling */
 .table-view {
     -fx-background-color: transparent;
     -fx-border-width: 0;
@@ -466,7 +551,6 @@
     -fx-background-color: #fcfcfc;
 }
 
-/* Keep selection highlighted with readable text (not white text) */
 .table-row-cell:selected,
 .table-row-cell:filled:selected {
     -fx-background-color: #dff3e8;
@@ -487,11 +571,11 @@
     -fx-background-color: #dff3e8;
     -fx-text-fill: #1b4332;
 }
+
 /* ================================
-   MODERN BUTTON TEMPLATES (The "Templates" you asked for)
+   BUTTON SYSTEM
    ================================ */
 
-/* Base Button Style (Add 'btn' class to any button) */
 .btn {
     -fx-cursor: hand;
     -fx-background-radius: 6;
@@ -499,10 +583,8 @@
     -fx-font-weight: bold;
     -fx-font-size: 14px;
     -fx-font-smoothing-type: lcd;
-    /* Subtle scale-up animation on hover would require Java, but we can do shadows */
 }
 
-/* Primary Eco-Green Button */
 .btn-primary {
     -fx-background-color: #2d6a4f;
     -fx-text-fill: white;
@@ -511,12 +593,10 @@
     -fx-background-color: #40916c;
     -fx-effect: dropshadow(three-pass-box, rgba(45,106,79,0.3), 10, 0, 0, 3);
 }
-
 .btn-primary:pressed {
     -fx-background-color: #1b4332;
 }
 
-/* Secondary Amber/Orange Button */
 .btn-secondary {
     -fx-background-color: #f1933e;
     -fx-text-fill: white;
@@ -526,7 +606,6 @@
     -fx-effect: dropshadow(three-pass-box, rgba(241,147,62,0.3), 10, 0, 0, 3);
 }
 
-/* Danger/Red Button */
 .btn-danger {
     -fx-background-color: #bc4749;
     -fx-text-fill: white;
@@ -536,7 +615,6 @@
     -fx-effect: dropshadow(three-pass-box, rgba(188,71,73,0.3), 10, 0, 0, 3);
 }
 
-/* Clean Light/Back Button */
 .btn-light {
     -fx-background-color: #e9ecef;
     -fx-text-fill: #495057;
@@ -547,19 +625,19 @@
     -fx-background-color: #dee2e6;
 }
 
-/* Modern Outline Primary */
 .btn-outline {
     -fx-background-color: transparent;
     -fx-border-color: #2d6a4f;
     -fx-border-width: 1.5;
     -fx-text-fill: #2d6a4f;
     -fx-border-radius: 6;
+    -fx-cursor: hand;
+    -fx-padding: 6 16;
 }
 .btn-outline:hover {
     -fx-background-color: #f0fdf4;
 }
 
-/* Stylish Gradient Button */
 .btn-grad {
     -fx-background-color: linear-gradient(to right, #2d6a4f, #40916c);
     -fx-text-fill: white;
@@ -759,8 +837,6 @@
     -fx-text-fill: white;
     -fx-font-weight: bold;
     -fx-background-radius: 8;
-    /* Optional margin to make it look like a floating button */
-    -fx-margin: 5 10;
 }
 
 .sidebar-separator {
@@ -812,7 +888,7 @@
 
 .stat-card {
     -fx-background-color: white;
-    -fx-background-radius: 12;
+    -fx-background-radius: 10;
     -fx-padding: 30;
     -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.05), 10, 0, 0, 5);
     -fx-cursor: hand;
@@ -904,7 +980,7 @@
     -fx-alignment: CENTER_RIGHT;
 }
 
-\.win-btn {
+.win-btn {
     -fx-background-color: transparent;
     -fx-text-fill: #333333;
     -fx-font-size: 16px;
@@ -914,7 +990,7 @@
     -fx-background-radius: 4;
 }
 
-\.win-btn:hover {
+.win-btn:hover {
     -fx-background-color: rgba(0, 0, 0, 0.1);
 }
 
@@ -923,3 +999,284 @@
     -fx-text-fill: white;
 }
 
+/* ================================
+   AI VOICE READER PANEL
+================================ */
+.ai-reader-panel {
+    -fx-background-color: #f0f7f4;
+    -fx-background-radius: 0 8 8 0;
+    -fx-border-color: #2d6a4f;
+    -fx-border-width: 0 0 0 4;
+    -fx-border-radius: 0 8 8 0;
+    -fx-padding: 12 16;
+}
+
+.ai-reader-panel.ai-reading {
+    -fx-background-color: #e9f5ee;
+}
+
+.ai-status-label {
+    -fx-text-fill: #666;
+    -fx-font-size: 12px;
+}
+
+.ai-title-label {
+    -fx-font-weight: bold;
+    -fx-text-fill: #1b4332;
+    -fx-font-size: 14px;
+}
+
+/* ================================
+   TICKET CARD STYLES
+   ================================ */
+
+.ticket-card {
+    -fx-background-color: white;
+    -fx-background-radius: 10;
+    -fx-border-color: #e5e7eb;
+    -fx-border-radius: 10;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.06), 10, 0, 0, 4);
+    -fx-min-width: 380;
+    -fx-max-width: 380;
+    -fx-min-height: 250;
+}
+
+.ticket-card:hover {
+    -fx-effect: dropshadow(three-pass-box, rgba(45,106,79,0.15), 15, 0, 0, 8);
+    -fx-translate-y: -2;
+}
+
+.ticket-card-content {
+    -fx-padding: 20;
+}
+
+.ticket-badge-low {
+    -fx-background-color: #dcfce7;
+    -fx-text-fill: #166534;
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+    -fx-padding: 4 12;
+    -fx-background-radius: 20;
+}
+
+.ticket-badge-medium {
+    -fx-background-color: #e0f2fe;
+    -fx-text-fill: #0369a1;
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+    -fx-padding: 4 12;
+    -fx-background-radius: 20;
+}
+
+.ticket-badge-urgent, .ticket-badge-high {
+    -fx-background-color: #fee2e2;
+    -fx-text-fill: #b91c1c;
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+    -fx-padding: 4 12;
+    -fx-background-radius: 20;
+}
+
+.ticket-domain {
+    -fx-text-fill: #6b7280;
+    -fx-font-size: 12px;
+}
+
+.ticket-title {
+    -fx-text-fill: #1f2937;
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+}
+
+.ticket-location {
+    -fx-text-fill: #6b7280;
+    -fx-font-size: 12px;
+}
+
+.ticket-description {
+    -fx-text-fill: #6b7280;
+    -fx-font-size: 14px;
+    -fx-line-spacing: 2;
+}
+
+.ticket-btn-view {
+    -fx-background-color: transparent;
+    -fx-text-fill: #f59e0b;
+    -fx-border-color: #fcd34d;
+    -fx-border-width: 1;
+    -fx-border-radius: 4;
+    -fx-padding: 4 12;
+    -fx-font-size: 12px;
+    -fx-cursor: hand;
+}
+
+.ticket-btn-view:hover {
+    -fx-background-color: #fffbeb;
+}
+
+.ticket-btn-complete {
+    -fx-background-color: #2d6a4f;
+    -fx-text-fill: white;
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+    -fx-border-radius: 6;
+    -fx-background-radius: 6;
+    -fx-padding: 5 12;
+    -fx-cursor: hand;
+}
+
+.ticket-btn-complete:hover {
+    -fx-background-color: #40916c;
+}
+
+.ticket-footer {
+    -fx-border-color: #e5e7eb transparent transparent transparent;
+    -fx-padding: 10 20;
+    -fx-background-color: white;
+}
+
+.ticket-footer-text {
+    -fx-text-fill: #9ca3af;
+    -fx-font-size: 11px;
+}
+
+.my-ticket-status-badge {
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+    -fx-padding: 4 10;
+    -fx-background-radius: 999;
+}
+
+.my-ticket-status-pending {
+    -fx-background-color: #e0f2fe;
+    -fx-text-fill: #0c4a6e;
+}
+
+.my-ticket-status-approved {
+    -fx-background-color: #dcfce7;
+    -fx-text-fill: #166534;
+}
+
+.my-ticket-status-rejected {
+    -fx-background-color: #fee2e2;
+    -fx-text-fill: #991b1b;
+}
+
+.my-ticket-status-revision {
+    -fx-background-color: #fef3c7;
+    -fx-text-fill: #92400e;
+}
+
+.my-ticket-status-completed {
+    -fx-background-color: #ede9fe;
+    -fx-text-fill: #5b21b6;
+}
+
+.my-ticket-revision-note {
+    -fx-text-fill: #92400e;
+    -fx-font-size: 12px;
+    -fx-background-color: #fffbeb;
+    -fx-padding: 8 10;
+    -fx-background-radius: 6;
+    -fx-border-color: #fde68a;
+    -fx-border-radius: 6;
+}
+
+/* ================================
+   ACHIEVEMENT CARD STYLES
+   ================================ */
+
+.achievement-card {
+    -fx-background-color: white;
+    -fx-border-color: #e5e7eb;
+    -fx-border-radius: 10;
+    -fx-background-radius: 10;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.06), 10, 0, 0, 4);
+    -fx-min-width: 380;
+    -fx-max-width: 380;
+    -fx-min-height: 180;
+}
+
+.achievement-card:hover {
+    -fx-effect: dropshadow(three-pass-box, rgba(45,106,79,0.15), 15, 0, 0, 8);
+    -fx-translate-y: -2;
+}
+
+.achievement-header {
+    -fx-background-color: #2d6a4f;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-padding: 8 15;
+    -fx-background-radius: 10 10 0 0;
+    -fx-border-radius: 10 10 0 0;
+    -fx-font-size: 13px;
+}
+
+.achievement-content {
+    -fx-padding: 15;
+}
+
+.achievement-completed-by {
+    -fx-text-fill: #6b7280;
+    -fx-font-size: 13px;
+    -fx-padding: 15 0 0 0;
+}
+
+/* ================================
+   SCROLLPANE & TRACKPAD OPTIMIZATIONS
+   ================================ */
+.scroll-pane {
+    -fx-background-color: transparent;
+}
+
+.scroll-pane > .viewport {
+    -fx-background-color: transparent;
+}
+
+.scroll-pane:pannable {
+    -fx-cursor: default;
+}
+
+/* Ensure empty areas in the scroll content still bubble events */
+.scroll-pane > .viewport > .container {
+    -fx-background-color: transparent;
+}
+
+/* ================================
+   REACTION BAR (Like / Dislike)
+================================ */
+.reaction-bar {
+    -fx-background-color: #f0f7f4;
+    -fx-background-radius: 20;
+    -fx-padding: 4 10;
+}
+
+.reaction-btn {
+    -fx-background-color: transparent;
+    -fx-border-color: #ccc;
+    -fx-border-radius: 20;
+    -fx-background-radius: 20;
+    -fx-padding: 6 14;
+    -fx-font-size: 13px;
+    -fx-cursor: hand;
+    -fx-text-fill: #444;
+}
+
+.reaction-btn:hover {
+    -fx-background-color: #e8f5e9;
+    -fx-border-color: #2d6a4f;
+}
+
+.like-btn.reaction-active {
+    -fx-background-color: #d8f3dc;
+    -fx-border-color: #2d6a4f;
+    -fx-text-fill: #1b4332;
+    -fx-font-weight: bold;
+}
+
+.dislike-btn.reaction-active {
+    -fx-background-color: #fde8e8;
+    -fx-border-color: #c0392b;
+    -fx-text-fill: #922b21;
+    -fx-font-weight: bold;
+}

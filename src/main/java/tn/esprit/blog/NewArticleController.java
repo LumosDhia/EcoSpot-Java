@@ -6,13 +6,15 @@ import javafx.scene.Parent;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import tn.esprit.services.BlogService;
 import tn.esprit.services.CategoryService;
 import tn.esprit.services.TagService;
-import tn.esprit.user.User;
+import tn.esprit.services.UnsplashService;
+import tn.esprit.services.AiSeoService;
 
 import java.io.File;
 import java.io.IOException;
@@ -32,6 +34,11 @@ public class NewArticleController {
     @FXML private TextField newTagField;
     @FXML private VBox revisionAlertBox;
     @FXML private Label revisionNoteLabel;
+    @FXML private TextField unsplashSearchField;
+    @FXML private HBox unsplashResults;
+    @FXML private TextField seoTitleField;
+    @FXML private TextArea seoDescriptionArea;
+    @FXML private TextField seoKeywordsField;
 
     private BlogService blogService = new BlogService();
     private CategoryService categoryService = new CategoryService();
@@ -39,7 +46,8 @@ public class NewArticleController {
     private ToggleGroup categoryGroup = new ToggleGroup();
     private Blog editArticle = null;
     private TagService tagService = new TagService();
-    private boolean ngoRevisionResubmission = false;
+    private UnsplashService unsplashService = new UnsplashService();
+    private AiSeoService aiSeoService = new AiSeoService();
 
     @FXML
     public void initialize() {
@@ -70,14 +78,7 @@ public class NewArticleController {
             } catch (Exception e) {}
         }
         
-        ngoRevisionResubmission = isNgoRevisionResubmission(blog);
-        if (ngoRevisionResubmission) {
-            publicationChoice.setValue("Save as draft");
-            publicationChoice.setDisable(true);
-        } else {
-            publicationChoice.setDisable(false);
-            publicationChoice.setValue(blog.getIsPublished() ? "Publish immediately" : "Save as draft");
-        }
+        publicationChoice.setValue(blog.getIsPublished() ? "Publish immediately" : "Save as draft");
         
         if (blog.getAdminRevisionNote() != null && !blog.getAdminRevisionNote().trim().isEmpty()) {
             revisionAlertBox.setVisible(true);
@@ -106,6 +107,96 @@ public class NewArticleController {
                 }
             }
         }
+    }
+
+    @FXML
+    private void showTitleIdeas() {
+        String currentTitle = titleField.getText();
+        String content = contentEditor.getHtmlText();
+
+        if (content.length() < 50) {
+            showAlert("Error", "Please write some content first so AI can brainstorm titles.", Alert.AlertType.WARNING);
+            return;
+        }
+
+        aiSeoService.generateTitleIdeas(currentTitle, content)
+                .thenAccept(titles -> {
+                    javafx.application.Platform.runLater(() -> {
+                        if (titles != null && !titles.isEmpty()) {
+                            ChoiceDialog<String> dialog = new ChoiceDialog<>(titles.get(0), titles);
+                            dialog.setTitle("AI Title Ideas");
+                            dialog.setHeaderText("Choose a catchy title for your article:");
+                            dialog.setContentText("Suggested Titles:");
+                            
+                            dialog.showAndWait().ifPresent(selectedTitle -> {
+                                titleField.setText(selectedTitle);
+                            });
+                        } else {
+                            showAlert("AI Error", "Failed to generate title ideas.", Alert.AlertType.ERROR);
+                        }
+                    });
+                });
+    }
+
+    @FXML
+    private void showSeoTitleIdeas() {
+        String currentTitle = titleField.getText();
+        String content = contentEditor.getHtmlText();
+
+        if (content.length() < 50) {
+            showAlert("Error", "Please write some content first so AI can brainstorm SEO titles.", Alert.AlertType.WARNING);
+            return;
+        }
+
+        aiSeoService.generateTitleIdeas(currentTitle, content)
+                .thenAccept(titles -> {
+                    javafx.application.Platform.runLater(() -> {
+                        if (titles != null && !titles.isEmpty()) {
+                            ChoiceDialog<String> dialog = new ChoiceDialog<>(titles.get(0), titles);
+                            dialog.setTitle("AI SEO Title Ideas");
+                            dialog.setHeaderText("Choose a catchy SEO title:");
+                            dialog.setContentText("Suggested Titles:");
+                            
+                            dialog.showAndWait().ifPresent(selectedTitle -> {
+                                seoTitleField.setText(selectedTitle);
+                            });
+                        } else {
+                            showAlert("AI Error", "Failed to generate SEO title ideas.", Alert.AlertType.ERROR);
+                        }
+                    });
+                });
+    }
+
+    @FXML
+    private void generateSeoWithAi() {
+        String title = titleField.getText();
+        String content = contentEditor.getHtmlText();
+
+        if (title.isEmpty() || content.length() < 50) {
+            showAlert("Error", "Please write some title and content first so AI can analyze it.", Alert.AlertType.WARNING);
+            return;
+        }
+
+        aiSeoService.generateSeoElements(title, content)
+                .thenAccept(result -> {
+                    javafx.application.Platform.runLater(() -> {
+                        if (result != null) {
+                            seoTitleField.setText(result.title);
+                            seoDescriptionArea.setText(result.description);
+                            seoKeywordsField.setText(result.keywords);
+                        } else {
+                            showAlert("AI Error", "Failed to generate SEO elements. Please check your connection or API key.", Alert.AlertType.ERROR);
+                        }
+                    });
+                });
+    }
+
+    private void showAlert(String title, String content, Alert.AlertType type) {
+        Alert alert = new Alert(type);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(content);
+        alert.showAndWait();
     }
 
     private void loadCategories() {
@@ -147,9 +238,57 @@ public class NewArticleController {
     }
 
     @FXML
+    private void searchUnsplash() {
+        String query = unsplashSearchField.getText();
+        if (query == null || query.trim().isEmpty()) return;
+
+        unsplashResults.getChildren().clear();
+        ProgressIndicator progress = new ProgressIndicator();
+        progress.setPrefSize(30, 30);
+        unsplashResults.getChildren().add(progress);
+
+        // Run search in background to keep UI responsive
+        new Thread(() -> {
+            List<String> urls = unsplashService.searchPhotos(query);
+            javafx.application.Platform.runLater(() -> {
+                unsplashResults.getChildren().clear();
+                if (urls.isEmpty()) {
+                    unsplashResults.getChildren().add(new Label("No results found."));
+                    return;
+                }
+                for (String url : urls) {
+                    ImageView thumb = new ImageView(new Image(url, 100, 100, true, true));
+                    thumb.setCursor(javafx.scene.Cursor.HAND);
+                    thumb.setStyle("-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.2), 5, 0, 0, 0); -fx-border-color: #eee; -fx-border-width: 2;");
+                    
+                    thumb.setOnMouseClicked(e -> {
+                        selectedImagePath = url;
+                        imagePreview.setImage(new Image(url, true));
+                        fileNameLabel.setText("Selected from Unsplash");
+                        
+                        // Highlight selection
+                        unsplashResults.getChildren().forEach(n -> n.setOpacity(0.5));
+                        thumb.setOpacity(1.0);
+                        thumb.setStyle("-fx-border-color: #f1933e; -fx-border-width: 3; -fx-effect: dropshadow(three-pass-box, rgba(241,147,62,0.4), 10, 0, 0, 0);");
+                    });
+                    
+                    unsplashResults.getChildren().add(thumb);
+                }
+            });
+        }).start();
+    }
+
+    @FXML
     private void saveArticle() {
         String title = titleField.getText();
         String content = contentEditor.getHtmlText();
+        
+        if (!createCategoryFromInputIfNeeded()) {
+            return;
+        }
+        if (!createTagsFromInputIfNeeded()) {
+            return;
+        }
 
         // Validation Logic (Controle de Saisir)
         RadioButton selectedCat = (RadioButton) categoryGroup.getSelectedToggle();
@@ -166,18 +305,7 @@ public class NewArticleController {
         blog.setCategory((Category) selectedCat.getUserData());
         
         // Set publication status
-        boolean publishRequested = "Publish immediately".equals(publicationChoice.getValue());
-        if (publishRequested && (selectedImagePath == null || selectedImagePath.trim().isEmpty())) {
-            showAlert("Validation Error", "An image is required before publishing an article.");
-            return;
-        }
-        if (ngoRevisionResubmission) {
-            // NGO resubmission after revision request must return to admin review queue.
-            blog.setIsPublished(false);
-            blog.setAdminRevisionNote(null);
-        } else {
-            blog.setIsPublished(publishRequested);
-        }
+        blog.setIsPublished("Publish immediately".equals(publicationChoice.getValue()));
 
         // Extract Tags
         List<Tag> selectedTags = new ArrayList<>();
@@ -198,16 +326,6 @@ public class NewArticleController {
         }
         
         goToArticles();
-    }
-
-    @FXML
-    private void addCategoryFromInput() {
-        createCategoryFromInputIfNeeded();
-    }
-
-    @FXML
-    private void addTagsFromInput() {
-        createTagsFromInputIfNeeded();
     }
 
     private boolean createCategoryFromInputIfNeeded() {
@@ -284,14 +402,6 @@ public class NewArticleController {
         alert.setHeaderText(null);
         alert.setContentText(message);
         alert.showAndWait();
-    }
-
-    private boolean isNgoRevisionResubmission(Blog blog) {
-        if (blog == null) return false;
-        User currentUser = tn.esprit.util.SessionManager.getCurrentUser();
-        boolean isNgo = currentUser != null && "NGO".equalsIgnoreCase(currentUser.getRole());
-        boolean hasRevisionNote = blog.getAdminRevisionNote() != null && !blog.getAdminRevisionNote().trim().isEmpty();
-        return isNgo && hasRevisionNote;
     }
 
     @FXML

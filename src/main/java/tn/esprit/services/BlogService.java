@@ -10,12 +10,19 @@ import tn.esprit.util.SessionManager;
 import java.sql.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.time.Duration;
 import tn.esprit.blog.Tag;
 
 public class BlogService implements GlobalInterface<Blog> {
 
     Connection cnx = MyConnection.getInstance().getCnx();
+    
+    // In-memory cache to track views: key = "viewerId:articleId", value = lastViewTime
+    private static final Map<String, LocalDateTime> viewHistory = new HashMap<>();
+    private static final int VIEW_COOLDOWN_MINUTES = 15;
 
     @Override
     public void add(Blog blog) {
@@ -161,6 +168,27 @@ public class BlogService implements GlobalInterface<Blog> {
             System.out.println("Article updated successfully!");
         } catch (SQLException e) {
             e.printStackTrace();
+        }
+    }
+
+    public boolean incrementViews(int articleId, String viewerId) {
+        String cacheKey = viewerId + ":" + articleId;
+        LocalDateTime lastView = viewHistory.get(cacheKey);
+        LocalDateTime now = LocalDateTime.now();
+
+        if (lastView != null && Duration.between(lastView, now).toMinutes() < VIEW_COOLDOWN_MINUTES) {
+            return false; // Cooldown active
+        }
+
+        String req = "UPDATE article SET views = views + 1 WHERE id = ?";
+        try (PreparedStatement ps = cnx.prepareStatement(req)) {
+            ps.setInt(1, articleId);
+            ps.executeUpdate();
+            viewHistory.put(cacheKey, now);
+            return true;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
         }
     }
 

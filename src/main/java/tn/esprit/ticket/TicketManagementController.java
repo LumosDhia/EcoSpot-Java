@@ -1,7 +1,5 @@
 package tn.esprit.ticket;
 
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -15,13 +13,15 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
-import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import tn.esprit.services.TicketService;
 
 import java.io.IOException;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class TicketManagementController {
 
@@ -30,59 +30,91 @@ public class TicketManagementController {
     @FXML private HBox userLinks;
     @FXML private Button dashboardTopBtn;
 
+    // Pagination
+    @FXML private Button prevBtn;
+    @FXML private Button nextBtn;
+    @FXML private HBox pageButtonsBox;
+    @FXML private Label pageInfoLabel;
+
+    private static final int PAGE_SIZE = 6;
+
     private final TicketService ticketService = new TicketService();
     private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+    private List<Ticket> allTickets = new ArrayList<>();
+    private int currentPage = 0;
 
     @FXML
     public void initialize() {
-        System.out.println("Ticket Management Initialized - Loading Cards...");
         tn.esprit.util.NavigationHistory.track(ticketsFlowPane, "/ticket/TicketManagement.fxml");
-        
-        // Session Management
+
         if (tn.esprit.util.SessionManager.isLoggedIn()) {
-            authLinks.setVisible(false);
-            authLinks.setManaged(false);
-            userLinks.setVisible(true);
-            userLinks.setManaged(true);
-            
+            authLinks.setVisible(false); authLinks.setManaged(false);
+            userLinks.setVisible(true); userLinks.setManaged(true);
             tn.esprit.user.User user = tn.esprit.util.SessionManager.getCurrentUser();
-            if (user.getRole().equalsIgnoreCase("ADMIN")) {
-                dashboardTopBtn.setText("📊 Admin Dashboard");
-            } else if (user.getRole().equalsIgnoreCase("NGO")) {
-                dashboardTopBtn.setText("📊 NGO Dashboard");
-            } else {
-                dashboardTopBtn.setText("📊 My Dashboard");
-            }
+            if (user.getRole().equalsIgnoreCase("ADMIN")) dashboardTopBtn.setText("📊 Admin Dashboard");
+            else if (user.getRole().equalsIgnoreCase("NGO")) dashboardTopBtn.setText("📊 NGO Dashboard");
+            else dashboardTopBtn.setText("📊 My Dashboard");
         } else {
-            authLinks.setVisible(true);
-            authLinks.setManaged(true);
-            userLinks.setVisible(false);
-            userLinks.setManaged(false);
+            authLinks.setVisible(true); authLinks.setManaged(true);
+            userLinks.setVisible(false); userLinks.setManaged(false);
         }
 
         loadTicketData();
     }
 
     private void loadTicketData() {
-        try {
-            ticketsFlowPane.getChildren().clear();
-            
-            for (Ticket t : ticketService.getAll()) {
-                if (t.getStatus() == TicketStatus.PUBLISHED
-                        || t.getStatus() == TicketStatus.ASSIGNED
-                        || t.getStatus() == TicketStatus.IN_PROGRESS
-                        || t.getStatus() == TicketStatus.COMPLETED) {
-                    Node card = createTicketCard(t);
-                    ticketsFlowPane.getChildren().add(card);
-                }
-            }
-            
-            System.out.println("Loaded " + ticketsFlowPane.getChildren().size() + " active ticket cards.");
-        } catch (Exception e) {
-            System.err.println("Error fetching tickets: " + e.getMessage());
-            e.printStackTrace();
+        allTickets = ticketService.getAll().stream()
+                .filter(t -> t.getStatus() == TicketStatus.PUBLISHED
+                          || t.getStatus() == TicketStatus.ASSIGNED
+                          || t.getStatus() == TicketStatus.IN_PROGRESS
+                          || t.getStatus() == TicketStatus.COMPLETED)
+                .collect(Collectors.toList());
+        currentPage = 0;
+        displayCurrentPage();
+    }
+
+    private void displayCurrentPage() {
+        int totalPages = getTotalPages();
+        if (currentPage >= totalPages && totalPages > 0) currentPage = totalPages - 1;
+
+        int from = currentPage * PAGE_SIZE;
+        int to = Math.min(from + PAGE_SIZE, allTickets.size());
+
+        ticketsFlowPane.getChildren().clear();
+        for (Ticket t : allTickets.subList(from, to)) {
+            ticketsFlowPane.getChildren().add(createTicketCard(t));
+        }
+
+        updatePaginationControls(totalPages);
+    }
+
+    private void updatePaginationControls(int totalPages) {
+        if (prevBtn == null) return;
+        prevBtn.setDisable(currentPage == 0);
+        nextBtn.setDisable(currentPage >= totalPages - 1);
+
+        int shown = Math.min((currentPage + 1) * PAGE_SIZE, allTickets.size());
+        int from = allTickets.isEmpty() ? 0 : currentPage * PAGE_SIZE + 1;
+        pageInfoLabel.setText(allTickets.isEmpty()
+                ? "No tickets found"
+                : String.format("Showing %d–%d of %d", from, shown, allTickets.size()));
+
+        pageButtonsBox.getChildren().clear();
+        for (int i = 0; i < totalPages; i++) {
+            final int page = i;
+            Button btn = new Button(String.valueOf(i + 1));
+            btn.getStyleClass().add(i == currentPage ? "page-btn-active" : "page-btn");
+            btn.setOnAction(e -> { currentPage = page; displayCurrentPage(); });
+            pageButtonsBox.getChildren().add(btn);
         }
     }
+
+    private int getTotalPages() {
+        return (int) Math.ceil((double) allTickets.size() / PAGE_SIZE);
+    }
+
+    @FXML private void goToPrevPage() { if (currentPage > 0) { currentPage--; displayCurrentPage(); } }
+    @FXML private void goToNextPage() { if (currentPage < getTotalPages() - 1) { currentPage++; displayCurrentPage(); } }
 
     private Node createTicketCard(Ticket t) {
         VBox card = new VBox();
@@ -101,16 +133,10 @@ public class TicketManagementController {
         loc.getStyleClass().add("ticket-location");
         loc.setWrapText(true);
 
-        // Ticket Image Thumbnail
         ImageView cardImg = new ImageView();
-        cardImg.setFitWidth(340);
-        cardImg.setFitHeight(180);
-        cardImg.setPreserveRatio(true);
-        if (t.getImage() != null && !t.getImage().isEmpty()) {
-            loadImageRobustly(t.getImage(), cardImg);
-        } else {
-            cardImg.setManaged(false);
-        }
+        cardImg.setFitWidth(340); cardImg.setFitHeight(180); cardImg.setPreserveRatio(true);
+        if (t.getImage() != null && !t.getImage().isEmpty()) loadImageRobustly(t.getImage(), cardImg);
+        else cardImg.setManaged(false);
 
         Label desc = new Label(t.getDescription());
         desc.getStyleClass().add("ticket-description");
@@ -119,27 +145,24 @@ public class TicketManagementController {
         HBox buttons = new HBox(10);
         buttons.setAlignment(Pos.CENTER_LEFT);
         buttons.setPadding(new Insets(10, 0, 0, 0));
-        
+
         Button btnView = new Button("View");
         btnView.getStyleClass().add("ticket-btn-view");
         btnView.setOnAction(e -> {
             try {
                 FXMLLoader loader = new FXMLLoader(getClass().getResource("/ticket/TicketDetail.fxml"));
                 Parent root = loader.load();
-                TicketDetailController controller = loader.getController();
-                controller.setTicket(t);
-                
+                TicketDetailController ctrl = loader.getController();
+                ctrl.setTicket(t);
                 Stage stage = (Stage) ((Node) e.getSource()).getScene().getWindow();
                 stage.getScene().setRoot(root);
-            } catch (IOException ex) {
-                ex.printStackTrace();
-            }
+            } catch (IOException ex) { ex.printStackTrace(); }
         });
-        
+
         Button btnComplete = new Button("✔ I completed this");
         btnComplete.getStyleClass().add("ticket-btn-complete");
         btnComplete.setOnAction(e -> openCompletionForm(e, t));
-        
+
         buttons.getChildren().add(btnView);
         if (tn.esprit.util.SessionManager.isLoggedIn() &&
                 (t.getStatus() == TicketStatus.PUBLISHED || t.getStatus() == TicketStatus.ASSIGNED)) {
@@ -152,7 +175,6 @@ public class TicketManagementController {
 
         content.getChildren().addAll(title, loc, cardImg, desc, buttons);
 
-
         VBox footer = new VBox();
         footer.getStyleClass().add("ticket-footer");
         String dateStr = t.getCreatedAt() != null ? t.getCreatedAt().format(formatter) : "Unknown Date";
@@ -161,7 +183,6 @@ public class TicketManagementController {
         footer.getChildren().add(footerText);
 
         card.getChildren().addAll(content, footer);
-
         return card;
     }
 
@@ -169,13 +190,11 @@ public class TicketManagementController {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/ticket/CompleteTicket.fxml"));
             Parent root = loader.load();
-            CompleteTicketController controller = loader.getController();
-            controller.setTicket(t);
+            CompleteTicketController ctrl = loader.getController();
+            ctrl.setTicket(t);
             Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
             stage.getScene().setRoot(root);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        } catch (IOException e) { e.printStackTrace(); }
     }
 
     @FXML
@@ -183,106 +202,42 @@ public class TicketManagementController {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/user/Dashboard.fxml"));
             Parent root = loader.load();
-            tn.esprit.user.DashboardController controller = loader.getController();
-            if (controller != null) {
-                controller.setUser(tn.esprit.util.SessionManager.getCurrentUser());
-            }
+            tn.esprit.user.DashboardController ctrl = loader.getController();
+            if (ctrl != null) ctrl.setUser(tn.esprit.util.SessionManager.getCurrentUser());
             Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
             stage.getScene().setRoot(root);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        } catch (IOException e) { e.printStackTrace(); }
     }
 
-    @FXML
-    void handleLogout(ActionEvent event) {
+    @FXML void handleLogout(ActionEvent event) {
         tn.esprit.util.SessionManager.logout();
-        try {
-            Parent root = FXMLLoader.load(getClass().getResource("/home/Home.fxml"));
-            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-            stage.getScene().setRoot(root);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    @FXML
-    private void goToLogin(ActionEvent event) {
-        navigate(event, "/user/Login.fxml");
-    }
-
-    @FXML
-    private void goToRegister(ActionEvent event) {
-        navigate(event, "/user/Register.fxml");
-    }
-
-    @FXML
-    private void goToHome(javafx.scene.input.MouseEvent event) {
         navigate(event, "/home/Home.fxml");
     }
 
-    @FXML
-    private void goToHome(ActionEvent event) {
-        navigate(event, "/home/Home.fxml");
-    }
+    @FXML private void goToLogin(ActionEvent e) { navigate(e, "/user/Login.fxml"); }
+    @FXML private void goToRegister(ActionEvent e) { navigate(e, "/user/Register.fxml"); }
+    @FXML private void goToAchievements(ActionEvent e) { navigate(e, "/ticket/Achievements.fxml"); }
+    @FXML private void goToEvents(ActionEvent e) { navigate(e, "/event/EventManagement.fxml"); }
+    @FXML private void goToTickets(ActionEvent e) { navigate(e, "/ticket/TicketManagement.fxml"); }
+    @FXML private void goToBlog(ActionEvent e) { navigate(e, "/blog/BlogManagement.fxml"); }
+    @FXML private void goToHome(javafx.scene.input.MouseEvent e) { navigate(e, "/home/Home.fxml"); }
+    @FXML private void goToHome(ActionEvent e) { navigate(e, "/home/Home.fxml"); }
 
-    @FXML
-    private void goToAchievements(ActionEvent event) {
-        navigate(event, "/ticket/Achievements.fxml");
-    }
-
-    @FXML
-    private void goToEvents(ActionEvent event) {
-        navigate(event, "/event/EventManagement.fxml");
-    }
-
-    @FXML
-    private void goToTickets(ActionEvent event) {
-        navigate(event, "/ticket/TicketManagement.fxml");
-    }
-
-    @FXML
-    private void goToBlog(ActionEvent event) {
-        navigate(event, "/blog/BlogManagement.fxml");
-    }
-
-    private void loadImageRobustly(String rawPath, javafx.scene.image.ImageView view) {
+    private void loadImageRobustly(String rawPath, ImageView view) {
         try {
-            String imgPath = rawPath;
-            if (imgPath.startsWith("/uploads/")) {
-                imgPath = "http://127.0.0.1:8000" + imgPath;
-            }
+            String imgPath = rawPath.startsWith("/uploads/") ? "http://127.0.0.1:8000" + rawPath : rawPath;
             javafx.scene.image.Image img = new javafx.scene.image.Image(imgPath, true);
             view.setImage(img);
-            
-            img.errorProperty().addListener((obs, oldVal, newVal) -> {
-                if (newVal) {
+            img.errorProperty().addListener((obs, o, n) -> {
+                if (n) {
                     try {
-                        String fb = "http://localhost/ecospot-web/public" + rawPath;
-                        javafx.scene.image.Image fbImg = new javafx.scene.image.Image(fb, true);
-                        view.setImage(fbImg);
-                        fbImg.errorProperty().addListener((o, old, nw) -> {
-                            if (nw) { view.setManaged(false); view.setVisible(false); }
-                        });
+                        javafx.scene.image.Image fb = new javafx.scene.image.Image("http://localhost/ecospot-web/public" + rawPath, true);
+                        view.setImage(fb);
+                        fb.errorProperty().addListener((o2, old, nw) -> { if (nw) { view.setManaged(false); view.setVisible(false); } });
                     } catch (Exception ex) { view.setManaged(false); view.setVisible(false); }
                 }
             });
-        } catch (Exception e) {
-            view.setManaged(false);
-            view.setVisible(false);
-        }
-    }
-
-    private void navigate(javafx.scene.input.MouseEvent event, String fxmlPath) {
-
-
-        try {
-            Parent root = FXMLLoader.load(getClass().getResource(fxmlPath));
-            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-            stage.getScene().setRoot(root);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        } catch (Exception e) { view.setManaged(false); view.setVisible(false); }
     }
 
     private void navigate(ActionEvent event, String fxmlPath) {
@@ -290,8 +245,14 @@ public class TicketManagementController {
             Parent root = FXMLLoader.load(getClass().getResource(fxmlPath));
             Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
             stage.getScene().setRoot(root);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        } catch (IOException e) { e.printStackTrace(); }
+    }
+
+    private void navigate(javafx.scene.input.MouseEvent event, String fxmlPath) {
+        try {
+            Parent root = FXMLLoader.load(getClass().getResource(fxmlPath));
+            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+            stage.getScene().setRoot(root);
+        } catch (IOException e) { e.printStackTrace(); }
     }
 }

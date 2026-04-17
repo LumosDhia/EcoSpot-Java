@@ -11,6 +11,7 @@
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.FlowPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
@@ -78,19 +79,58 @@
                         <VBox alignment="CENTER" spacing="30.0">
                            <padding><Insets bottom="40.0" left="100.0" right="100.0" top="40.0" /></padding>
                            <children>
+                               <HBox alignment="CENTER_LEFT">
+                                   <children>
+                                       <Button onAction="#goToBlog" styleClass="btn-back" text="Back to Articles">
+                                           <graphic>
+                                               <SVGPath content="M20,11V13H8L13.5,18.5L12.08,19.92L4.16,12L12.08,4.08L13.5,5.5L8,11H20Z" scaleX="0.8" scaleY="0.8" styleClass="article-author" />
+                                           </graphic>
+                                       </Button>
+                                   </children>
+                               </HBox>
                                <ImageView fx:id="articleImg" fitHeight="400.0" fitWidth="700.0" pickOnBounds="true" preserveRatio="false" styleClass="detail-main-img" />
                                
                                <VBox spacing="15.0">
                                   <children>
-                                     <Label fx:id="categoryLabel" styleClass="category-tag" text="Category" />
+                                     <HBox alignment="CENTER_LEFT" spacing="10.0">
+                                        <children>
+                                           <Label fx:id="categoryLabel" styleClass="category-tag" text="Category" />
+                                           <FlowPane fx:id="tagsFlowPane" hgap="5.0" vgap="5.0" />
+                                        </children>
+                                     </HBox>
                                      <Label fx:id="titleLabel" styleClass="detail-article-title" text="Article Title" wrapText="true" />
                                      <HBox alignment="CENTER_LEFT" spacing="20.0" styleClass="detail-meta-row">
                                        <children>
                                           <Label fx:id="dateLabel" text="🕒 Date" />
-                                          <Label fx:id="readTimeLabel" text="📖 1 min read" />
+                                          <Label fx:id="viewsLabel" text="👁 0 views" />
+                                           <Label fx:id="readTimeLabel" text="📖 1 min read" />
                                           <Label fx:id="authorLabel" text="👤 Writer: Admin" />
+                                          <Region HBox.hgrow="ALWAYS" />
+                                          <HBox alignment="CENTER" spacing="10.0" styleClass="reaction-bar">
+                                             <children>
+                                                <Button fx:id="likeBtn" onAction="#handleLike" styleClass="reaction-btn like-btn" text="👍 0" />
+                                                <Button fx:id="dislikeBtn" onAction="#handleDislike" styleClass="reaction-btn dislike-btn" text="👎 0" />
+                                             </children>
+                                          </HBox>
                                        </children>
                                     </HBox>
+                                     <!-- ===== AI VOICE READER PANEL ===== -->
+                                     <HBox fx:id="aiReaderPanel" alignment="CENTER_LEFT" spacing="15.0" styleClass="ai-reader-panel">
+                                        <children>
+                                           <Label style="-fx-font-size: 26px;" text="🤖" />
+                                           <VBox spacing="2.0">
+                                              <children>
+                                                 <Label styleClass="ai-title-label" text="EcoSpot AI Assistant" />
+                                                 <Label fx:id="aiStatusLabel" styleClass="ai-status-label" text="Ready to read aloud" />
+                                              </children>
+                                           </VBox>
+                                           <Region HBox.hgrow="ALWAYS" />
+                                           <Button fx:id="aiPlayBtn" onAction="#handleTtsPlay" styleClass="btn btn-primary" text="▶ Play" />
+                                           <Button fx:id="aiPauseBtn" disable="true" onAction="#handleTtsPause" styleClass="btn-outline" text="⏸ Pause" />
+                                           <Button fx:id="aiStopBtn" onAction="#handleTtsStop" styleClass="btn btn-danger" text="⏹ Stop" />
+                                        </children>
+                                     </HBox>
+
                                      <WebView fx:id="contentWebView" prefHeight="450.0" minHeight="300.0" />
                                      <Separator />
                                   </children>
@@ -137,34 +177,18 @@
                            </children>
                         </VBox>
                         
-                        <!-- ===== FOOTER ===== -->
-                        <VBox spacing="20.0" styleClass="eco-footer">
-                           <padding><Insets bottom="40.0" left="60.0" right="60.0" top="40.0" /></padding>
-                           <children>
-                              <HBox spacing="50.0">
-                                 <children>
-                                    <VBox spacing="10.0" HBox.hgrow="ALWAYS">
-                                       <children>
-                                          <Label styleClass="footer-brand" text="EcoSpot" />
-                                          <Label styleClass="footer-desc" text="Environmental news, events, and community action for a greener future." wrapText="true" />
-                                       </children>
-                                    </VBox>
-                                    <VBox spacing="10.0">
-                                       <children>
-                                          <Label styleClass="footer-heading" text="QUICK LINKS" />
-                                          <Label onMouseClicked="#goToHome" styleClass="footer-link" text="Home" />
-                                          <Label onMouseClicked="#goToBlog" styleClass="footer-link" text="Blog" />
-
-                                       </children>
-                                    </VBox>
-                                 </children>
-                              </HBox>
-                              <Label alignment="CENTER" maxWidth="Infinity" styleClass="footer-copyright" text="© 2026 EcoSpot. All rights reserved." />
-                           </children>
-                        </VBox>
+                        <!-- ===== MINIMALIST FOOTER ===== -->
+                        <HBox alignment="CENTER_LEFT" spacing="10.0" styleClass="eco-footer">
+                            <padding><Insets bottom="20.0" left="20.0" right="20.0" top="20.0" /></padding>
+                            <children>
+                                <Label styleClass="footer-brand-mini" text="🌿 EcoSpot" />
+                                <Label styleClass="footer-copyright" text="— © 2026. All rights reserved." />
+                            </children>
+                        </HBox>
                     </children>
                 </VBox>
             </content>
         </ScrollPane>
     </center>
 </BorderPane>
+

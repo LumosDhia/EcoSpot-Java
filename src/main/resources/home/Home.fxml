@@ -60,7 +60,7 @@
     </top>
 
     <center>
-        <ScrollPane fitToWidth="true" style="-fx-background-color: #f0f7f4; -fx-background: #f0f7f4;">
+        <ScrollPane fitToWidth="true" focusTraversable="false" pannable="true" style="-fx-background-color: #f0f7f4; -fx-background: #f0f7f4;">
             <content>
                 <VBox spacing="0.0">
                     <!-- ===== HERO SECTION ===== -->
@@ -137,6 +137,13 @@
                             </HBox>
                         </children>
                     </VBox>
+                    <!-- ===== MINIMALIST FOOTER ===== -->
+                    <HBox alignment="CENTER_LEFT" spacing="10.0" styleClass="eco-footer">
+                        <children>
+                            <Label styleClass="footer-brand-mini" text="🌿 EcoSpot" />
+                            <Label styleClass="footer-copyright" text="— © 2026. All rights reserved." />
+                        </children>
+                    </HBox>
                 </VBox>
             </content>
         </ScrollPane>
