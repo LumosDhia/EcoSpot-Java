@@ -83,10 +83,11 @@
                 <Region prefHeight="10.0" />
 
                 <HBox spacing="15.0">
-                    <Button onAction="#handleCreateUser" styleClass="btn,btn-secondary" text="Create user" />
+                    <Button onAction="#handleCreateUser" styleClass="btn btn-secondary" text="Create user" />
                     <Button onAction="#handleCancel" styleClass="btn-outline" text="Cancel" />
                 </HBox>
             </children>
         </VBox>
     </children>
 </VBox>
+

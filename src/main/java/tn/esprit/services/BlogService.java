@@ -164,6 +164,16 @@ public class BlogService implements GlobalInterface<Blog> {
         }
     }
 
+    public void incrementViews(int articleId) {
+        String req = "UPDATE article SET views = views + 1 WHERE id = ?";
+        try (PreparedStatement ps = cnx.prepareStatement(req)) {
+            ps.setInt(1, articleId);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
     @Override
     public List<Blog> getAll() {
         return search(""); // Default search all

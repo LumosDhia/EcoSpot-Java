@@ -67,7 +67,7 @@
                     <Region prefHeight="5.0" />
 
                     <HBox spacing="15.0">
-                        <Button onAction="#handleSave" styleClass="btn,btn-secondary" text="Save" />
+                        <Button onAction="#handleSave" styleClass="btn btn-secondary" text="Save" />
                         <Button onAction="#handleCancel" styleClass="btn-outline" text="Cancel" />
                     </HBox>
                 </children>
@@ -75,3 +75,4 @@
         </VBox>
     </children>
 </VBox>
+

@@ -105,7 +105,7 @@
                                                 <ChoiceBox fx:id="publicationChoice" maxWidth="Infinity" styleClass="sort-choice-box" />
                                             </children>
                                         </VBox>
-                                        <Button onAction="#saveArticle" maxWidth="Infinity" styleClass="btn, btn-primary" text="💾 Save Article" />
+                                        <Button onAction="#saveArticle" maxWidth="Infinity" styleClass="btn  btn-primary" text="💾 Save Article" />
                                         <Button onAction="#goBackToArticles" maxWidth="Infinity" styleClass="btn-outline" text="← Back to My articles" />
                                     </children>
                                 </VBox>
@@ -174,3 +174,4 @@
         </ScrollPane>
     </center>
 </BorderPane>
+

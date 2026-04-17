@@ -32,6 +32,7 @@ public class BlogDetailController {
     @FXML private Label dateLabel;
     @FXML private Label readTimeLabel;
     @FXML private Label authorLabel;
+    @FXML private Label viewsLabel;
     @FXML private WebView contentWebView;
 
     // Comments
@@ -53,8 +54,13 @@ public class BlogDetailController {
 
     private static final int WORDS_PER_MINUTE = 150;
 
+    @FXML private Button likeBtn;
+    @FXML private Button dislikeBtn;
+
     private Blog currentArticle;
     private final tn.esprit.services.CommentService commentService = new tn.esprit.services.CommentService();
+    private final tn.esprit.services.ReactionService reactionService = new tn.esprit.services.ReactionService();
+    private final tn.esprit.services.BlogService blogService = new tn.esprit.services.BlogService();
 
     // TTS state
     private Process ttsProcess;
@@ -82,6 +88,36 @@ public class BlogDetailController {
         }
     }
 
+    // ─── Reactions ──────────────────────────────────────────────────────────────
+
+    @FXML
+    private void handleLike() {
+        if (!tn.esprit.util.SessionManager.isLoggedIn()) { showError("You must be logged in to react."); return; }
+        int userId = tn.esprit.util.SessionManager.getCurrentUser().getId();
+        reactionService.toggleReaction(currentArticle.getId(), userId, "like");
+        refreshReactions(userId);
+    }
+
+    @FXML
+    private void handleDislike() {
+        if (!tn.esprit.util.SessionManager.isLoggedIn()) { showError("You must be logged in to react."); return; }
+        int userId = tn.esprit.util.SessionManager.getCurrentUser().getId();
+        reactionService.toggleReaction(currentArticle.getId(), userId, "dislike");
+        refreshReactions(userId);
+    }
+
+    private void refreshReactions(int userId) {
+        int likes = reactionService.getLikes(currentArticle.getId());
+        int dislikes = reactionService.getDislikes(currentArticle.getId());
+        String userReaction = reactionService.getUserReaction(currentArticle.getId(), userId);
+        likeBtn.setText("👍 " + likes);
+        dislikeBtn.setText("👎 " + dislikes);
+        likeBtn.getStyleClass().removeAll("reaction-active");
+        dislikeBtn.getStyleClass().removeAll("reaction-active");
+        if ("like".equals(userReaction)) likeBtn.getStyleClass().add("reaction-active");
+        else if ("dislike".equals(userReaction)) dislikeBtn.getStyleClass().add("reaction-active");
+    }
+
     public void setArticle(Blog blog) {
         this.currentArticle = blog;
         heroTitle.setText(blog.getTitle());
@@ -101,8 +137,18 @@ public class BlogDetailController {
         categoryLabel.setText(blog.getCategory() != null ? blog.getCategory().getName() : "General");
         readTimeLabel.setText("📖 " + blog.getReadingTime() + " min read");
         authorLabel.setText("👤 Writer: " + (blog.getAuthor() != null ? blog.getAuthor() : "Admin User"));
+        
+        // Views functionality
+        blogService.incrementViews(blog.getId()); 
+        int totalViews = blog.getViews() + 1;
+        viewsLabel.setText("👁 " + totalViews + " views");
+
         contentWebView.getEngine().loadContent(blog.getContent());
         loadComments();
+
+        int userId = tn.esprit.util.SessionManager.isLoggedIn()
+                ? tn.esprit.util.SessionManager.getCurrentUser().getId() : -1;
+        refreshReactions(userId);
     }
 
     // ─── AI Voice Reader ────────────────────────────────────────────────────────

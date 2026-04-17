@@ -1207,3 +1207,42 @@
 .scroll-pane > .viewport > .container {
     -fx-background-color: transparent;
 }
+
+/* ================================
+   REACTION BAR (Like / Dislike)
+================================ */
+.reaction-bar {
+    -fx-background-color: #f0f7f4;
+    -fx-background-radius: 20;
+    -fx-padding: 4 10;
+}
+
+.reaction-btn {
+    -fx-background-color: transparent;
+    -fx-border-color: #ccc;
+    -fx-border-radius: 20;
+    -fx-background-radius: 20;
+    -fx-padding: 6 14;
+    -fx-font-size: 13px;
+    -fx-cursor: hand;
+    -fx-text-fill: #444;
+}
+
+.reaction-btn:hover {
+    -fx-background-color: #e8f5e9;
+    -fx-border-color: #2d6a4f;
+}
+
+.like-btn.reaction-active {
+    -fx-background-color: #d8f3dc;
+    -fx-border-color: #2d6a4f;
+    -fx-text-fill: #1b4332;
+    -fx-font-weight: bold;
+}
+
+.dislike-btn.reaction-active {
+    -fx-background-color: #fde8e8;
+    -fx-border-color: #c0392b;
+    -fx-text-fill: #922b21;
+    -fx-font-weight: bold;
+}
