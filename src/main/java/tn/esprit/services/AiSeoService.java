@@ -14,7 +14,7 @@ import java.util.concurrent.CompletableFuture;
 public class AiSeoService {
 
     private static final String API_URL = "https://openrouter.ai/api/v1/chat/completions";
-    private static final String API_KEY = "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";
+    private static final String API_KEY = "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";
 
     public static class SeoResult {
         public String title;
