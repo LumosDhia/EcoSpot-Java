@@ -12,6 +12,7 @@
 <?import javafx.scene.control.ToggleGroup?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.FlowPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
@@ -110,7 +111,7 @@
                                     </children>
                                 </VBox>
 
-                                <!-- Hero Image (No Unsplash) -->
+                                <!-- Hero Image (Unsplash & Upload) -->
                                 <VBox spacing="15.0" style="-fx-background-color: white; -fx-padding: 20; -fx-background-radius: 8; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.05), 10, 0, 0, 2);">
                                     <children>
                                         <HBox alignment="CENTER_LEFT" spacing="10.0">
@@ -118,6 +119,30 @@
                                                 <Label style="-fx-font-size: 16; -fx-font-weight: bold; -fx-text-fill: #f1933e;" text="🖼 Hero Image" />
                                             </children>
                                         </HBox>
+                                        
+                                        <!-- Unsplash Search -->
+                                        <VBox spacing="10.0" style="-fx-background-color: #f8f9fa; -fx-padding: 15; -fx-background-radius: 8;">
+                                            <children>
+                                                <Label style="-fx-font-size: 12; -fx-font-weight: bold; -fx-text-fill: #555;" text="Search Unsplash" />
+                                                <HBox spacing="5.0">
+                                                    <children>
+                                                        <TextField fx:id="unsplashSearchField" promptText="Nature, Forest..." HBox.hgrow="ALWAYS" />
+                                                        <Button onAction="#searchUnsplash" style="-fx-background-color: #f1933e; -fx-text-fill: white;" text="🔍" />
+                                                    </children>
+                                                </HBox>
+                                                <ScrollPane fitToHeight="true" minHeight="120.0" style="-fx-background-color: transparent; -fx-background: transparent;">
+                                                    <content>
+                                                        <HBox fx:id="unsplashResults" spacing="10.0">
+                                                            <!-- Unsplash results will appear here -->
+                                                        </HBox>
+                                                    </content>
+                                                </ScrollPane>
+                                            </children>
+                                        </VBox>
+
+                                        <Separator />
+
+                                        <!-- Local Upload -->
                                         <VBox spacing="10.0">
                                             <children>
                                                 <Label style="-fx-font-size: 13; -fx-font-weight: bold; -fx-text-fill: #555;" text="Thumbnail / hero image (upload)" />
@@ -127,8 +152,8 @@
                                                         <Label fx:id="fileNameLabel" text="No file chosen" style="-fx-text-fill: #888;" />
                                                     </children>
                                                 </HBox>
-                                                <ImageView fx:id="imagePreview" fitHeight="120.0" fitWidth="260.0" pickOnBounds="true" preserveRatio="true" style="-fx-border-color: #eee; -fx-border-width: 1;" />
-                                                <Label style="-fx-font-size: 11; -fx-text-fill: #888;" text="Click to upload image." />
+                                                <ImageView fx:id="imagePreview" fitHeight="150.0" fitWidth="260.0" pickOnBounds="true" preserveRatio="true" style="-fx-border-color: #eee; -fx-border-width: 1;" />
+                                                <Label style="-fx-font-size: 11; -fx-text-fill: #888;" text="Click to upload or select from Unsplash." />
                                             </children>
                                         </VBox>
                                     </children>

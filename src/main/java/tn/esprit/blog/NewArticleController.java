@@ -6,12 +6,14 @@ import javafx.scene.Parent;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import tn.esprit.services.BlogService;
 import tn.esprit.services.CategoryService;
 import tn.esprit.services.TagService;
+import tn.esprit.services.UnsplashService;
 
 import java.io.File;
 import java.io.IOException;
@@ -31,6 +33,8 @@ public class NewArticleController {
     @FXML private TextField newTagField;
     @FXML private VBox revisionAlertBox;
     @FXML private Label revisionNoteLabel;
+    @FXML private TextField unsplashSearchField;
+    @FXML private HBox unsplashResults;
 
     private BlogService blogService = new BlogService();
     private CategoryService categoryService = new CategoryService();
@@ -38,6 +42,7 @@ public class NewArticleController {
     private ToggleGroup categoryGroup = new ToggleGroup();
     private Blog editArticle = null;
     private TagService tagService = new TagService();
+    private UnsplashService unsplashService = new UnsplashService();
 
     @FXML
     public void initialize() {
@@ -135,6 +140,47 @@ public class NewArticleController {
             selectedImagePath = selectedFile.toURI().toString();
             imagePreview.setImage(new Image(selectedImagePath));
         }
+    }
+
+    @FXML
+    private void searchUnsplash() {
+        String query = unsplashSearchField.getText();
+        if (query == null || query.trim().isEmpty()) return;
+
+        unsplashResults.getChildren().clear();
+        ProgressIndicator progress = new ProgressIndicator();
+        progress.setPrefSize(30, 30);
+        unsplashResults.getChildren().add(progress);
+
+        // Run search in background to keep UI responsive
+        new Thread(() -> {
+            List<String> urls = unsplashService.searchPhotos(query);
+            javafx.application.Platform.runLater(() -> {
+                unsplashResults.getChildren().clear();
+                if (urls.isEmpty()) {
+                    unsplashResults.getChildren().add(new Label("No results found."));
+                    return;
+                }
+                for (String url : urls) {
+                    ImageView thumb = new ImageView(new Image(url, 100, 100, true, true));
+                    thumb.setCursor(javafx.scene.Cursor.HAND);
+                    thumb.setStyle("-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.2), 5, 0, 0, 0); -fx-border-color: #eee; -fx-border-width: 2;");
+                    
+                    thumb.setOnMouseClicked(e -> {
+                        selectedImagePath = url;
+                        imagePreview.setImage(new Image(url, true));
+                        fileNameLabel.setText("Selected from Unsplash");
+                        
+                        // Highlight selection
+                        unsplashResults.getChildren().forEach(n -> n.setOpacity(0.5));
+                        thumb.setOpacity(1.0);
+                        thumb.setStyle("-fx-border-color: #f1933e; -fx-border-width: 3; -fx-effect: dropshadow(three-pass-box, rgba(241,147,62,0.4), 10, 0, 0, 0);");
+                    });
+                    
+                    unsplashResults.getChildren().add(thumb);
+                }
+            });
+        }).start();
     }
 
     @FXML
