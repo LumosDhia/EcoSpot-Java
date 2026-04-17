@@ -17,7 +17,7 @@
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.shape.Circle?>
-<?import javafx.scene.shape.Separator?>
+<?import javafx.scene.control.Separator?>
 <?import javafx.scene.shape.SVGPath?>
 <?import javafx.scene.web.HTMLEditor?>
 
