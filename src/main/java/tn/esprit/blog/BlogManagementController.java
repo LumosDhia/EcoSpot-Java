@@ -48,6 +48,7 @@ public class BlogManagementController {
 
     public static Category selectedCategory = null;
     public static Tag selectedTag = null;
+    public static String selectedAuthor = null;
 
     @FXML
     public void initialize() {
@@ -108,6 +109,9 @@ public class BlogManagementController {
                     if (selectedTag != null) {
                         return matchesQuery && b.getTags() != null && b.getTags().stream().anyMatch(t -> t.getId() == selectedTag.getId());
                     }
+                    if (selectedAuthor != null) {
+                        return matchesQuery && b.getAuthor() != null && b.getAuthor().equals(selectedAuthor);
+                    }
                     return matchesQuery;
                 })
                 .collect(Collectors.toList());
@@ -126,7 +130,7 @@ public class BlogManagementController {
     }
 
     private void updateActiveFiltersUI() {
-        if (selectedCategory == null && selectedTag == null) {
+        if (selectedCategory == null && selectedTag == null && selectedAuthor == null) {
             activeFiltersBox.setVisible(false);
             activeFiltersBox.setManaged(false);
             return;
@@ -145,6 +149,12 @@ public class BlogManagementController {
         if (selectedTag != null) {
             addFilterPill("#" + selectedTag.getName(), () -> {
                 selectedTag = null;
+                filterAndDisplay();
+            });
+        }
+        if (selectedAuthor != null) {
+            addFilterPill("Writer: " + selectedAuthor, () -> {
+                selectedAuthor = null;
                 filterAndDisplay();
             });
         }
@@ -170,6 +180,7 @@ public class BlogManagementController {
     private void clearFilters() {
         selectedCategory = null;
         selectedTag = null;
+        selectedAuthor = null;
         filterAndDisplay();
     }
 
@@ -284,6 +295,7 @@ public class BlogManagementController {
     @FXML private void goToBlog(javafx.event.ActionEvent e) { 
         selectedCategory = null;
         selectedTag = null;
+        selectedAuthor = null;
         navigate(e, "/blog/BlogManagement.fxml"); 
     }
 

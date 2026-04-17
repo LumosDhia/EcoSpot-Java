@@ -53,6 +53,14 @@ public class BlogCardController {
         titleLabel.setText(blog.getTitle());
         readTimeLabel.setText("📖 " + blog.getReadingTime() + "m");
         authorLabel.setText("👤 " + (blog.getAuthor() != null ? blog.getAuthor() : "Anonymous"));
+        authorLabel.setStyle("-fx-cursor: hand;");
+        authorLabel.setOnMouseClicked(e -> {
+            BlogManagementController.selectedCategory = null;
+            BlogManagementController.selectedTag = null;
+            BlogManagementController.selectedAuthor = blog.getAuthor();
+            refreshBlogList();
+            e.consume();
+        });
         
         String content = blog.getContent();
         if (content != null) {

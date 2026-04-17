@@ -145,6 +145,13 @@ public class BlogDetailController {
         });
         readTimeLabel.setText("📖 " + blog.getReadingTime() + " min read");
         authorLabel.setText("👤 Writer: " + (blog.getAuthor() != null ? blog.getAuthor() : "Admin User"));
+        authorLabel.setStyle("-fx-cursor: hand;");
+        authorLabel.setOnMouseClicked(e -> {
+            BlogManagementController.selectedCategory = null;
+            BlogManagementController.selectedTag = null;
+            BlogManagementController.selectedAuthor = blog.getAuthor();
+            goToBlog();
+        });
         
         // Views functionality
         String viewerId = tn.esprit.util.SessionManager.isLoggedIn() 
