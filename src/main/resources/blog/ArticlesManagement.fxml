@@ -54,6 +54,16 @@
                 <VBox spacing="25.0">
                     <padding><Insets bottom="40.0" left="40.0" right="40.0" top="40.0" /></padding>
                     <children>
+                        <!-- BACK BUTTON -->
+                        <HBox alignment="CENTER_LEFT">
+                            <children>
+                                <Button onAction="#goToDashboard" styleClass="btn-back" text="Back to Dashboard">
+                                    <graphic>
+                                        <SVGPath content="M20,11V13H8L13.5,18.5L12.08,19.92L4.16,12L12.08,4.08L13.5,5.5L8,11H20Z" scaleX="0.8" scaleY="0.8" styleClass="article-author" />
+                                    </graphic>
+                                </Button>
+                            </children>
+                        </HBox>
                         
                         <!-- Header matching the screenshot Admin > Blog articles ... -->
                         <HBox alignment="CENTER_LEFT" style="-fx-background-color: white; -fx-padding: 15 20; -fx-background-radius: 8; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.05), 8, 0, 0, 2);">

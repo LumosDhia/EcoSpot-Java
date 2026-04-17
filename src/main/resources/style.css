@@ -250,6 +250,28 @@
     -fx-fill: #2d6a4f;
 }
 
+.btn-back {
+    -fx-background-color: #f1f5f9;
+    -fx-text-fill: #475569;
+    -fx-font-weight: bold;
+    -fx-background-radius: 20;
+    -fx-padding: 8 16;
+    -fx-font-size: 13px;
+    -fx-cursor: hand;
+    -fx-border-color: #e2e8f0;
+    -fx-border-radius: 20;
+    -fx-border-width: 1;
+}
+
+.btn-back:hover {
+    -fx-background-color: #e2e8f0;
+    -fx-text-fill: #1e293b;
+}
+
+.btn-back:pressed {
+    -fx-background-color: #cbd5e1;
+}
+
 /* ================================
    BLOG SPECIFIC STYLES
    ================================ */
