@@ -14,7 +14,6 @@
 <BorderPane prefHeight="800.0" prefWidth="1000.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="tn.esprit.ticket.TicketDetailController">
     <stylesheets>
         <URL value="@../style.css" />
-        <URL value="@../ticket-style.css" />
     </stylesheets>
 
     <top>
