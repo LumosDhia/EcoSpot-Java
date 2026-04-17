@@ -37,7 +37,7 @@ public class BlogManagementController {
     @FXML private HBox pageButtonsBox;
     @FXML private Label pageInfoLabel;
 
-    private static final int PAGE_SIZE = 6;
+    private static final int PAGE_SIZE = 8;
 
     private final BlogService blogService = new BlogService();
     private List<Blog> allBlogs = new ArrayList<>();

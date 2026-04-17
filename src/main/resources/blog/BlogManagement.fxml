@@ -88,7 +88,7 @@
 
                 <ScrollPane fitToWidth="true" style="-fx-background-color: transparent; -fx-background: transparent; -fx-border-color: transparent;" VBox.vgrow="ALWAYS">
                     <content>
-                        <FlowPane fx:id="articlesGrid" hgap="25.0" prefWrapLength="920.0" vgap="25.0">
+                        <FlowPane fx:id="articlesGrid" alignment="CENTER" hgap="20.0" vgap="20.0">
                             <padding><Insets bottom="20.0" top="10.0" /></padding>
                         </FlowPane>
                     </content>
