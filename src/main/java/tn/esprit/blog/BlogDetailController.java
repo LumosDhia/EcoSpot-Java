@@ -1,19 +1,24 @@
 package tn.esprit.blog;
 
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
-import javafx.scene.Scene;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.control.TextField;
-import javafx.scene.text.Text;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import javafx.scene.web.WebView;
 import javafx.stage.Stage;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
 import java.util.List;
 
 public class BlogDetailController {
@@ -27,8 +32,8 @@ public class BlogDetailController {
     @FXML private Label dateLabel;
     @FXML private Label readTimeLabel;
     @FXML private Label authorLabel;
-    @FXML private javafx.scene.web.WebView contentWebView;
-    
+    @FXML private WebView contentWebView;
+
     // Comments
     @FXML private VBox commentsContainer;
     @FXML private Label commentsCountLabel;
@@ -39,8 +44,23 @@ public class BlogDetailController {
     @FXML private VBox commentInputSection;
     @FXML private VBox guestPromptSection;
 
+    // AI Voice Reader
+    @FXML private HBox aiReaderPanel;
+    @FXML private Label aiStatusLabel;
+    @FXML private Button aiPlayBtn;
+    @FXML private Button aiPauseBtn;
+    @FXML private Button aiStopBtn;
+
+    private static final int WORDS_PER_MINUTE = 150;
+
     private Blog currentArticle;
-    private tn.esprit.services.CommentService commentService = new tn.esprit.services.CommentService();
+    private final tn.esprit.services.CommentService commentService = new tn.esprit.services.CommentService();
+
+    // TTS state
+    private Process ttsProcess;
+    private volatile boolean isPlaying = false;
+    private long playStartTime;
+    private String remainingText;
 
     @FXML
     public void initialize() {
@@ -49,12 +69,10 @@ public class BlogDetailController {
             commentInputSection.setManaged(true);
             guestPromptSection.setVisible(false);
             guestPromptSection.setManaged(false);
-            
-            // Pre-fill author name
             tn.esprit.user.User user = tn.esprit.util.SessionManager.getCurrentUser();
             if (user != null) {
                 commentAuthorField.setText(user.getUsername());
-                commentAuthorField.setEditable(false); // They must use their account name
+                commentAuthorField.setEditable(false);
             }
         } else {
             commentInputSection.setVisible(false);
@@ -69,31 +87,153 @@ public class BlogDetailController {
         heroTitle.setText(blog.getTitle());
         breadcrumbTitle.setText(blog.getTitle());
         titleLabel.setText(blog.getTitle());
-        
+
         if (blog.getPublishedAt() != null) {
             String dateFormatted = blog.getPublishedAt().format(DateTimeFormatter.ofPattern("dd MMMM yyyy"));
             heroDate.setText("Published on " + dateFormatted);
             dateLabel.setText("🕒 " + blog.getPublishedAt().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
         }
-        
+
         if (blog.getImage() != null && !blog.getImage().isEmpty()) {
-            try {
-                articleImg.setImage(new Image(blog.getImage(), true));
-            } catch (Exception e) {}
+            try { articleImg.setImage(new Image(blog.getImage(), true)); } catch (Exception ignored) {}
         }
-        
+
         categoryLabel.setText(blog.getCategory() != null ? blog.getCategory().getName() : "General");
         readTimeLabel.setText("📖 " + blog.getReadingTime() + " min read");
         authorLabel.setText("👤 Writer: " + (blog.getAuthor() != null ? blog.getAuthor() : "Admin User"));
-        
         contentWebView.getEngine().loadContent(blog.getContent());
-        
         loadComments();
     }
 
+    // ─── AI Voice Reader ────────────────────────────────────────────────────────
+
+    @FXML
+    private void handleTtsPlay() {
+        if (isPlaying) return;
+
+        if (remainingText == null) {
+            remainingText = extractPlainText();
+        }
+
+        if (remainingText == null || remainingText.isBlank()) {
+            aiStatusLabel.setText("No content to read");
+            return;
+        }
+
+        startSpeaking(remainingText);
+    }
+
+    @FXML
+    private void handleTtsPause() {
+        if (!isPlaying) return;
+
+        // Estimate how many words were spoken based on elapsed time
+        long elapsedMs = System.currentTimeMillis() - playStartTime;
+        int wordsSpoken = (int) (elapsedMs / 1000.0 / 60.0 * WORDS_PER_MINUTE);
+        String[] words = remainingText.split("\\s+");
+        remainingText = wordsSpoken < words.length
+                ? String.join(" ", Arrays.copyOfRange(words, wordsSpoken, words.length))
+                : null;
+
+        killProcess();
+        isPlaying = false;
+        aiReaderPanel.getStyleClass().remove("ai-reading");
+        aiPlayBtn.setDisable(false);
+        aiPauseBtn.setDisable(true);
+        aiStatusLabel.setText("⏸ Paused");
+    }
+
+    @FXML
+    private void handleTtsStop() {
+        killProcess();
+        isPlaying = false;
+        remainingText = null;
+        aiReaderPanel.getStyleClass().remove("ai-reading");
+        aiPlayBtn.setDisable(false);
+        aiPauseBtn.setDisable(true);
+        aiStatusLabel.setText("Ready to read aloud");
+    }
+
+    private void startSpeaking(String text) {
+        killProcess();
+        try {
+            java.io.File tmp = java.io.File.createTempFile("ecospot_tts_", ".txt");
+            tmp.deleteOnExit();
+            Files.writeString(tmp.toPath(), text, StandardCharsets.UTF_8);
+
+            String path = tmp.getAbsolutePath().replace("\\", "\\\\");
+            String ps = String.format(
+                "Add-Type -AssemblyName System.Speech; " +
+                "$s = New-Object System.Speech.Synthesis.SpeechSynthesizer; " +
+                "$s.Rate = 1; " +
+                "$s.Speak([System.IO.File]::ReadAllText('%s', [System.Text.Encoding]::UTF8))",
+                path
+            );
+
+            ttsProcess = new ProcessBuilder("powershell", "-NonInteractive", "-Command", ps)
+                    .redirectErrorStream(true)
+                    .start();
+
+            isPlaying = true;
+            playStartTime = System.currentTimeMillis();
+
+            if (!aiReaderPanel.getStyleClass().contains("ai-reading"))
+                aiReaderPanel.getStyleClass().add("ai-reading");
+            aiPlayBtn.setDisable(true);
+            aiPauseBtn.setDisable(false);
+            aiStatusLabel.setText("🔊 Reading aloud...");
+
+            Thread watcher = new Thread(() -> {
+                try {
+                    ttsProcess.waitFor();
+                } catch (InterruptedException ex) {
+                    Thread.currentThread().interrupt();
+                }
+                if (isPlaying) {
+                    isPlaying = false;
+                    remainingText = null;
+                    Platform.runLater(() -> {
+                        aiReaderPanel.getStyleClass().remove("ai-reading");
+                        aiPlayBtn.setDisable(false);
+                        aiPauseBtn.setDisable(true);
+                        aiStatusLabel.setText("✅ Finished");
+                    });
+                }
+            });
+            watcher.setDaemon(true);
+            watcher.start();
+
+        } catch (Exception e) {
+            aiStatusLabel.setText("TTS error: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    private String extractPlainText() {
+        // Try to get plain text from the WebView first (strips HTML naturally)
+        try {
+            Object result = contentWebView.getEngine().executeScript(
+                "document.body ? document.body.innerText : ''"
+            );
+            if (result != null && !result.toString().isBlank()) return result.toString();
+        } catch (Exception ignored) {}
+
+        // Fallback: strip HTML tags manually
+        return currentArticle != null
+                ? currentArticle.getContent().replaceAll("<[^>]+>", " ").replaceAll("\\s+", " ").trim()
+                : "";
+    }
+
+    private void killProcess() {
+        if (ttsProcess != null && ttsProcess.isAlive()) {
+            ttsProcess.destroyForcibly();
+        }
+    }
+
+    // ─── Comments ───────────────────────────────────────────────────────────────
+
     private void loadComments() {
         if (currentArticle == null) return;
-        
         commentsContainer.getChildren().clear();
         List<Comment> comments = commentService.getByArticleId(currentArticle.getId());
         System.out.println("Loading comments for article ID: " + currentArticle.getId() + ". Found: " + comments.size());
@@ -107,7 +247,6 @@ public class BlogDetailController {
                 controller.setData(comment);
                 commentsContainer.getChildren().add(card);
             } catch (IOException e) {
-                System.err.println("Error loading comment card for " + comment.getAuthorName());
                 e.printStackTrace();
             }
         }
@@ -118,147 +257,51 @@ public class BlogDetailController {
         commentErrorLabel.setVisible(false);
         commentSuccessLabel.setVisible(false);
 
-        if (currentArticle == null || currentArticle.getId() <= 0) {
-            showError("This article is not saved in the database yet.");
-            return;
-        }
+        if (currentArticle == null || currentArticle.getId() <= 0) { showError("Article not in database."); return; }
 
-        String author = commentAuthorField.getText();
         String content = commentArea.getText();
-
-        // 1. Basic empty check
-        if (content == null || content.trim().isEmpty()) {
-            showError("Your comment cannot be empty.");
-            return;
-        }
-
-        // 2. Length control
+        if (content == null || content.trim().isEmpty()) { showError("Comment cannot be empty."); return; }
         String trimmed = content.trim();
-        if (trimmed.length() < 5) {
-            showError("Your comment is too short (min 5 chars).");
-            return;
-        }
-        if (trimmed.length() > 500) {
-            showError("Your comment is too long (max 500 chars).");
-            return;
-        }
+        if (trimmed.length() < 5) { showError("Comment too short (min 5 chars)."); return; }
+        if (trimmed.length() > 500) { showError("Comment too long (max 500 chars)."); return; }
+        if (trimmed.matches("\\d+")) { showError("Comment cannot be only numbers."); return; }
+        if (Character.isDigit(trimmed.charAt(0))) { showError("Comment cannot start with a number."); return; }
 
-        // 3. Numeric checks
-        if (trimmed.matches("\\d+")) {
-            showError("Your comment cannot be only numbers.");
-            return;
-        }
-        if (Character.isDigit(trimmed.charAt(0))) {
-            showError("Your comment cannot start with a number.");
-            return;
-        }
-
-        // 4. Simple Bad Words Filter
-        String[] badWords = {"badword1", "badword2", "spam", "offensive"}; // Example list
+        String[] badWords = {"badword1", "badword2", "spam", "offensive"};
         for (String word : badWords) {
-            if (trimmed.toLowerCase().contains(word)) {
-                showError("Your comment contains inappropriate language.");
-                return;
-            }
+            if (trimmed.toLowerCase().contains(word)) { showError("Comment contains inappropriate language."); return; }
         }
 
-        // 4. Post comment
-        Comment comment = new Comment(author, trimmed, currentArticle.getId());
-        boolean inserted = commentService.add(comment);
-        if (!inserted) {
-            String dbError = commentService.getLastErrorMessage();
-            if (dbError != null && !dbError.isBlank()) {
-                showError("Failed to post comment: " + dbError);
-            } else {
-                showError("Failed to post comment. Please try again.");
-            }
+        Comment comment = new Comment(commentAuthorField.getText(), trimmed, currentArticle.getId());
+        if (!commentService.add(comment)) {
+            showError("Failed to post comment. Please try again.");
             return;
         }
-        
-        // Clear fields and reload
         commentArea.clear();
-        commentErrorLabel.setVisible(false);
         showSuccess("Comment posted successfully!");
         loadComments();
     }
 
-    private void showSuccess(String message) {
-        commentSuccessLabel.setText("✅ " + message);
-        commentSuccessLabel.setVisible(true);
-        // Optional: Hide after 3 seconds could be added here
-    }
+    private void showSuccess(String msg) { commentSuccessLabel.setText("✅ " + msg); commentSuccessLabel.setVisible(true); }
+    private void showError(String msg) { commentSuccessLabel.setVisible(false); commentErrorLabel.setText("❌ " + msg); commentErrorLabel.setVisible(true); }
 
-    private void showError(String message) {
-        commentSuccessLabel.setVisible(false);
-        commentErrorLabel.setText("❌ " + message);
-        commentErrorLabel.setVisible(true);
-    }
+    // ─── Navigation ─────────────────────────────────────────────────────────────
 
-    @FXML
-    private void goToBlog() {
+    @FXML private void goToBlog() { stopTtsAndNavigate("/blog/BlogManagement.fxml", null); }
+    @FXML private void goToHome() { stopTtsAndNavigate("/home/Home.fxml", null); }
+    @FXML private void goToArticles() { stopTtsAndNavigate("/blog/ArticlesManagement.fxml", null); }
+    @FXML private void goToEvents(javafx.event.ActionEvent e) { handleTtsStop(); navigate(e, "/event/EventManagement.fxml"); }
+    @FXML private void goToTickets(javafx.event.ActionEvent e) { handleTtsStop(); navigate(e, "/ticket/TicketManagement.fxml"); }
+    @FXML private void goToAchievements(javafx.event.ActionEvent e) { handleTtsStop(); navigate(e, "/ticket/Achievements.fxml"); }
+    @FXML private void goToLogin(javafx.event.ActionEvent e) { navigate(e, "/user/Login.fxml"); }
+
+    private void stopTtsAndNavigate(String fxmlPath, javafx.event.ActionEvent event) {
+        handleTtsStop();
         try {
-            Parent root = FXMLLoader.load(getClass().getResource("/blog/BlogManagement.fxml"));
+            Parent root = FXMLLoader.load(getClass().getResource(fxmlPath));
             Stage stage = (Stage) heroTitle.getScene().getWindow();
             stage.getScene().setRoot(root);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    @FXML
-    private void goToHome() {
-        try {
-            Parent root = FXMLLoader.load(getClass().getResource("/home/Home.fxml"));
-            Stage stage = (Stage) heroTitle.getScene().getWindow();
-            stage.getScene().setRoot(root);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    @FXML
-    private void goToArticles() {
-        try {
-            Parent root = FXMLLoader.load(getClass().getResource("/blog/ArticlesManagement.fxml"));
-            Stage stage = (Stage) heroTitle.getScene().getWindow();
-            stage.getScene().setRoot(root);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    @FXML
-    private void goToEvents(javafx.event.ActionEvent event) {
-        navigate(event, "/event/EventManagement.fxml");
-    }
-
-    @FXML
-    private void goToTickets(javafx.event.ActionEvent event) {
-        navigate(event, "/ticket/TicketManagement.fxml");
-    }
-
-    @FXML
-    private void goToAchievements(javafx.event.ActionEvent event) {
-        navigate(event, "/ticket/Achievements.fxml");
-    }
-    @FXML
-    private void handleMinimize() {
-        tn.esprit.util.WindowUtils.minimize(heroTitle);
-    }
-
-    @FXML
-    private void handleMaximize() {
-        tn.esprit.util.WindowUtils.toggleFullScreen(heroTitle);
-    }
-
-    @FXML
-    private void handleClose() {
-        tn.esprit.util.WindowUtils.close(heroTitle);
-    }
-
-    @FXML
-    private void goToLogin(javafx.event.ActionEvent event) {
-        navigate(event, "/user/Login.fxml");
+        } catch (IOException e) { e.printStackTrace(); }
     }
 
     private void navigate(javafx.event.ActionEvent event, String fxmlPath) {
@@ -266,8 +309,10 @@ public class BlogDetailController {
             Parent root = FXMLLoader.load(getClass().getResource(fxmlPath));
             Stage stage = (Stage) ((javafx.scene.Node) event.getSource()).getScene().getWindow();
             stage.getScene().setRoot(root);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        } catch (IOException e) { e.printStackTrace(); }
     }
+
+    @FXML private void handleMinimize() { tn.esprit.util.WindowUtils.minimize(heroTitle); }
+    @FXML private void handleMaximize() { tn.esprit.util.WindowUtils.toggleFullScreen(heroTitle); }
+    @FXML private void handleClose() { handleTtsStop(); tn.esprit.util.WindowUtils.close(heroTitle); }
 }

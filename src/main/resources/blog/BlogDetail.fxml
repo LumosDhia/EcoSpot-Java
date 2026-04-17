@@ -91,6 +91,23 @@
                                           <Label fx:id="authorLabel" text="👤 Writer: Admin" />
                                        </children>
                                     </HBox>
+                                     <!-- ===== AI VOICE READER PANEL ===== -->
+                                     <HBox fx:id="aiReaderPanel" alignment="CENTER_LEFT" spacing="15.0" styleClass="ai-reader-panel">
+                                        <children>
+                                           <Label style="-fx-font-size: 26px;" text="🤖" />
+                                           <VBox spacing="2.0">
+                                              <children>
+                                                 <Label styleClass="ai-title-label" text="EcoSpot AI Assistant" />
+                                                 <Label fx:id="aiStatusLabel" styleClass="ai-status-label" text="Ready to read aloud" />
+                                              </children>
+                                           </VBox>
+                                           <Region HBox.hgrow="ALWAYS" />
+                                           <Button fx:id="aiPlayBtn" onAction="#handleTtsPlay" styleClass="btn,btn-primary" text="▶ Play" />
+                                           <Button fx:id="aiPauseBtn" disable="true" onAction="#handleTtsPause" styleClass="btn-outline" text="⏸ Pause" />
+                                           <Button fx:id="aiStopBtn" onAction="#handleTtsStop" styleClass="btn,btn-danger" text="⏹ Stop" />
+                                        </children>
+                                     </HBox>
+
                                      <WebView fx:id="contentWebView" prefHeight="450.0" minHeight="300.0" />
                                      <Separator />
                                   </children>

@@ -966,6 +966,33 @@
 }
 
 /* ================================
+   AI VOICE READER PANEL
+================================ */
+.ai-reader-panel {
+    -fx-background-color: #f0f7f4;
+    -fx-background-radius: 0 8 8 0;
+    -fx-border-color: #2d6a4f;
+    -fx-border-width: 0 0 0 4;
+    -fx-border-radius: 0 8 8 0;
+    -fx-padding: 12 16;
+}
+
+.ai-reader-panel.ai-reading {
+    -fx-background-color: #e9f5ee;
+}
+
+.ai-status-label {
+    -fx-text-fill: #666;
+    -fx-font-size: 12px;
+}
+
+.ai-title-label {
+    -fx-font-weight: bold;
+    -fx-text-fill: #1b4332;
+    -fx-font-size: 14px;
+}
+
+/* ================================
    TICKET CARD STYLES
    ================================ */
 
