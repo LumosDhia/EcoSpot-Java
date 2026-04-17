@@ -139,9 +139,13 @@ public class BlogDetailController {
         authorLabel.setText("👤 Writer: " + (blog.getAuthor() != null ? blog.getAuthor() : "Admin User"));
         
         // Views functionality
-        blogService.incrementViews(blog.getId()); 
-        int totalViews = blog.getViews() + 1;
-        viewsLabel.setText("👁 " + totalViews + " views");
+        String viewerId = tn.esprit.util.SessionManager.isLoggedIn() 
+                ? "user_" + tn.esprit.util.SessionManager.getCurrentUser().getId() 
+                : "guest_" + System.getProperty("user.name", "unknown");
+
+        boolean incremented = blogService.incrementViews(blog.getId(), viewerId);
+        int displayViews = incremented ? blog.getViews() + 1 : blog.getViews();
+        viewsLabel.setText("👁 " + displayViews + " views");
 
         contentWebView.getEngine().loadContent(blog.getContent());
         loadComments();
