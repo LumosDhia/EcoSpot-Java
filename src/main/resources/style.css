@@ -238,6 +238,18 @@
     -fx-border-width: 1.5;
 }
 
+.svg-icon {
+    -fx-fill: #f1933e;
+}
+
+.svg-icon-white {
+    -fx-fill: white;
+}
+
+.svg-icon-green {
+    -fx-fill: #2d6a4f;
+}
+
 /* ================================
    BLOG SPECIFIC STYLES
    ================================ */
