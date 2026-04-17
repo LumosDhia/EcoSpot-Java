@@ -14,6 +14,7 @@ import tn.esprit.services.BlogService;
 import tn.esprit.services.CategoryService;
 import tn.esprit.services.TagService;
 import tn.esprit.services.UnsplashService;
+import tn.esprit.services.AiSeoService;
 
 import java.io.File;
 import java.io.IOException;
@@ -35,6 +36,9 @@ public class NewArticleController {
     @FXML private Label revisionNoteLabel;
     @FXML private TextField unsplashSearchField;
     @FXML private HBox unsplashResults;
+    @FXML private TextField seoTitleField;
+    @FXML private TextArea seoDescriptionArea;
+    @FXML private TextField seoKeywordsField;
 
     private BlogService blogService = new BlogService();
     private CategoryService categoryService = new CategoryService();
@@ -43,6 +47,7 @@ public class NewArticleController {
     private Blog editArticle = null;
     private TagService tagService = new TagService();
     private UnsplashService unsplashService = new UnsplashService();
+    private AiSeoService aiSeoService = new AiSeoService();
 
     @FXML
     public void initialize() {
@@ -102,6 +107,38 @@ public class NewArticleController {
                 }
             }
         }
+    }
+
+    @FXML
+    private void generateSeoWithAi() {
+        String title = titleField.getText();
+        String content = contentEditor.getHtmlText();
+
+        if (title.isEmpty() || content.length() < 50) {
+            showAlert("Error", "Please write some title and content first so AI can analyze it.", Alert.AlertType.WARNING);
+            return;
+        }
+
+        aiSeoService.generateSeoElements(title, content)
+                .thenAccept(result -> {
+                    javafx.application.Platform.runLater(() -> {
+                        if (result != null) {
+                            seoTitleField.setText(result.title);
+                            seoDescriptionArea.setText(result.description);
+                            seoKeywordsField.setText(result.keywords);
+                        } else {
+                            showAlert("AI Error", "Failed to generate SEO elements. Please check your connection or API key.", Alert.AlertType.ERROR);
+                        }
+                    });
+                });
+    }
+
+    private void showAlert(String title, String content, Alert.AlertType type) {
+        Alert alert = new Alert(type);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(content);
+        alert.showAndWait();
     }
 
     private void loadCategories() {

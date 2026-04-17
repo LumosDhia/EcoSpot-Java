@@ -160,6 +160,42 @@
                                     </children>
                                 </VBox>
 
+                                 <!-- AI SEO Optimization -->
+                                <VBox spacing="15.0" style="-fx-background-color: white; -fx-padding: 20; -fx-background-radius: 8; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.05), 10, 0, 0, 2);">
+                                    <children>
+                                        <HBox alignment="CENTER_LEFT" spacing="10.0">
+                                            <children>
+                                                <Label style="-fx-font-size: 16; -fx-font-weight: bold; -fx-text-fill: #f1933e;" text="⚡ AI SEO Optimization" />
+                                                <Region HBox.hgrow="ALWAYS" />
+                                                <Button onAction="#generateSeoWithAi" style="-fx-background-color: #2d6a4f; -fx-text-fill: white; -fx-padding: 4 10; -fx-font-size: 11; -fx-background-radius: 4; -fx-cursor: hand;" text="🪄 Generate" />
+                                            </children>
+                                        </HBox>
+                                        
+                                        <VBox spacing="12.0">
+                                            <children>
+                                                <VBox spacing="5.0">
+                                                    <children>
+                                                        <Label style="-fx-font-size: 11; -fx-font-weight: bold; -fx-text-fill: #666;" text="SEO TITLE" />
+                                                        <TextField fx:id="seoTitleField" promptText="Catchy SEO title" styleClass="form-input" />
+                                                    </children>
+                                                </VBox>
+                                                <VBox spacing="5.0">
+                                                    <children>
+                                                        <Label style="-fx-font-size: 11; -fx-font-weight: bold; -fx-text-fill: #666;" text="SEO DESCRIPTION" />
+                                                        <TextArea fx:id="seoDescriptionArea" prefHeight="80.0" promptText="Compelling meta description" styleClass="form-input" wrapText="true" />
+                                                    </children>
+                                                </VBox>
+                                                <VBox spacing="5.0">
+                                                    <children>
+                                                        <Label style="-fx-font-size: 11; -fx-font-weight: bold; -fx-text-fill: #666;" text="SEO KEYWORDS" />
+                                                        <TextField fx:id="seoKeywordsField" promptText="eco, sustainability, solar..." styleClass="form-input" />
+                                                    </children>
+                                                </VBox>
+                                            </children>
+                                        </VBox>
+                                    </children>
+                                </VBox>
+
                                 <!-- Organization -->
                                 <VBox spacing="15.0" style="-fx-background-color: white; -fx-padding: 20; -fx-background-radius: 8; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.05), 10, 0, 0, 2);">
                                     <children>
