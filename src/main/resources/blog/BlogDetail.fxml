@@ -163,30 +163,79 @@
                         </VBox>
                         
                         <!-- ===== FOOTER ===== -->
-                        <VBox spacing="20.0" styleClass="eco-footer">
-                           <padding><Insets bottom="40.0" left="60.0" right="60.0" top="40.0" /></padding>
-                           <children>
-                              <HBox spacing="50.0">
-                                 <children>
-                                    <VBox spacing="10.0" HBox.hgrow="ALWAYS">
-                                       <children>
-                                          <Label styleClass="footer-brand" text="EcoSpot" />
-                                          <Label styleClass="footer-desc" text="Environmental news, events, and community action for a greener future." wrapText="true" />
-                                       </children>
+                    <!-- ===== PREMIUM DARK FOOTER ===== -->
+                    <VBox styleClass="eco-footer">
+                        <children>
+                            <HBox spacing="50.0">
+                                <children>
+                                    <!-- Brand Column -->
+                                    <VBox prefWidth="300.0" styleClass="footer-column">
+                                        <children>
+                                            <Label styleClass="footer-brand" text="🌿 EcoSpot" />
+                                            <Label styleClass="footer-desc" text="Empowering communities to take climate action through events, education, and collaboration. Join us in making a difference for a greener future." wrapText="true" />
+                                            <HBox spacing="15.0">
+                                                <children>
+                                                    <Label styleClass="social-icon" text="fb" />
+                                                    <Label styleClass="social-icon" text="tw" />
+                                                    <Label styleClass="social-icon" text="ig" />
+                                                    <Label styleClass="social-icon" text="li" />
+                                                </children>
+                                            </HBox>
+                                        </children>
                                     </VBox>
-                                    <VBox spacing="10.0">
-                                       <children>
-                                          <Label styleClass="footer-heading" text="QUICK LINKS" />
-                                          <Label onMouseClicked="#goToHome" styleClass="footer-link" text="Home" />
-                                          <Label onMouseClicked="#goToBlog" styleClass="footer-link" text="Blog" />
 
-                                       </children>
+                                    <!-- Quick Links -->
+                                    <VBox spacing="10.0" styleClass="footer-column" HBox.hgrow="ALWAYS">
+                                        <children>
+                                            <Label styleClass="footer-heading" text="Quick Links" />
+                                            <Label onMouseClicked="#goToHome" styleClass="footer-link" text="Home" />
+                                            <Label onMouseClicked="#goToEvents" styleClass="footer-link" text="Events" />
+                                            <Label onMouseClicked="#goToBlog" styleClass="footer-link" text="Blog" />
+                                            <Label onMouseClicked="#goToTickets" styleClass="footer-link" text="Tickets" />
+                                        </children>
                                     </VBox>
-                                 </children>
-                              </HBox>
-                              <Label alignment="CENTER" maxWidth="Infinity" styleClass="footer-copyright" text="© 2026 EcoSpot. All rights reserved." />
-                           </children>
-                        </VBox>
+
+                                    <!-- Community -->
+                                    <VBox spacing="10.0" styleClass="footer-column" HBox.hgrow="ALWAYS">
+                                        <children>
+                                            <Label styleClass="footer-heading" text="Community" />
+                                            <Label styleClass="footer-link" text="Our Mission" />
+                                            <Label styleClass="footer-link" text="Partners" />
+                                            <Label styleClass="footer-link" text="Volunteer" />
+                                            <Label onMouseClicked="#goToAchievements" styleClass="footer-link" text="Achievements" />
+                                        </children>
+                                    </VBox>
+
+                                    <!-- Newsletter/Contact -->
+                                    <VBox spacing="15.0" styleClass="footer-column" HBox.hgrow="ALWAYS">
+                                        <children>
+                                            <Label styleClass="footer-heading" text="Get in Touch" />
+                                            <Label styleClass="footer-desc" text="Email: contact@ecospot.org" />
+                                            <Label styleClass="footer-desc" text="Support: +216 123 456 78" />
+                                            <Button style="-fx-background-color: #2d6a4f; -fx-text-fill: white; -fx-background-radius: 20;" text="Contact Us" />
+                                        </children>
+                                    </VBox>
+                                </children>
+                            </HBox>
+                            
+                            <Region minHeight="40.0" />
+                            <Region styleClass="footer-separator" />
+                            
+                            <HBox alignment="CENTER_LEFT" styleClass="footer-bottom">
+                                <children>
+                                    <Label styleClass="footer-copyright" text="© 2026 EcoSpot Application. All rights reserved by Esprit Students." />
+                                    <Region HBox.hgrow="ALWAYS" />
+                                    <HBox spacing="20.0">
+                                        <children>
+                                            <Label styleClass="footer-copyright" text="Privacy Policy" />
+                                            <Label styleClass="footer-copyright" text="Terms of Service" />
+                                            <Label styleClass="footer-copyright" text="Cookie Policy" />
+                                        </children>
+                                    </HBox>
+                                </children>
+                            </HBox>
+                        </children>
+                    </VBox>
                     </children>
                 </VBox>
             </content>

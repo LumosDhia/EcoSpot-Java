@@ -417,14 +417,19 @@
 }
 
 /* ================================
-   FOOTER
+   PREMIUM DARK FOOTER
    ================================ */
 .eco-footer {
-    -fx-background-color: white;
+    -fx-background-color: #081c15; /* Very dark green */
+    -fx-padding: 40 60;
+}
+
+.footer-column {
+    -fx-spacing: 15;
 }
 
 .footer-brand {
-    -fx-text-fill: white;
+    -fx-text-fill: #d8f3dc;
     -fx-font-size: 24px;
     -fx-font-weight: bold;
 }
@@ -432,27 +437,52 @@
 .footer-desc {
     -fx-text-fill: #95d5b2;
     -fx-font-size: 13px;
+    -fx-line-spacing: 1.5;
 }
 
 .footer-heading {
     -fx-text-fill: white;
-    -fx-font-size: 14px;
+    -fx-font-size: 16px;
     -fx-font-weight: bold;
+    -fx-padding: 0 0 10 0;
 }
 
 .footer-link {
     -fx-text-fill: #95d5b2;
-    -fx-font-size: 13px;
+    -fx-font-size: 14px;
     -fx-cursor: hand;
+    -fx-transition: 0.3s;
 }
 
 .footer-link:hover {
-    -fx-text-fill: white;
+    -fx-text-fill: #40916c;
+    -fx-translate-x: 5;
+}
+
+.footer-separator {
+    -fx-background-color: #2d6a4f;
+    -fx-max-height: 1;
+    -fx-min-height: 1;
+}
+
+.footer-bottom {
+    -fx-padding: 20 0 0 0;
 }
 
 .footer-copyright {
     -fx-text-fill: #52b788;
     -fx-font-size: 12px;
+}
+
+.social-icon {
+    -fx-font-size: 18px;
+    -fx-text-fill: #d8f3dc;
+    -fx-cursor: hand;
+    -fx-padding: 5;
+}
+
+.social-icon:hover {
+    -fx-text-fill: white;
 }
 
 /* ================================
