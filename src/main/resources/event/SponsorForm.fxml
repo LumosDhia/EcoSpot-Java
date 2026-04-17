@@ -25,38 +25,39 @@
         <VBox alignment="CENTER" spacing="25.0">
             <padding><Insets bottom="40.0" left="60.0" right="60.0" top="40.0" /></padding>
             <children>
-                <VBox maxWidth="500.0" spacing="20.0" style="-fx-background-color: white; -fx-padding: 30; -fx-background-radius: 15; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 10, 0, 0, 5);">
+                <VBox maxWidth="500.0" spacing="20.0" styleClass="section-card">
+                    <padding><Insets top="30.0" bottom="30.0" left="30.0" right="30.0" /></padding>
                     <children>
                         <Label fx:id="formTitle" styleClass="section-title" text="Add New Sponsor" />
-                        
+
                         <VBox spacing="10.0">
                             <children>
-                                <Label text="Sponsor Name (*)" style="-fx-font-weight: bold; -fx-text-fill: #2d6a4f;" />
+                                <Label styleClass="form-label" text="Sponsor Name (*)" />
                                 <TextField fx:id="nameField" promptText="Company name..." styleClass="search-field" />
                             </children>
                         </VBox>
 
                         <VBox spacing="10.0">
                             <children>
-                                <Label text="Sector (*)" style="-fx-font-weight: bold; -fx-text-fill: #2d6a4f;" />
+                                <Label styleClass="form-label" text="Sector (*)" />
                                 <TextField fx:id="sectorField" promptText="e.g. Technology, Energy..." styleClass="search-field" />
                             </children>
                         </VBox>
 
                         <VBox spacing="10.0">
                             <children>
-                                <Label text="Location (*)" style="-fx-font-weight: bold; -fx-text-fill: #2d6a4f;" />
+                                <Label styleClass="form-label" text="Location (*)" />
                                 <TextField fx:id="locationField" promptText="City, Country..." styleClass="search-field" />
                             </children>
                         </VBox>
 
                         <VBox spacing="10.0">
                             <children>
-                                <Label style="-fx-font-weight: bold; -fx-text-fill: #2d6a4f;" text="Sponsor Logo (*)" />
+                                <Label styleClass="form-label" text="Sponsor Logo (*)" />
                                 <HBox alignment="CENTER_LEFT" spacing="10.0">
                                     <children>
                                         <Button onAction="#importImage" styleClass="nav-link-btn" text="📁 Import Logo" />
-                                        <Label fx:id="imageNameLabel" style="-fx-text-fill: #666;" text="No logo selected" />
+                                        <Label fx:id="imageNameLabel" styleClass="card-text" text="No logo selected" />
                                     </children>
                                 </HBox>
                             </children>
@@ -64,15 +65,15 @@
 
                         <VBox spacing="10.0">
                             <children>
-                                <Label text="Description (*)" style="-fx-font-weight: bold; -fx-text-fill: #2d6a4f;" />
+                                <Label styleClass="form-label" text="Description (*)" />
                                 <TextArea fx:id="descriptionArea" prefHeight="100.0" promptText="About the sponsor..." styleClass="search-field" wrapText="true" />
                             </children>
                         </VBox>
 
                         <HBox alignment="CENTER_RIGHT" spacing="15.0">
                             <children>
-                                <Button onAction="#cancel" styleClass="nav-link-btn" text="Cancel" />
-                                <Button fx:id="saveBtn" onAction="#save" prefWidth="120.0" styleClass="btn-hero-primary" text="Save Sponsor" />
+                                <Button onAction="#cancel" styleClass="btn-outline" text="Cancel" />
+                                <Button fx:id="saveBtn" onAction="#save" styleClass="btn-hero-primary" text="Save Sponsor" />
                             </children>
                         </HBox>
                     </children>

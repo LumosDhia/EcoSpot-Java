@@ -216,6 +216,13 @@
     -fx-text-fill: #666;
 }
 
+/* Green bold label used on event/sponsor forms */
+.form-label {
+    -fx-font-weight: bold;
+    -fx-text-fill: #2d6a4f;
+    -fx-font-size: 14px;
+}
+
 /* Standard form input for management forms */
 .form-input {
     -fx-background-color: white;
