@@ -25,6 +25,10 @@ public class BlogCardController {
     @FXML private Label titleLabel;
     @FXML private Label readTimeLabel;
     @FXML private Label authorLabel;
+    @FXML private Label viewsLabel;
+    @FXML private Label likesLabel;
+    @FXML private Label dislikesLabel;
+    @FXML private Label commentsLabel;
     @FXML private Text excerptText;
     @FXML private Button readMoreBtn;
     @FXML private FlowPane tagsFlowPane;
@@ -51,8 +55,13 @@ public class BlogCardController {
         }
         
         titleLabel.setText(blog.getTitle());
-        readTimeLabel.setText("📖 " + blog.getReadingTime() + "m");
-        authorLabel.setText("👤 " + (blog.getAuthor() != null ? blog.getAuthor() : "Anonymous"));
+        viewsLabel.setText("👁 " + blog.getViews());
+        likesLabel.setText("👍 " + blog.getLikesCount());
+        dislikesLabel.setText("👎 " + blog.getDislikesCount());
+        readTimeLabel.setText("👤 " + blog.getReadingTime() + "m");
+        commentsLabel.setText("💬 " + blog.getCommentsCount());
+        
+        authorLabel.setText(blog.getAuthor() != null ? blog.getAuthor() : "Anonymous");
         authorLabel.setStyle("-fx-cursor: hand;");
         authorLabel.setOnMouseClicked(e -> {
             BlogManagementController.selectedCategory = null;

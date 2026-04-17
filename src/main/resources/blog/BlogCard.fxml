@@ -15,38 +15,46 @@
             </ImageView>
          </children>
       </StackPane>
-      <VBox spacing="10" style="-fx-padding: 15;">
+      <VBox spacing="12" style="-fx-padding: 15;">
          <children>
             <HBox alignment="CENTER_LEFT" spacing="10">
                <children>
-                  <Label fx:id="categoryLabel" styleClass="category-tag" text="Waste Management" />
+                  <Label fx:id="categoryLabel" styleClass="category-tag" text="Energy" />
                   <Region HBox.hgrow="ALWAYS" />
-                  <Label fx:id="dateLabel" styleClass="article-date" text="7 days ago">
+                  <Label fx:id="dateLabel" styleClass="article-date" text="15 minutes ago">
                      <graphic>
-                        <Label text="📅" />
+                        <Label style="-fx-text-fill: #64748b;" text="📅" />
                      </graphic>
                   </Label>
                </children>
             </HBox>
-            <FlowPane fx:id="tagsFlowPane" hgap="5.0" vgap="5.0">
-                <!-- Tags will be injected here -->
-            </FlowPane>
-            <Label fx:id="titleLabel" styleClass="article-title" text="Innovating the Recycling Process..." wrapText="true">
-               <font>
-                  <Font name="System Bold" size="16.0" />
-               </font>
-            </Label>
-            <HBox spacing="10" styleClass="article-stats-container">
+            
+            <Label fx:id="titleLabel" styleClass="article-title" text="hufhuhu ijoij" wrapText="true" />
+            
+            <HBox fx:id="statsBar" alignment="CENTER_LEFT" spacing="15.0" styleClass="article-stats-bar">
                <children>
-                  <Label fx:id="readTimeLabel" styleClass="stat-label" text="📖 1m" />
+                  <Label fx:id="viewsLabel" styleClass="stat-item" text="👁 3" />
+                  <Label fx:id="likesLabel" styleClass="stat-item" text="👍 0" />
+                  <Label fx:id="dislikesLabel" styleClass="stat-item" text="👎 0" />
+                  <Label fx:id="readTimeLabel" styleClass="stat-item" text="👤 1m" />
+                  <Label fx:id="commentsLabel" styleClass="stat-item" text="💬 0" />
                </children>
             </HBox>
-            <Label fx:id="authorLabel" styleClass="article-author" text="👤 Admin User" />
+
+            <Label fx:id="authorLabel" styleClass="article-author" text="👤 Admin User">
+                <graphic>
+                    <Label style="-fx-text-fill: #64748b;" text="🖋" />
+                </graphic>
+            </Label>
+
             <TextFlow prefHeight="60.0">
                <children>
-                  <Text fx:id="excerptText" styleClass="article-excerpt" text="Transitioning to a circular economy requires a fundamental change in how we perceive and handle wast..." />
+                  <Text fx:id="excerptText" styleClass="article-excerpt" text="jij ijoiijiojijioiji ioj ijijo joijoijij ioj ij joijiojijio j jjoijiojijjo jijioiWrite your article..." />
                </children>
             </TextFlow>
+
+            <FlowPane fx:id="tagsFlowPane" hgap="5.0" vgap="5.0" />
+
             <Button fx:id="readMoreBtn" maxWidth="1.7976931348623157E308" styleClass="read-more-btn" text="Read more" />
          </children>
       </VBox>
