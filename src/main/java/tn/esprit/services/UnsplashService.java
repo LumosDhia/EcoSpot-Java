@@ -10,10 +10,10 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import tn.esprit.util.Config;
 
 public class UnsplashService {
-    // NOTE: Keep this placeholder for the user to fill or I'll provide a working one if I had it.
-    private static final String ACCESS_KEY = "vOkL9H1TAzjvAfiF2Gu2dx4EGqgmk1LFDgkIqw_z-lo"; 
+    private static final String ACCESS_KEY = Config.get("UNSPLASH_ACCESS_KEY");
     private static final String API_URL = "https://api.unsplash.com/search/photos";
 
     public List<String> searchPhotos(String query) {

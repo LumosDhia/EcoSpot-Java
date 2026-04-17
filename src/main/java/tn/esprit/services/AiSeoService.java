@@ -11,10 +11,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
+import tn.esprit.util.Config;
+
 public class AiSeoService {
 
     private static final String API_URL = "https://openrouter.ai/api/v1/chat/completions";
-    private static final String API_KEY = "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";
+    private static final String API_KEY = Config.get("OPENROUTER_API_KEY");
 
     public static class SeoResult {
         public String title;
@@ -65,8 +67,9 @@ public class AiSeoService {
 
         return client.sendAsync(request, HttpResponse.BodyHandlers.ofString())
                 .thenApply(response -> {
+                    System.out.println("OpenRouter Response Status: " + response.statusCode());
                     if (response.statusCode() != 200) {
-                        System.err.println("OpenRouter error: " + response.body());
+                        System.err.println("OpenRouter error body: " + response.body());
                         return null;
                     }
                     try {
