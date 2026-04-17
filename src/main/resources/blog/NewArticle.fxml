@@ -181,7 +181,13 @@
                                             <children>
                                                 <VBox spacing="5.0">
                                                     <children>
-                                                        <Label style="-fx-font-size: 11; -fx-font-weight: bold; -fx-text-fill: #666;" text="SEO TITLE" />
+                                                        <HBox alignment="CENTER_LEFT" spacing="5.0">
+                                                            <children>
+                                                                <Label style="-fx-font-size: 11; -fx-font-weight: bold; -fx-text-fill: #666;" text="SEO TITLE" />
+                                                                <Region HBox.hgrow="ALWAYS" />
+                                                                <Button onAction="#showSeoTitleIdeas" style="-fx-background-color: transparent; -fx-text-fill: #2d6a4f; -fx-cursor: hand; -fx-font-size: 10; -fx-padding: 0;" text="🪄 Ideas" />
+                                                            </children>
+                                                        </HBox>
                                                         <TextField fx:id="seoTitleField" promptText="Catchy SEO title" styleClass="form-input" />
                                                     </children>
                                                 </VBox>
