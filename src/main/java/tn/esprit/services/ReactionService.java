@@ -57,6 +57,7 @@ public class ReactionService {
                     ps.setInt(2, userId);
                     ps.setString(3, type);
                     ps.executeUpdate();
+                    tn.esprit.util.StatisticsCollector.getInstance().recordReaction(articleId, userId, "like".equalsIgnoreCase(type) ? "LIKE" : "DISLIKE");
                 }
                 return type;
             } else if (existing.equals(type)) {
@@ -76,6 +77,7 @@ public class ReactionService {
                     ps.setInt(2, articleId);
                     ps.setInt(3, userId);
                     ps.executeUpdate();
+                    tn.esprit.util.StatisticsCollector.getInstance().recordReaction(articleId, userId, "like".equalsIgnoreCase(type) ? "LIKE" : "DISLIKE");
                 }
                 return type;
             }

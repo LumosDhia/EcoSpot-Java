@@ -127,6 +127,10 @@ public class BlogManagementController {
 
         displayCurrentPage();
         updateActiveFiltersUI();
+        
+        if (query != null && !query.trim().isEmpty() && query.trim().length() > 2) {
+            tn.esprit.util.StatisticsCollector.getInstance().recordSearchTerm(query.trim(), filteredBlogs.size());
+        }
     }
 
     private void updateActiveFiltersUI() {

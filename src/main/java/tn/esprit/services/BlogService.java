@@ -185,6 +185,10 @@ public class BlogService implements GlobalInterface<Blog> {
             ps.setInt(1, articleId);
             ps.executeUpdate();
             viewHistory.put(cacheKey, now);
+            
+            // Record granular event
+            tn.esprit.util.StatisticsCollector.getInstance().recordView(articleId, viewerId, null);
+            
             return true;
         } catch (SQLException e) {
             e.printStackTrace();
