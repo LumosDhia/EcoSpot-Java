@@ -255,6 +255,11 @@ public class BlogService implements GlobalInterface<Blog> {
                 b.setReadingTime(b.getReadingTime());
                 b.setAdminRevisionNote(rs.getString("admin_revision_note"));
                 
+                // Fetch reaction counts
+                ReactionService rsrv = new ReactionService();
+                b.setLikesCount(rsrv.getLikes(b.getId()));
+                b.setDislikesCount(rsrv.getDislikes(b.getId()));
+                
                 // Fetch tags and comments for this blog
                 b.setTags(getTagsForArticle(b.getId()));
                 b.setComments(new CommentService().getByArticleId(b.getId()));
