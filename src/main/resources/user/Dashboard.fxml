@@ -175,6 +175,21 @@
                                                 </VBox>
                                             </children>
                                         </VBox>
+                                        <VBox onMouseClicked="#goToStatisticsGrid" styleClass="stat-card">
+                                            <children>
+                                                <VBox alignment="CENTER" spacing="15.0">
+                                                    <children>
+                                                        <StackPane styleClass="dashboard-icon-container">
+                                                            <children>
+                                                                <Label styleClass="dashboard-icon" text="&#xE9D9;" />
+                                                            </children>
+                                                        </StackPane>
+                                                        <Label styleClass="card-title-lg" text="Statistics" />
+                                                        <Label styleClass="card-subtitle" text="View blog and analytics metrics" textAlignment="CENTER" wrapText="true" />
+                                                    </children>
+                                                </VBox>
+                                            </children>
+                                        </VBox>
                                         <VBox onMouseClicked="#goToEventManagementGrid" styleClass="stat-card">
                                             <children>
                                                 <StackPane alignment="TOP_RIGHT">

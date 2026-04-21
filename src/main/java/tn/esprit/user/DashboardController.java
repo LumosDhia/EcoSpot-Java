@@ -353,6 +353,18 @@ public class DashboardController {
     }
 
     @FXML
+    void goToStatisticsGrid(MouseEvent event) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/blog/Statistics.fxml"));
+            Parent root = loader.load();
+            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+            stage.getScene().setRoot(root);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @FXML
     void goToTaxonomyManagementGrid(MouseEvent event) {
         navigateToTaxonomy(event, null);
     }
