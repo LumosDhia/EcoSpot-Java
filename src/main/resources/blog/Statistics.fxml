@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.chart.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+
+<ScrollPane fitToWidth="true" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="tn.esprit.blog.StatisticsController" style="-fx-background-color: #f4f6f8;">
+    <VBox spacing="20" style="-fx-padding: 30; -fx-background-color: #f4f6f8;">
+        <!-- Header -->
+        <HBox alignment="CENTER_LEFT" spacing="20">
+            <Button fx:id="backBtn" mnemonicParsing="false" onAction="#goBack" text="← Back to Dashboard" style="-fx-font-size: 14; -fx-padding: 8 16; -fx-background-color: #ffffff; -fx-border-color: #e2e8f0; -fx-border-radius: 6; -fx-background-radius: 6; -fx-cursor: hand;" />
+            <Label style="-fx-font-size: 28; -fx-font-weight: bold; -fx-text-fill: #1a202c;" text="Blog Statistics" />
+            <Region HBox.hgrow="ALWAYS" />
+            <Label text="Period:" style="-fx-font-size: 14;" />
+            <ChoiceBox fx:id="periodSelector" prefWidth="150" style="-fx-font-size: 14; -fx-padding: 4;" />
+            <Button text="Refresh" onAction="#loadData" style="-fx-font-size: 14; -fx-padding: 8 16; -fx-background-color: #3182ce; -fx-text-fill: white; -fx-background-radius: 6; -fx-cursor: hand;" />
+            <Button text="Export CSV" onAction="#handleExportCSV" style="-fx-font-size: 14; -fx-padding: 8 16; -fx-background-color: #38a169; -fx-text-fill: white; -fx-background-radius: 6; -fx-cursor: hand;" />
+        </HBox>
+
+        <!-- KPI Cards -->
+        <HBox spacing="20">
+            <!-- Card 1 -->
+            <VBox HBox.hgrow="ALWAYS" style="-fx-background-color: white; -fx-padding: 24; -fx-background-radius: 12; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 10, 0, 0, 4);">
+                <Label style="-fx-font-size: 14; -fx-text-fill: #718096; -fx-font-weight: bold; -fx-text-transform: uppercase;" text="Total Views" />
+                <Label fx:id="totalViewsLabel" style="-fx-font-size: 36; -fx-font-weight: bold; -fx-text-fill: #2d3748;" text="0" />
+            </VBox>
+            <!-- Card 2 -->
+            <VBox HBox.hgrow="ALWAYS" style="-fx-background-color: white; -fx-padding: 24; -fx-background-radius: 12; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 10, 0, 0, 4);">
+                <Label style="-fx-font-size: 14; -fx-text-fill: #718096; -fx-font-weight: bold; -fx-text-transform: uppercase;" text="Articles Published" />
+                <Label fx:id="totalArticlesLabel" style="-fx-font-size: 36; -fx-font-weight: bold; -fx-text-fill: #2d3748;" text="0" />
+            </VBox>
+            <!-- Card 3 -->
+            <VBox HBox.hgrow="ALWAYS" style="-fx-background-color: white; -fx-padding: 24; -fx-background-radius: 12; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 10, 0, 0, 4);">
+                <Label style="-fx-font-size: 14; -fx-text-fill: #718096; -fx-font-weight: bold; -fx-text-transform: uppercase;" text="Total Comments" />
+                <Label fx:id="totalCommentsLabel" style="-fx-font-size: 36; -fx-font-weight: bold; -fx-text-fill: #2d3748;" text="0" />
+            </VBox>
+            <!-- Card 4 -->
+            <VBox HBox.hgrow="ALWAYS" style="-fx-background-color: white; -fx-padding: 24; -fx-background-radius: 12; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 10, 0, 0, 4);">
+                <Label style="-fx-font-size: 14; -fx-text-fill: #718096; -fx-font-weight: bold; -fx-text-transform: uppercase;" text="Like Rate" />
+                <Label fx:id="likeRateLabel" style="-fx-font-size: 36; -fx-font-weight: bold; -fx-text-fill: #2d3748;" text="0%" />
+            </VBox>
+        </HBox>
+
+        <!-- Main Chart -->
+        <VBox style="-fx-background-color: white; -fx-padding: 24; -fx-background-radius: 12; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 10, 0, 0, 4);">
+            <Label style="-fx-font-size: 18; -fx-font-weight: bold; -fx-text-fill: #2d3748; -fx-padding: 0 0 10 0;" text="Views Over Time" />
+            <AreaChart fx:id="viewsChart" prefHeight="350" animated="false" legendVisible="false">
+                <xAxis>
+                    <CategoryAxis side="BOTTOM" />
+                </xAxis>
+                <yAxis>
+                    <NumberAxis side="LEFT" />
+                </yAxis>
+            </AreaChart>
+        </VBox>
+
+        <!-- Middle Row -->
+        <HBox spacing="20">
+            <!-- Top Articles -->
+            <VBox HBox.hgrow="ALWAYS" style="-fx-background-color: white; -fx-padding: 24; -fx-background-radius: 12; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 10, 0, 0, 4);" prefWidth="400">
+                <Label style="-fx-font-size: 18; -fx-font-weight: bold; -fx-text-fill: #2d3748; -fx-padding: 0 0 15 0;" text="Top Articles" />
+                <ListView fx:id="topArticlesList" VBox.vgrow="ALWAYS" prefHeight="300" style="-fx-background-insets: 0; -fx-padding: 0;" />
+            </VBox>
+            
+            <!-- Views by Category -->
+            <VBox HBox.hgrow="ALWAYS" style="-fx-background-color: white; -fx-padding: 24; -fx-background-radius: 12; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 10, 0, 0, 4);" prefWidth="400">
+                <Label style="-fx-font-size: 18; -fx-font-weight: bold; -fx-text-fill: #2d3748; -fx-padding: 0 0 10 0;" text="Views by Category" />
+                <PieChart fx:id="categoryChart" prefHeight="300" animated="false" labelsVisible="true" />
+            </VBox>
+        </HBox>
+        
+        <!-- Bottom Row -->
+        <HBox spacing="20">
+            <!-- Search Terms -->
+            <VBox HBox.hgrow="ALWAYS" style="-fx-background-color: white; -fx-padding: 24; -fx-background-radius: 12; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 10, 0, 0, 4);" prefWidth="400">
+                <Label style="-fx-font-size: 18; -fx-font-weight: bold; -fx-text-fill: #2d3748; -fx-padding: 0 0 10 0;" text="Top Search Terms" />
+                <BarChart fx:id="searchTermsChart" prefHeight="300" animated="false" legendVisible="false">
+                    <xAxis>
+                        <CategoryAxis side="BOTTOM" />
+                    </xAxis>
+                    <yAxis>
+                        <NumberAxis side="LEFT" />
+                    </yAxis>
+                </BarChart>
+            </VBox>
+            
+            <!-- Views By Hour -->
+            <VBox HBox.hgrow="ALWAYS" style="-fx-background-color: white; -fx-padding: 24; -fx-background-radius: 12; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 10, 0, 0, 4);" prefWidth="400">
+                <Label style="-fx-font-size: 18; -fx-font-weight: bold; -fx-text-fill: #2d3748; -fx-padding: 0 0 10 0;" text="Views by Hour of Day" />
+                <BarChart fx:id="hourlyChart" prefHeight="300" animated="false" legendVisible="false">
+                    <xAxis>
+                        <CategoryAxis side="BOTTOM" />
+                    </xAxis>
+                    <yAxis>
+                        <NumberAxis side="LEFT" />
+                    </yAxis>
+                </BarChart>
+            </VBox>
+        </HBox>
+    </VBox>
+</ScrollPane>
