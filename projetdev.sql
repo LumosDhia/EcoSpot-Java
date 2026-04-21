@@ -137,4 +137,56 @@ INSERT INTO `event_sponsor` (`event_id`, `sponsor_id`) VALUES
 INSERT INTO `event_participation` (`event_id`, `user_id`) VALUES
 (1, 2);
 
+-- 9. Article View Event Table
+DROP TABLE IF EXISTS `article_view_event`;
+CREATE TABLE `article_view_event` (
+    `id` bigint(20) NOT NULL AUTO_INCREMENT,
+    `article_id` int(11) NOT NULL,
+    `user_id` int(11) DEFAULT NULL,
+    `session_id` varchar(64) DEFAULT NULL,
+    `viewed_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (`id`),
+    KEY `idx_article_viewed` (`article_id`,`viewed_at`),
+    KEY `idx_viewed_at` (`viewed_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- 10. Article Reaction Event Table
+DROP TABLE IF EXISTS `article_reaction_event`;
+CREATE TABLE `article_reaction_event` (
+    `id` bigint(20) NOT NULL AUTO_INCREMENT,
+    `article_id` int(11) NOT NULL,
+    `user_id` int(11) DEFAULT NULL,
+    `reaction` enum('LIKE','DISLIKE') NOT NULL,
+    `acted_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (`id`),
+    KEY `idx_article_reacted` (`article_id`,`acted_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- 11. Search Term Log Table
+DROP TABLE IF EXISTS `search_term_log`;
+CREATE TABLE `search_term_log` (
+    `id` bigint(20) NOT NULL AUTO_INCREMENT,
+    `term` varchar(255) NOT NULL,
+    `result_count` int(11) NOT NULL DEFAULT 0,
+    `searched_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (`id`),
+    KEY `idx_searched_at` (`searched_at`),
+    KEY `idx_term` (`term`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- 12. Article Stats Daily Table
+DROP TABLE IF EXISTS `article_stats_daily`;
+CREATE TABLE `article_stats_daily` (
+    `id` bigint(20) NOT NULL AUTO_INCREMENT,
+    `article_id` int(11) NOT NULL,
+    `stat_date` date NOT NULL,
+    `views` int(11) NOT NULL DEFAULT 0,
+    `likes` int(11) NOT NULL DEFAULT 0,
+    `dislikes` int(11) NOT NULL DEFAULT 0,
+    `comments` int(11) NOT NULL DEFAULT 0,
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `uq_article_date` (`article_id`,`stat_date`),
+    KEY `idx_stat_date` (`stat_date`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 COMMIT;
