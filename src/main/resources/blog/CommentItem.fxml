@@ -2,15 +2,26 @@
 
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.shape.Circle?>
 
 <VBox spacing="5.0" style="-fx-background-color: white; -fx-padding: 15; -fx-background-radius: 8; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.05), 10, 0, 0, 2);" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="tn.esprit.blog.CommentItemController">
    <children>
       <HBox alignment="CENTER_LEFT" spacing="10.0">
          <children>
-            <Label fx:id="authorLabel" style="-fx-font-weight: bold; -fx-text-fill: #2d6a4f; -fx-font-size: 13;" text="Author Name" />
-            <Label fx:id="dateLabel" style="-fx-text-fill: #999; -fx-font-size: 11;" text="Date" />
+            <ImageView fx:id="avatarImageView" fitHeight="32.0" fitWidth="32.0" pickOnBounds="true" preserveRatio="true">
+               <clip>
+                  <Circle centerX="16.0" centerY="16.0" radius="16.0" />
+               </clip>
+            </ImageView>
+            <VBox alignment="CENTER_LEFT">
+               <children>
+                  <Label fx:id="authorLabel" style="-fx-font-weight: bold; -fx-text-fill: #2d6a4f; -fx-font-size: 13;" text="Author Name" />
+                  <Label fx:id="dateLabel" style="-fx-text-fill: #999; -fx-font-size: 11;" text="Date" />
+               </children>
+            </VBox>
          </children>
       </HBox>
       <Label fx:id="contentLabel" style="-fx-text-fill: #444; -fx-font-size: 13;" text="Comment content goes here. This can be multiple lines long." wrapText="true" />

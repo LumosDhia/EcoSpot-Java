@@ -10,6 +10,7 @@ public class Comment {
     private LocalDateTime createdAt;
     private String articleTitle;
     private boolean flagged;
+    private String avatarStyle;
 
     public Comment() {}
 
@@ -42,4 +43,6 @@ public class Comment {
     public void setArticleTitle(String articleTitle) { this.articleTitle = articleTitle; }
     public boolean isFlagged() { return flagged; }
     public void setFlagged(boolean flagged) { this.flagged = flagged; }
+    public String getAvatarStyle() { return avatarStyle; }
+    public void setAvatarStyle(String avatarStyle) { this.avatarStyle = avatarStyle; }
 }
