@@ -13,11 +13,11 @@ public class DebugStatsTest {
         try {
             System.out.println("--- SERVICE OVERVIEW ---");
             System.out.println("Total Articles (Unfiltered): " + getCount(cnx, "SELECT COUNT(*) FROM article"));
-            System.out.println("Total Articles (Service): " + service.getTotalPublishedArticles());
+            System.out.println("Total Articles (Service): " + service.getTotalPublishedArticles(null));
             
             System.out.println("\n--- REACTION DATA ---");
             System.out.println("Total Reactions (Table): " + getCount(cnx, "SELECT COUNT(*) FROM article_reaction_event"));
-            Map<String, Integer> reactions = service.getTotalReactions();
+            Map<String, Integer> reactions = service.getTotalReactions(null);
             System.out.println("Reactions Map: " + reactions);
             
             System.out.println("\n--- ARTICLE SAMPLE ---");

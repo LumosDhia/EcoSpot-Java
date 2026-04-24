@@ -45,22 +45,10 @@
             </AreaChart>
         </VBox>
 
-        <!-- Reactions & Comments -->
-        <HBox spacing="20">
-            <VBox HBox.hgrow="ALWAYS" style="-fx-background-color: white; -fx-padding: 24; -fx-background-radius: 12; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 10, 0, 0, 4);">
-                <Label style="-fx-font-size: 18; -fx-font-weight: bold; -fx-text-fill: #2d3748;" text="Reactions Trend" />
-                <LineChart fx:id="reactionsChart" prefHeight="250" animated="false">
-                    <xAxis><CategoryAxis side="BOTTOM" /></xAxis>
-                    <yAxis><NumberAxis side="LEFT" /></yAxis>
-                </LineChart>
-            </VBox>
-            <VBox HBox.hgrow="ALWAYS" style="-fx-background-color: white; -fx-padding: 24; -fx-background-radius: 12; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 10, 0, 0, 4);">
-                <Label style="-fx-font-size: 18; -fx-font-weight: bold; -fx-text-fill: #2d3748;" text="Comment Activity" />
-                <BarChart fx:id="commentsChart" prefHeight="250" animated="false">
-                    <xAxis><CategoryAxis side="BOTTOM" /></xAxis>
-                    <yAxis><NumberAxis side="LEFT" /></yAxis>
-                </BarChart>
-            </VBox>
-        </HBox>
+        <!-- Article Comments -->
+        <VBox style="-fx-background-color: white; -fx-padding: 24; -fx-background-radius: 12; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 10, 0, 0, 4);" VBox.vgrow="ALWAYS">
+            <Label style="-fx-font-size: 18; -fx-font-weight: bold; -fx-text-fill: #2d3748; -fx-padding: 0 0 15 0;" text="Article Comments" />
+            <ListView fx:id="commentsListView" prefHeight="300" style="-fx-background-insets: 0; -fx-padding: 0; -fx-background-color: transparent;" />
+        </VBox>
     </VBox>
 </ScrollPane>

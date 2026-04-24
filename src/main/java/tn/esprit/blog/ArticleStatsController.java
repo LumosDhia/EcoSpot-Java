@@ -28,11 +28,15 @@ public class ArticleStatsController {
     @FXML private Label commentsLabel;
     
     @FXML private AreaChart<String, Number> viewsTimelineChart;
-    @FXML private LineChart<String, Number> reactionsChart;
-    @FXML private BarChart<String, Number> commentsChart;
+    @FXML private javafx.scene.control.ListView<String> commentsListView;
 
     private final StatisticsService statsService = new StatisticsService();
     private int articleId;
+    private String ownerEmail = null;
+
+    public void setOwnerEmail(String email) {
+        this.ownerEmail = email;
+    }
 
     public void setArticleId(int id) {
         this.articleId = id;
@@ -62,6 +66,23 @@ public class ArticleStatsController {
         }
         viewsTimelineChart.getData().clear();
         viewsTimelineChart.getData().add(viewsSeries);
+
+        // Load Comments
+        commentsListView.getItems().clear();
+        List<Map<String, Object>> comments = statsService.getArticleComments(articleId);
+        if (comments.isEmpty()) {
+            commentsListView.getItems().add("No comments yet.");
+        } else {
+            for (Map<String, Object> comment : comments) {
+                String author = (String) comment.get("author");
+                String content = (String) comment.get("content");
+                Timestamp commentTs = (Timestamp) comment.get("date");
+                String commentDate = commentTs != null 
+                    ? commentTs.toLocalDateTime().format(DateTimeFormatter.ofPattern("dd MMM HH:mm"))
+                    : "N/A";
+                commentsListView.getItems().add(String.format("[%s] %s: %s", commentDate, author, content));
+            }
+        }
     }
 
     @FXML
@@ -69,6 +90,10 @@ public class ArticleStatsController {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/blog/Statistics.fxml"));
             Parent root = loader.load();
+            StatisticsController controller = loader.getController();
+            if (ownerEmail != null) {
+                controller.setOwnerEmail(ownerEmail);
+            }
             Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
             stage.getScene().setRoot(root);
         } catch (IOException e) {

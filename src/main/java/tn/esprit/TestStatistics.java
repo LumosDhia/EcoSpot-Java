@@ -68,7 +68,7 @@ public class TestStatistics {
 
             // Test 3: Get Total Views
             StatisticsService statService = new StatisticsService();
-            int totalViews = statService.getTotalViews(LocalDate.now().minusDays(1), LocalDate.now().plusDays(1));
+            int totalViews = statService.getTotalViews(LocalDate.now().minusDays(1), LocalDate.now().plusDays(1), null);
             System.out.println("Total views in range: " + totalViews);
 
             System.out.println("Test Complete Successfully!");
