@@ -106,6 +106,30 @@
                             </children>
                         </VBox>
 
+                        <!-- Weather Forecast -->
+                        <VBox fx:id="weatherBox" spacing="15.0" style="-fx-background-color: #f0f9ff; -fx-padding: 20; -fx-background-radius: 8; -fx-border-color: #bae6fd; -fx-border-radius: 8;">
+                            <children>
+                                <HBox alignment="CENTER_LEFT" spacing="10.0">
+                                    <children>
+                                        <Label style="-fx-font-size: 20px;" text="🌦️" />
+                                        <VBox>
+                                            <children>
+                                                <Label style="-fx-font-weight: bold; -fx-text-fill: #0369a1; -fx-font-size: 14px;" text="7-DAY WEATHER FORECAST" />
+                                                <Label style="-fx-text-fill: #0ea5e9; -fx-font-size: 11px;" text="Local forecast for this ticket's coordinates" />
+                                            </children>
+                                        </VBox>
+                                    </children>
+                                </HBox>
+                                <ScrollPane fitToHeight="true" style="-fx-background-color: transparent; -fx-background: transparent; -fx-border-color: transparent;" vbarPolicy="NEVER">
+                                    <content>
+                                        <HBox fx:id="forecastContainer" spacing="15.0">
+                                            <!-- Dynamic forecast cards will be added here -->
+                                        </HBox>
+                                    </content>
+                                </ScrollPane>
+                            </children>
+                        </VBox>
+
                         <!-- Ticket Image -->
                         <VBox alignment="CENTER" spacing="10.0">
                             <children>
