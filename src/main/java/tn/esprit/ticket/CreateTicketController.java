@@ -13,6 +13,7 @@ import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import tn.esprit.services.TicketService;
 import tn.esprit.services.GeocodingService;
+import tn.esprit.services.OpenRouterService;
 import tn.esprit.user.User;
 import tn.esprit.util.SessionManager;
 import javafx.scene.control.ListView;
@@ -28,6 +29,7 @@ public class CreateTicketController {
     @FXML private TextField titleInput;
     @FXML private TextArea descriptionInput;
     @FXML private VBox consignesContainer;
+    @FXML private Button aiSuggestBtn;
     @FXML private TextField locationInput;
     @FXML private Button searchLocationBtn;
     @FXML private ListView<GeocodingService.Place> locationResultsList;
@@ -37,6 +39,7 @@ public class CreateTicketController {
     private File selectedFile;
     private final TicketService ticketService = new TicketService();
     private final GeocodingService geocodingService = new GeocodingService();
+    private final OpenRouterService openRouterService = new OpenRouterService();
     private Ticket editingTicket;
     private double selectedLat = 0.0;
     private double selectedLon = 0.0;
@@ -170,6 +173,47 @@ public class CreateTicketController {
                     locationResultsList.setManaged(true);
                     errorLabel.setVisible(false);
                     errorLabel.setManaged(false);
+                }
+            });
+        }).start();
+    }
+
+    @FXML
+    void handleAiSuggest(ActionEvent event) {
+        String title = titleInput.getText().trim();
+        String desc = descriptionInput.getText().trim();
+
+        if (desc.length() < 10) {
+            errorLabel.setText("Please provide a longer description (min 10 chars) for AI analysis.");
+            errorLabel.setVisible(true);
+            errorLabel.setManaged(true);
+            return;
+        }
+
+        aiSuggestBtn.setDisable(true);
+        aiSuggestBtn.setText("✨ Thinking...");
+
+        new Thread(() -> {
+            OpenRouterService.AiResponse response = openRouterService.generateTasks(title, desc);
+            javafx.application.Platform.runLater(() -> {
+                aiSuggestBtn.setDisable(false);
+                aiSuggestBtn.setText("✨ AI Suggest Tasks");
+                
+                if (response.tasks.isEmpty()) {
+                    errorLabel.setText("AI could not generate tasks. Check your .env key or description.");
+                    errorLabel.setVisible(true);
+                    errorLabel.setManaged(true);
+                } else {
+                    consignesContainer.getChildren().clear();
+                    for (String task : response.tasks) {
+                        addConsigneRow(task);
+                    }
+                    errorLabel.setVisible(false);
+                    errorLabel.setManaged(false);
+                    
+                    // Also suggest priority if it's a new ticket
+                    // (We don't have a priority input yet in this Java screen, 
+                    // but we could add one or just log it for now).
                 }
             });
         }).start();

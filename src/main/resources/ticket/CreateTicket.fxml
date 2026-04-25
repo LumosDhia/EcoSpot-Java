@@ -102,7 +102,12 @@
                                                 <VBox fx:id="consignesContainer" spacing="10.0">
                                                     <!-- Dynamic rows will be added here -->
                                                 </VBox>
-                                                <Button onAction="#handleAddConsigne" style="-fx-background-color: #f3f4f6; -fx-text-fill: #374151; -fx-font-weight: bold; -fx-padding: 5 15; -fx-background-radius: 4; -fx-cursor: hand; -fx-border-color: #d1d5db; -fx-border-radius: 4;" text="+ Add Instruction" />
+                                                <HBox spacing="10.0">
+                                                    <children>
+                                                        <Button onAction="#handleAddConsigne" style="-fx-background-color: #f3f4f6; -fx-text-fill: #374151; -fx-font-weight: bold; -fx-padding: 8 15; -fx-background-radius: 4; -fx-cursor: hand; -fx-border-color: #d1d5db; -fx-border-radius: 4;" text="+ Manual Task" />
+                                                        <Button fx:id="aiSuggestBtn" onAction="#handleAiSuggest" style="-fx-background-color: #ecfdf5; -fx-text-fill: #059669; -fx-font-weight: bold; -fx-padding: 8 15; -fx-background-radius: 4; -fx-cursor: hand; -fx-border-color: #10b981; -fx-border-radius: 4;" text="✨ AI Suggest Tasks" />
+                                                    </children>
+                                                </HBox>
                                                 <Label style="-fx-text-fill: #6b7280; -fx-font-size: 12px;" text="✎ Break down the task into clear, simple steps." />
                                             </children>
                                         </VBox>
