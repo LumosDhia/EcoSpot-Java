@@ -1,5 +1,5 @@
 @echo off
-set "JAVA_HOME=C:\Program Files\JetBrains\IntelliJ IDEA 2025.3\jbr"
+set "JAVA_HOME=C:\Program Files\Java\jdk-23"
 setlocal enabledelayedexpansion
 cd /d "%~dp0"
 
