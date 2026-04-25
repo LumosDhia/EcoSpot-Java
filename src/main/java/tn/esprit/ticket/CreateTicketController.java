@@ -17,6 +17,7 @@ import tn.esprit.services.OpenRouterService;
 import tn.esprit.user.User;
 import tn.esprit.util.SessionManager;
 import javafx.scene.control.ListView;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 
@@ -28,6 +29,7 @@ public class CreateTicketController {
     @FXML private Label userNameLabel;
     @FXML private TextField titleInput;
     @FXML private TextArea descriptionInput;
+    @FXML private ScrollPane mainScrollPane;
     @FXML private VBox consignesContainer;
     @FXML private Button aiSuggestBtn;
     @FXML private TextField locationInput;
@@ -193,6 +195,9 @@ public class CreateTicketController {
         aiSuggestBtn.setDisable(true);
         aiSuggestBtn.setText("✨ Thinking...");
 
+        // Save current scroll position
+        double currentScroll = mainScrollPane.getVvalue();
+
         new Thread(() -> {
             OpenRouterService.AiResponse response = openRouterService.generateTasks(title, desc);
             javafx.application.Platform.runLater(() -> {
@@ -211,9 +216,8 @@ public class CreateTicketController {
                     errorLabel.setVisible(false);
                     errorLabel.setManaged(false);
                     
-                    // Also suggest priority if it's a new ticket
-                    // (We don't have a priority input yet in this Java screen, 
-                    // but we could add one or just log it for now).
+                    // Restore scroll position after layout updates
+                    javafx.application.Platform.runLater(() -> mainScrollPane.setVvalue(currentScroll));
                 }
             });
         }).start();

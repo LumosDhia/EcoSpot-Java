@@ -10,6 +10,7 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
@@ -25,6 +26,7 @@ import java.util.List;
 public class AdminAllTicketsController {
 
     @FXML private VBox ticketsListContainer;
+    @FXML private ScrollPane mainScrollPane;
     @FXML private Label userNameLabel;
 
     private final TicketService ticketService = new TicketService();
@@ -118,8 +120,10 @@ public class AdminAllTicketsController {
         Alert confirm = new Alert(Alert.AlertType.CONFIRMATION, "Delete ticket \"" + t.getTitle() + "\"?");
         confirm.showAndWait().ifPresent(result -> {
             if (result == ButtonType.OK) {
+                double currentScroll = mainScrollPane.getVvalue();
                 ticketService.delete(t);
                 loadAllTickets();
+                javafx.application.Platform.runLater(() -> mainScrollPane.setVvalue(currentScroll));
             }
         });
     }

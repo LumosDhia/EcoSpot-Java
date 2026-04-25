@@ -38,7 +38,7 @@
             </children>
         </HBox>
 
-        <ScrollPane fitToWidth="true" style="-fx-background-color: transparent; -fx-background: transparent; -fx-border-color: transparent;" VBox.vgrow="ALWAYS">
+        <ScrollPane fx:id="mainScrollPane" fitToWidth="true" style="-fx-background-color: transparent; -fx-background: transparent; -fx-border-color: transparent;" VBox.vgrow="ALWAYS">
             <content>
                 <VBox alignment="TOP_CENTER" spacing="20.0">
                     <padding><Insets bottom="40.0" left="40.0" right="40.0" top="30.0" /></padding>

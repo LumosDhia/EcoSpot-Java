@@ -58,7 +58,7 @@
 
                 <Region prefHeight="20.0" />
 
-                <ScrollPane fitToWidth="true" style="-fx-background-color: transparent;" VBox.vgrow="ALWAYS">
+                <ScrollPane fx:id="mainScrollPane" fitToWidth="true" style="-fx-background-color: transparent;" VBox.vgrow="ALWAYS">
                     <content>
                         <VBox fx:id="ticketsListContainer" spacing="12.0" />
                     </content>
