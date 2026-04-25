@@ -22,6 +22,11 @@ public class OpenRouterService {
         public String suggestedPriority = "MEDIUM";
     }
 
+    public static class DetectionResult {
+        public boolean isSpam;
+        public String reason;
+    }
+
     public AiResponse generateTasks(String title, String description) {
         AiResponse result = new AiResponse();
         if (API_KEY == null || API_KEY.isEmpty()) {
@@ -80,6 +85,68 @@ public class OpenRouterService {
                     result.tasks.add(tasksArr.getString(i));
                 }
                 result.suggestedPriority = decoded.optString("suggested_priority", "MEDIUM");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return result;
+    }
+
+    public DetectionResult checkSpam(String title, String description) {
+        DetectionResult result = new DetectionResult();
+        result.isSpam = false;
+        result.reason = "";
+
+        if (API_KEY == null || API_KEY.isEmpty()) {
+            return result;
+        }
+
+        try {
+            URL url = new URL(API_URL);
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setRequestMethod("POST");
+            conn.setRequestProperty("Authorization", "Bearer " + API_KEY);
+            conn.setRequestProperty("Content-Type", "application/json");
+            conn.setRequestProperty("HTTP-Referer", "http://localhost:8000");
+            conn.setDoOutput(true);
+
+            JSONObject payload = new JSONObject();
+            payload.put("model", "openrouter/auto");
+            
+            JSONArray messages = new JSONArray();
+            messages.put(new JSONObject().put("role", "system").put("content", "You are a precise spam filter. Output ONLY valid JSON."));
+            messages.put(new JSONObject().put("role", "user").put("content", 
+                "Analyze if this ticket is spam (gibberish or unrelated to environment/nature).\n" +
+                "Title: " + title + "\nDescription: " + description + "\n\n" +
+                "Reply ONLY with a JSON object: {\"is_spam\": boolean, \"reason\": \"string\"}"));
+            
+            payload.put("messages", messages);
+            payload.put("response_format", new JSONObject().put("type", "json_object"));
+
+            try (OutputStream os = conn.getOutputStream()) {
+                byte[] input = payload.toString().getBytes(StandardCharsets.UTF_8);
+                os.write(input, 0, input.length);
+            }
+
+            if (conn.getResponseCode() == 200) {
+                BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+                StringBuilder res = new StringBuilder();
+                String line;
+                while ((line = in.readLine()) != null) res.append(line);
+                in.close();
+
+                JSONObject data = new JSONObject(res.toString());
+                String content = data.getJSONArray("choices").getJSONObject(0).getJSONObject("message").getString("content");
+                JSONObject decoded = new JSONObject(content);
+                result.isSpam = decoded.getBoolean("is_spam");
+                result.reason = decoded.optString("reason", "");
+            } else {
+                BufferedReader in = new BufferedReader(new InputStreamReader(conn.getErrorStream()));
+                StringBuilder err = new StringBuilder();
+                String line;
+                while ((line = in.readLine()) != null) err.append(line);
+                in.close();
+                System.err.println("Spam check failed (" + conn.getResponseCode() + "): " + err.toString());
             }
         } catch (Exception e) {
             e.printStackTrace();

@@ -247,68 +247,83 @@ public class CreateTicketController {
             return;
         }
 
-        Ticket t = editingTicket != null ? editingTicket : new Ticket();
-        if (editingTicket != null && editingTicket.getStatus() == TicketStatus.PUBLISHED) {
-            showError("Accepted tickets can no longer be edited.");
-            return;
-        }
-        t.setTitle(title);
-        t.setDescription(desc);
-        
-        // Collect Consignes
-        t.getConsignes().clear();
-        for (Node node : consignesContainer.getChildren()) {
-            if (node instanceof HBox) {
-                HBox row = (HBox) node;
-                for (Node child : row.getChildren()) {
-                    if (child instanceof TextField) {
-                        String txt = ((TextField) child).getText().trim();
-                        if (!txt.isEmpty()) {
-                            t.getConsignes().add(new Consigne(txt));
+        Button submitBtn = (Button) event.getSource();
+        String originalText = submitBtn.getText();
+        submitBtn.setDisable(true);
+        submitBtn.setText("Validating...");
+
+        // Perform Spam Detection first using the unified OpenRouterService
+        new Thread(() -> {
+            OpenRouterService.DetectionResult result = openRouterService.checkSpam(title, desc);
+            javafx.application.Platform.runLater(() -> {
+                Ticket t = editingTicket != null ? editingTicket : new Ticket();
+                if (editingTicket != null && editingTicket.getStatus() == TicketStatus.PUBLISHED) {
+                    showError("Accepted tickets can no longer be edited.");
+                    submitBtn.setDisable(false);
+                    submitBtn.setText(originalText);
+                    return;
+                }
+                
+                t.setTitle(title);
+                t.setDescription(desc);
+                t.setSpam(result.isSpam);
+                if (result.isSpam) {
+                    System.out.println("AI Flagged as SPAM: " + result.reason);
+                }
+
+                // Collect Consignes
+                t.getConsignes().clear();
+                for (Node node : consignesContainer.getChildren()) {
+                    if (node instanceof HBox) {
+                        HBox row = (HBox) node;
+                        for (Node child : row.getChildren()) {
+                            if (child instanceof TextField) {
+                                String txt = ((TextField) child).getText().trim();
+                                if (!txt.isEmpty()) {
+                                    t.getConsignes().add(new Consigne(txt));
+                                }
+                            }
                         }
                     }
                 }
-            }
-        }
 
-        t.setLocation(loc);
-        t.setLatitude(selectedLat);
-        t.setLongitude(selectedLon);
-        
-        if (editingTicket != null) {
-            // Any user edit is treated as a new admin review cycle.
-            t.setStatus(TicketStatus.PENDING);
-        } else {
-            t.setStatus(TicketStatus.PENDING);
-        }
-        if (t.getPriority() == null) t.setPriority(TicketPriority.MEDIUM);
-        if (t.getDomain() == null) t.setDomain(ActionDomain.OTHER);
-        t.setAdminNotes(null); // reset revision notes on resubmission
-        
-        if (SessionManager.isLoggedIn()) {
-            t.setUserId(SessionManager.getCurrentUser().getId());
-        } else {
-            t.setUserId(0);
-        }
+                t.setLocation(loc);
+                t.setLatitude(selectedLat);
+                t.setLongitude(selectedLon);
 
-        if (selectedFile != null) {
-            t.setImage(selectedFile.toURI().toString());
-        }
-        try {
-            if (editingTicket != null) {
-                ticketService.update(t);
-                System.out.println("Ticket resubmitted for review: " + title);
-            } else {
-                ticketService.add(t);
-                System.out.println("Ticket created: " + title);
-            }
-        } catch (RuntimeException ex) {
-            showError(ex.getMessage());
-            return;
-        }
+                if (editingTicket != null) {
+                    t.setStatus(TicketStatus.PENDING);
+                } else {
+                    t.setStatus(TicketStatus.PENDING);
+                }
+                if (t.getPriority() == null) t.setPriority(TicketPriority.MEDIUM);
+                if (t.getDomain() == null) t.setDomain(ActionDomain.OTHER);
+                t.setAdminNotes(null);
 
-        // Redirect back to My Tickets after creation
-        goToMyTickets(event);
+                if (SessionManager.isLoggedIn()) {
+                    t.setUserId(SessionManager.getCurrentUser().getId());
+                } else {
+                    t.setUserId(0);
+                }
+
+                if (selectedFile != null) {
+                    t.setImage(selectedFile.toURI().toString());
+                }
+
+                try {
+                    if (editingTicket != null) {
+                        ticketService.update(t);
+                    } else {
+                        ticketService.add(t);
+                    }
+                    goToMyTickets(event);
+                } catch (RuntimeException ex) {
+                    showError(ex.getMessage());
+                    submitBtn.setDisable(false);
+                    submitBtn.setText(originalText);
+                }
+            });
+        }).start();
     }
 
     public void setTicketForEdit(Ticket ticket) {
