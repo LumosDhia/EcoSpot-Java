@@ -78,6 +78,13 @@ public class PendingTicketsController {
         loc.setStyle("-fx-text-fill: #4b5563; -fx-font-size: 13px;");
         
         topInfo.getChildren().addAll(title, new Label("•"), loc, new Label("•"), date);
+        
+        if (t.isSpam()) {
+            Label spamBadge = new Label("🚨 AI SPAM FLAG");
+            spamBadge.setStyle("-fx-background-color: #fef2f2; -fx-text-fill: #b91c1c; -fx-padding: 4 10; -fx-background-radius: 12; -fx-font-size: 11px; -fx-font-weight: bold; -fx-border-color: #fecaca; -fx-border-radius: 12;");
+            topInfo.getChildren().add(new Label("•"));
+            topInfo.getChildren().add(spamBadge);
+        }
 
         // Body Row (Desc + Image)
         HBox body = new HBox(20);

@@ -107,7 +107,15 @@ public class AdminAllTicketsController {
 
         Region spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);
-        top.getChildren().addAll(title, spacer, status);
+        top.getChildren().addAll(title, spacer);
+        
+        if (t.isSpam()) {
+            Label spamBadge = new Label("🚨 SPAM");
+            spamBadge.setStyle("-fx-background-color: #fef2f2; -fx-text-fill: #b91c1c; -fx-padding: 4 10; -fx-background-radius: 12; -fx-font-size: 11px; -fx-font-weight: bold; -fx-border-color: #fecaca; -fx-border-radius: 12;");
+            top.getChildren().add(spamBadge);
+        }
+        
+        top.getChildren().add(status);
 
         Label meta = new Label(
                 "📍 " + (t.getLocation() == null ? "No location" : t.getLocation()) +
