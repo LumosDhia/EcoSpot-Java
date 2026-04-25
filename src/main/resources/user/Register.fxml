@@ -8,6 +8,7 @@
 <?import javafx.scene.control.PasswordField?>
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.TextField?>
+<?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Region?>
@@ -124,10 +125,25 @@
                                     </children>
                                 </VBox>
 
+                                <VBox spacing="10.0" style="-fx-background-color: #f7fafc; -fx-padding: 15; -fx-background-radius: 8; -fx-border-color: #cbd5e0; -fx-border-radius: 8;">
+                                    <children>
+                                        <Label text="Robot Verification" styleClass="field-label" />
+                                        <HBox spacing="10.0" alignment="CENTER_LEFT">
+                                            <children>
+                                                <ImageView fx:id="captchaImageView" fitHeight="40.0" fitWidth="120.0" pickOnBounds="true" preserveRatio="true" />
+                                                <Button text="🔄" onAction="#refreshCaptcha" style="-fx-background-color: transparent; -fx-cursor: hand;" />
+                                                <TextField fx:id="captchaField" promptText="Enter code" styleClass="login-input" HBox.hgrow="ALWAYS" />
+                                            </children>
+                                        </HBox>
+                                    </children>
+                                </VBox>
+
                                 <CheckBox fx:id="termsCheckBox" text="I agree to the terms and conditions" styleClass="terms-checkbox" />
 
                                 <VBox spacing="15.0">
                                     <children>
+                                        <Button text="📸 Add Face ID (Optional)" onAction="#handleFaceEnroll" maxWidth="Infinity" 
+                                                style="-fx-background-color: #f7fafc; -fx-border-color: #cbd5e0; -fx-text-fill: #2d3748; -fx-font-weight: bold; -fx-padding: 10; -fx-background-radius: 4; -fx-border-radius: 4; -fx-cursor: hand;" />
                                         <Button fx:id="registerBtn" text="Register" styleClass="btn-signin" maxWidth="Infinity" onAction="#handleRegister" />
                                         <Button text="Already have an account? Sign in" styleClass="btn-register-outline" maxWidth="Infinity" onAction="#goToLogin" />
                                     </children>

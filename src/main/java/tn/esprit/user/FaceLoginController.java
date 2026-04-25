@@ -38,10 +38,29 @@ public class FaceLoginController {
     private AtomicBoolean stopCamera = new AtomicBoolean(false);
     private UserService userService = new UserService();
     private final String FACE_SERVICE_URL = Config.get("FACE_SERVICE_URL", "http://localhost:8001");
+    
+    private boolean enrollMode = false;
+    private String enrollEmail = null;
 
     @FXML
     public void initialize() {
         startWebcam();
+        
+        // Ensure camera stops if window is closed via X button
+        Platform.runLater(() -> {
+            if (webcamView.getScene() != null && webcamView.getScene().getWindow() != null) {
+                webcamView.getScene().getWindow().setOnCloseRequest(e -> stopCamera.set(true));
+            }
+        });
+    }
+
+    public void setEnrollmentMode(String email) {
+        this.enrollMode = true;
+        this.enrollEmail = email;
+        Platform.runLater(() -> {
+            scanBtn.setText("Enroll Face");
+            statusLabel.setText("Registering Face for: " + email);
+        });
     }
 
     private void startWebcam() {
@@ -96,7 +115,43 @@ public class FaceLoginController {
             return;
         }
 
-        verifyFace(base64Image, event);
+        if (enrollMode) {
+            enrollFace(base64Image, event);
+        } else {
+            verifyFace(base64Image, event);
+        }
+    }
+
+    private void enrollFace(String base64Image, ActionEvent event) {
+        HttpClient client = HttpClient.newHttpClient();
+        String jsonBody = "{\"image\": \"" + base64Image + "\", \"user_id\": \"" + enrollEmail + "\"}";
+
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(FACE_SERVICE_URL + "/enroll"))
+                .header("Content-Type", "application/json")
+                .POST(HttpRequest.BodyPublishers.ofString(jsonBody))
+                .build();
+
+        client.sendAsync(request, HttpResponse.BodyHandlers.ofString())
+                .thenApply(HttpResponse::body)
+                .thenAccept(response -> {
+                    Platform.runLater(() -> {
+                        if (response.contains("\"status\":\"success\"") || response.contains("\"success\"")) {
+                            statusLabel.setText("Face Enrolled Successfully!");
+                            statusLabel.setStyle("-fx-text-fill: #2d6a4f;");
+                            new Thread(() -> {
+                                try { Thread.sleep(1500); } catch (InterruptedException ignored) {}
+                                Platform.runLater(() -> closeWindow(event));
+                            }).start();
+                        } else {
+                            showError("Enrollment failed: " + response);
+                        }
+                    });
+                })
+                .exceptionally(ex -> {
+                    Platform.runLater(() -> showError("Face service unavailable."));
+                    return null;
+                });
     }
 
     private String encodeImageToBase64(BufferedImage image) {
