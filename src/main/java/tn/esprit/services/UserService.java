@@ -115,6 +115,17 @@ public class UserService {
         return null;
     }
 
+    public User getUserByEmail(String email) {
+        if (email == null) return null;
+        loadUsersFromDb();
+        for (User user : users) {
+            if (user.getEmail().equalsIgnoreCase(email)) {
+                return user;
+            }
+        }
+        return null;
+    }
+
     private void ensureQuickAppUsersExist() {
         if (!hasTable("app_user")) return;
         ensureQuickAppUser("admin@mail.com", "Admin", "User", "ROLE_ADMIN");

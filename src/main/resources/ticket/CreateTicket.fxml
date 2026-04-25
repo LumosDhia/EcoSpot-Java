@@ -7,6 +7,7 @@
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.TextArea?>
 <?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.ListView?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
@@ -37,7 +38,7 @@
             </children>
         </HBox>
 
-        <ScrollPane fitToWidth="true" style="-fx-background-color: transparent; -fx-background: transparent; -fx-border-color: transparent;" VBox.vgrow="ALWAYS">
+        <ScrollPane fx:id="mainScrollPane" fitToWidth="true" style="-fx-background-color: transparent; -fx-background: transparent; -fx-border-color: transparent;" VBox.vgrow="ALWAYS">
             <content>
                 <VBox alignment="TOP_CENTER" spacing="20.0">
                     <padding><Insets bottom="40.0" left="40.0" right="40.0" top="30.0" /></padding>
@@ -93,12 +94,37 @@
                                                 <TextArea fx:id="descriptionInput" promptText="Describe the issue in detail (min 20 characters)" prefRowCount="5" style="-fx-padding: 5; -fx-background-color: white; -fx-border-color: #d1d5db; -fx-border-radius: 4; -fx-font-size: 14px;" wrapText="true" />
                                             </children>
                                         </VBox>
-                                        
-                                        <!-- Location (Implicitly required according to alert) -->
+
+                                        <!-- Dynamic Consignes Section -->
                                         <VBox spacing="8.0">
                                             <children>
-                                                <Label style="-fx-font-weight: bold; -fx-text-fill: #1f2937; -fx-font-size: 14px;" text="Location" />
-                                                <TextField fx:id="locationInput" promptText="City, Neighborhood or exact address" style="-fx-padding: 10; -fx-background-color: white; -fx-border-color: #d1d5db; -fx-border-radius: 4; -fx-font-size: 14px;" />
+                                                <Label style="-fx-font-weight: bold; -fx-text-fill: #1f2937; -fx-font-size: 14px;" text="Specific Instructions (Consignes)" />
+                                                <VBox fx:id="consignesContainer" spacing="10.0">
+                                                    <!-- Dynamic rows will be added here -->
+                                                </VBox>
+                                                <HBox spacing="10.0">
+                                                    <children>
+                                                        <Button onAction="#handleAddConsigne" style="-fx-background-color: #f3f4f6; -fx-text-fill: #374151; -fx-font-weight: bold; -fx-padding: 8 15; -fx-background-radius: 4; -fx-cursor: hand; -fx-border-color: #d1d5db; -fx-border-radius: 4;" text="+ Manual Task" />
+                                                        <Button fx:id="aiSuggestBtn" onAction="#handleAiSuggest" style="-fx-background-color: #ecfdf5; -fx-text-fill: #059669; -fx-font-weight: bold; -fx-padding: 8 15; -fx-background-radius: 4; -fx-cursor: hand; -fx-border-color: #10b981; -fx-border-radius: 4;" text="✨ AI Suggest Tasks" />
+                                                    </children>
+                                                </HBox>
+                                                <Label style="-fx-text-fill: #6b7280; -fx-font-size: 12px;" text="✎ Break down the task into clear, simple steps." />
+                                            </children>
+                                        </VBox>
+                                        
+                                        <!-- Location (Implicitly required according to alert) -->
+                                        <!-- Location Search -->
+                                        <VBox spacing="8.0">
+                                            <children>
+                                                <Label style="-fx-font-weight: bold; -fx-text-fill: #1f2937; -fx-font-size: 14px;" text="Location *" />
+                                                <HBox spacing="10.0">
+                                                    <children>
+                                                        <TextField fx:id="locationInput" promptText="Search for a place (e.g. Paris, Central Park)" HBox.hgrow="ALWAYS" style="-fx-padding: 10; -fx-background-color: white; -fx-border-color: #d1d5db; -fx-border-radius: 4; -fx-font-size: 14px;" />
+                                                        <Button fx:id="searchLocationBtn" onAction="#handleLocationSearch" style="-fx-background-color: #10b981; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 10 20; -fx-background-radius: 4; -fx-cursor: hand;" text="Search" />
+                                                    </children>
+                                                </HBox>
+                                                <ListView fx:id="locationResultsList" visible="false" managed="false" prefHeight="150.0" style="-fx-background-radius: 4; -fx-border-color: #d1d5db;" />
+                                                <Label style="-fx-text-fill: #6b7280; -fx-font-size: 12px;" text="📍 Tip: Search and select a precise location for accurate weather data." />
                                             </children>
                                         </VBox>
 

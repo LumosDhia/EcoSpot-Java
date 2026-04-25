@@ -12,6 +12,7 @@ import java.util.StringJoiner;
 
 public class TicketService implements GlobalInterface<Ticket> {
     private Connection cnx;
+    private final ConsigneService consigneService = new ConsigneService();
 
     public TicketService() {
         cnx = MyConnection.getInstance().getCnx();
@@ -85,7 +86,7 @@ public class TicketService implements GlobalInterface<Ticket> {
         }
 
         String req = "INSERT INTO `ticket` (" + columns + ") VALUES (" + values + ")";
-        try (PreparedStatement ps = cnx.prepareStatement(req)) {
+        try (PreparedStatement ps = cnx.prepareStatement(req, Statement.RETURN_GENERATED_KEYS)) {
             int idx = 1;
             ps.setString(idx++, ticket.getTitle());
             ps.setString(idx++, ticket.getDescription());
@@ -117,6 +118,16 @@ public class TicketService implements GlobalInterface<Ticket> {
                 else ps.setNull(idx++, Types.BINARY);
             }
             ps.executeUpdate();
+            try (ResultSet generatedKeys = ps.getGeneratedKeys()) {
+                if (generatedKeys.next()) {
+                    int ticketId = generatedKeys.getInt(1);
+                    ticket.setId(ticketId);
+                    for (tn.esprit.ticket.Consigne c : ticket.getConsignes()) {
+                        c.setTicketId(ticketId);
+                        consigneService.add(c);
+                    }
+                }
+            }
         } catch (SQLException e) {
             e.printStackTrace();
             throw new RuntimeException("SQL Error adding ticket: " + e.getMessage(), e);
@@ -168,6 +179,13 @@ public class TicketService implements GlobalInterface<Ticket> {
             
             ps.setInt(17, ticket.getId());
             ps.executeUpdate();
+
+            // Update Consignes: Delete and Re-add
+            consigneService.deleteByTicketId(ticket.getId());
+            for (Consigne c : ticket.getConsignes()) {
+                c.setTicketId(ticket.getId());
+                consigneService.add(c);
+            }
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -273,6 +291,7 @@ public class TicketService implements GlobalInterface<Ticket> {
         if (cid instanceof Number) t.setCompletedById(((Number) cid).intValue());
         t.setCompletionMessage(rs.getString("completion_message"));
         t.setCompletionImage(rs.getString("completion_image"));
+        t.setConsignes(consigneService.getByTicketId(t.getId()));
         t.setSpam(rs.getBoolean("is_spam"));
         t.setCreatedAt(rs.getTimestamp("created_at").toLocalDateTime());
         Timestamp ach = rs.getTimestamp("achieved_at");

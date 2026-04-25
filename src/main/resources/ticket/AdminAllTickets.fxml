@@ -44,7 +44,7 @@
                 <Insets top="25.0" bottom="25.0" left="30.0" right="30.0" />
             </padding>
             <children>
-                <HBox alignment="CENTER_LEFT">
+                <HBox alignment="CENTER_LEFT" spacing="20.0">
                     <children>
                         <VBox spacing="5.0">
                             <children>
@@ -53,12 +53,18 @@
                             </children>
                         </VBox>
                         <Region HBox.hgrow="ALWAYS" />
+                        <VBox spacing="5.0">
+                            <children>
+                                <Label style="-fx-font-weight: bold; -fx-text-fill: #4b5563; -fx-font-size: 12px;" text="FILTER BY STATUS" />
+                                <javafx.scene.control.ComboBox fx:id="statusFilter" prefWidth="180.0" promptText="Select Status" style="-fx-background-color: white; -fx-border-color: #d1d5db; -fx-border-radius: 4; -fx-padding: 2;" />
+                            </children>
+                        </VBox>
                     </children>
                 </HBox>
 
                 <Region prefHeight="20.0" />
 
-                <ScrollPane fitToWidth="true" style="-fx-background-color: transparent;" VBox.vgrow="ALWAYS">
+                <ScrollPane fx:id="mainScrollPane" fitToWidth="true" style="-fx-background-color: transparent;" VBox.vgrow="ALWAYS">
                     <content>
                         <VBox fx:id="ticketsListContainer" spacing="12.0" />
                     </content>

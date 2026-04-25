@@ -10,8 +10,11 @@ import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
+import javafx.application.Platform;
 import javafx.stage.Stage;
 import tn.esprit.services.TicketService;
+import tn.esprit.services.WeatherService;
 
 import java.io.IOException;
 import java.time.format.DateTimeFormatter;
@@ -29,10 +32,15 @@ public class TicketDetailController {
     @FXML private HBox authLinks;
     @FXML private HBox userLinks;
     @FXML private HBox completionBox;
+    @FXML private VBox consigneBox;
+    @FXML private VBox consignesDisplayContainer;
+    @FXML private VBox weatherBox;
+    @FXML private HBox forecastContainer;
     @FXML private Button dashboardTopBtn;
 
     private Ticket currentTicket;
     private final TicketService ticketService = new TicketService();
+    private final WeatherService weatherService = new WeatherService();
     private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
 
     @FXML
@@ -74,6 +82,23 @@ public class TicketDetailController {
         dateLabel.setText("Created " + (t.getCreatedAt() != null ? t.getCreatedAt().format(formatter) : "Unknown"));
         statusBadge.setText(t.getStatus().name());
         priorityBadge.setText(t.getPriority().name());
+
+        consignesDisplayContainer.getChildren().clear();
+        if (t.getConsignes() != null && !t.getConsignes().isEmpty()) {
+            consigneBox.setVisible(true);
+            consigneBox.setManaged(true);
+            for (Consigne c : t.getConsignes()) {
+                Label l = new Label("• " + c.getText());
+                l.setStyle("-fx-text-fill: #1e293b; -fx-font-size: 15px;");
+                l.setWrapText(true);
+                consignesDisplayContainer.getChildren().add(l);
+            }
+        } else {
+            consigneBox.setVisible(false);
+            consigneBox.setManaged(false);
+        }
+
+        loadWeather(t);
 
         // Priority Badge styling
         priorityBadge.getStyleClass().removeAll("ticket-badge-low", "ticket-badge-medium", "ticket-badge-high");
@@ -130,7 +155,71 @@ public class TicketDetailController {
             ticketImageView.setManaged(false);
             ticketImageView.setVisible(false);
         }
+    }
 
+    private void loadWeather(Ticket t) {
+        if (t.getLatitude() == 0 && t.getLongitude() == 0) {
+            weatherBox.setVisible(false);
+            weatherBox.setManaged(false);
+            return;
+        }
+
+        weatherBox.setVisible(true);
+        weatherBox.setManaged(true);
+        forecastContainer.getChildren().clear();
+        
+        Label loading = new Label("Loading weather forecast...");
+        loading.setStyle("-fx-text-fill: #0ea5e9;");
+        forecastContainer.getChildren().add(loading);
+
+        new Thread(() -> {
+            java.util.List<WeatherService.ForecastDay> forecast = weatherService.getWeeklyForecast(t.getLatitude(), t.getLongitude());
+            Platform.runLater(() -> {
+                forecastContainer.getChildren().clear();
+                if (forecast.isEmpty()) {
+                    forecastContainer.getChildren().add(new Label("Failed to load weather."));
+                } else {
+                    for (WeatherService.ForecastDay day : forecast) {
+                        forecastContainer.getChildren().add(createForecastCard(day));
+                    }
+                }
+            });
+        }).start();
+    }
+
+    private VBox createForecastCard(WeatherService.ForecastDay day) {
+        VBox card = new VBox(5);
+        card.setAlignment(javafx.geometry.Pos.CENTER);
+        card.setStyle("-fx-background-color: white; -fx-padding: 10; -fx-background-radius: 8; -fx-border-color: #e0f2fe; -fx-min-width: 100;");
+
+        Label dateLbl = new Label(day.getDate().substring(5)); // Show MM-DD
+        dateLbl.setStyle("-fx-font-weight: bold; -fx-text-fill: #64748b;");
+
+        Label iconLbl = new Label(getWeatherEmoji(day.getWeatherCode()));
+        iconLbl.setStyle("-fx-font-size: 24px;");
+
+        Label tempLbl = new Label(Math.round(day.getTempMax()) + "° / " + Math.round(day.getTempMin()) + "°");
+        tempLbl.setStyle("-fx-font-weight: bold; -fx-text-fill: #1e293b;");
+
+        Label descLbl = new Label(day.getDescription());
+        descLbl.setStyle("-fx-font-size: 10px; -fx-text-fill: #94a3b8;");
+        descLbl.setWrapText(true);
+        descLbl.setAlignment(javafx.geometry.Pos.CENTER);
+
+        card.getChildren().addAll(dateLbl, iconLbl, tempLbl, descLbl);
+        return card;
+    }
+
+    private String getWeatherEmoji(int code) {
+        if (code == 0) return "☀️";
+        if (code >= 1 && code <= 3) return "☁️";
+        if (code >= 45 && code <= 48) return "🌫️";
+        if (code >= 51 && code <= 67) return "🌧️";
+        if (code >= 71 && code <= 77) return "❄️";
+        if (code >= 80 && code <= 82) return "🌦️";
+        if (code >= 85 && code <= 86) return "🌨️";
+        if (code >= 95) return "⛈️";
+        return "❓";
     }
 
     @FXML

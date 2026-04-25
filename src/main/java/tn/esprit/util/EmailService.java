@@ -16,13 +16,16 @@ public class EmailService {
         if (user == null || pass == null) {
             throw new MessagingException("Email configuration missing in .env file (MAIL_USER or MAIL_PASS)");
         }
+        System.out.println("Attempting to send email using: " + user);
 
         Properties props = new Properties();
         props.put("mail.smtp.auth", "true");
-        props.put("mail.smtp.starttls.enable", "true");
         props.put("mail.smtp.host", host);
-        props.put("mail.smtp.port", port);
-        props.put("mail.smtp.ssl.protocols", "TLSv1.2");
+        props.put("mail.smtp.port", "465");
+        props.put("mail.smtp.socketFactory.port", "465");
+        props.put("mail.smtp.socketFactory.class", "javax.net.ssl.SSLSocketFactory");
+        props.put("mail.smtp.ssl.checkserveridentity", "false");
+        props.put("mail.smtp.trust", "*");
 
         Session session = Session.getInstance(props, new Authenticator() {
             @Override

@@ -9,13 +9,17 @@ import javafx.scene.Parent;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import tn.esprit.services.TicketService;
+import tn.esprit.services.UserService;
+import tn.esprit.user.User;
 import tn.esprit.util.SessionManager;
 
 import java.io.IOException;
@@ -25,10 +29,14 @@ import java.util.List;
 public class AdminAllTicketsController {
 
     @FXML private VBox ticketsListContainer;
+    @FXML private ScrollPane mainScrollPane;
     @FXML private Label userNameLabel;
+    @FXML private ComboBox<String> statusFilter;
 
     private final TicketService ticketService = new TicketService();
+    private final UserService userService = new UserService();
     private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+    private List<User> ngoUsers;
 
     @FXML
     public void initialize() {
@@ -40,13 +48,39 @@ public class AdminAllTicketsController {
             userNameLabel.setText(SessionManager.getCurrentUser().getUsername());
         }
         tn.esprit.util.NavigationHistory.track(ticketsListContainer, "/ticket/AdminAllTickets.fxml");
+        
+        setupFilters();
+        loadNgoUsers();
         loadAllTickets();
+    }
+
+    private void setupFilters() {
+        statusFilter.getItems().add("ALL");
+        for (TicketStatus s : TicketStatus.values()) {
+            statusFilter.getItems().add(s.name());
+        }
+        statusFilter.setValue("ALL");
+        statusFilter.setOnAction(e -> loadAllTickets());
+    }
+
+    private void loadNgoUsers() {
+        ngoUsers = userService.getAllUsers().stream()
+                .filter(u -> "NGO".equalsIgnoreCase(u.getRole()))
+                .collect(java.util.stream.Collectors.toList());
     }
 
     private void loadAllTickets() {
         ticketsListContainer.getChildren().clear();
 
         List<Ticket> all = ticketService.getAll();
+        String filter = statusFilter.getValue();
+        
+        if (filter != null && !"ALL".equals(filter)) {
+            all = all.stream()
+                    .filter(t -> t.getStatus().name().equals(filter))
+                    .collect(java.util.stream.Collectors.toList());
+        }
+
         if (all.isEmpty()) {
             Label emptyLbl = new Label("No tickets found.");
             emptyLbl.setStyle("-fx-text-fill: #9ca3af; -fx-font-size: 16px; -fx-padding: 30;");
@@ -81,6 +115,14 @@ public class AdminAllTicketsController {
         );
         meta.setStyle("-fx-text-fill: #6b7280; -fx-font-size: 12px;");
 
+        if (t.getAssignedNgoId() != null && t.getAssignedNgoId() > 0) {
+            User ngo = ngoUsers.stream().filter(u -> u.getId() == t.getAssignedNgoId()).findFirst().orElse(null);
+            String ngoName = (ngo != null) ? ngo.getUsername() : "Unknown NGO";
+            Label assignedLbl = new Label("🤝 Assigned to: " + ngoName);
+            assignedLbl.setStyle("-fx-text-fill: #0369a1; -fx-font-weight: bold; -fx-font-size: 12px; -fx-padding: 5 0;");
+            row.getChildren().add(assignedLbl);
+        }
+
         Label desc = new Label(t.getDescription() == null ? "" : t.getDescription());
         desc.setWrapText(true);
         desc.setStyle("-fx-text-fill: #374151; -fx-font-size: 13px;");
@@ -97,7 +139,50 @@ public class AdminAllTicketsController {
         deleteBtn.setOnAction(e -> deleteTicket(t));
 
         actions.getChildren().addAll(deleteBtn, viewBtn);
-        row.getChildren().addAll(top, meta, desc, actions);
+
+        // Assignment Controls for Published tickets
+        if (t.getStatus() == TicketStatus.PUBLISHED) {
+            HBox assignBox = new HBox(10);
+            assignBox.setAlignment(Pos.CENTER_LEFT);
+            assignBox.setStyle("-fx-padding: 10 0 0 0; -fx-border-color: #e5e7eb transparent transparent transparent;");
+            
+            Label assignLbl = new Label("Assign to NGO:");
+            assignLbl.setStyle("-fx-font-weight: bold; -fx-text-fill: #4b5563;");
+            
+            ComboBox<User> ngoCombo = new ComboBox<>();
+            ngoCombo.setPromptText("Choose NGO...");
+            ngoCombo.getItems().addAll(ngoUsers);
+            ngoCombo.setCellFactory(lv -> new javafx.scene.control.ListCell<User>() {
+                @Override protected void updateItem(User item, boolean empty) {
+                    super.updateItem(item, empty);
+                    setText(empty ? "" : item.getUsername());
+                }
+            });
+            ngoCombo.setButtonCell(new javafx.scene.control.ListCell<User>() {
+                @Override protected void updateItem(User item, boolean empty) {
+                    super.updateItem(item, empty);
+                    setText(empty ? "" : item.getUsername());
+                }
+            });
+
+            Button assignBtn = new Button("Assign");
+            assignBtn.setStyle("-fx-background-color: #0369a1; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;");
+            assignBtn.setOnAction(e -> {
+                User selectedNgo = ngoCombo.getValue();
+                if (selectedNgo != null) {
+                    t.setAssignedNgoId(selectedNgo.getId());
+                    t.setStatus(TicketStatus.ASSIGNED);
+                    ticketService.update(t);
+                    loadAllTickets();
+                }
+            });
+
+            assignBox.getChildren().addAll(assignLbl, ngoCombo, assignBtn);
+            row.getChildren().addAll(top, meta, desc, actions, assignBox);
+        } else {
+            row.getChildren().addAll(top, meta, desc, actions);
+        }
+        
         return row;
     }
 
@@ -118,8 +203,10 @@ public class AdminAllTicketsController {
         Alert confirm = new Alert(Alert.AlertType.CONFIRMATION, "Delete ticket \"" + t.getTitle() + "\"?");
         confirm.showAndWait().ifPresent(result -> {
             if (result == ButtonType.OK) {
+                double currentScroll = mainScrollPane.getVvalue();
                 ticketService.delete(t);
                 loadAllTickets();
+                javafx.application.Platform.runLater(() -> mainScrollPane.setVvalue(currentScroll));
             }
         });
     }
