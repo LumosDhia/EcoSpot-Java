@@ -1,6 +1,8 @@
 package tn.esprit.ticket;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Ticket {
     private int id;
@@ -23,6 +25,7 @@ public class Ticket {
     private String completionMessage;
     private String completionImage;
     private LocalDateTime achievedAt;
+    private List<Consigne> consignes = new ArrayList<>();
 
     public Ticket() {
         this.status = TicketStatus.PENDING;
@@ -82,4 +85,7 @@ public class Ticket {
     public void setSpam(boolean spam) { isSpam = spam; }
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+
+    public List<Consigne> getConsignes() { return consignes; }
+    public void setConsignes(List<Consigne> consignes) { this.consignes = consignes; }
 }

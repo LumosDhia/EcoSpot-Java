@@ -10,6 +10,7 @@ import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import tn.esprit.services.TicketService;
 
@@ -29,6 +30,8 @@ public class TicketDetailController {
     @FXML private HBox authLinks;
     @FXML private HBox userLinks;
     @FXML private HBox completionBox;
+    @FXML private VBox consigneBox;
+    @FXML private VBox consignesDisplayContainer;
     @FXML private Button dashboardTopBtn;
 
     private Ticket currentTicket;
@@ -74,6 +77,21 @@ public class TicketDetailController {
         dateLabel.setText("Created " + (t.getCreatedAt() != null ? t.getCreatedAt().format(formatter) : "Unknown"));
         statusBadge.setText(t.getStatus().name());
         priorityBadge.setText(t.getPriority().name());
+
+        consignesDisplayContainer.getChildren().clear();
+        if (t.getConsignes() != null && !t.getConsignes().isEmpty()) {
+            consigneBox.setVisible(true);
+            consigneBox.setManaged(true);
+            for (Consigne c : t.getConsignes()) {
+                Label l = new Label("• " + c.getText());
+                l.setStyle("-fx-text-fill: #1e293b; -fx-font-size: 15px;");
+                l.setWrapText(true);
+                consignesDisplayContainer.getChildren().add(l);
+            }
+        } else {
+            consigneBox.setVisible(false);
+            consigneBox.setManaged(false);
+        }
 
         // Priority Badge styling
         priorityBadge.getStyleClass().removeAll("ticket-badge-low", "ticket-badge-medium", "ticket-badge-high");

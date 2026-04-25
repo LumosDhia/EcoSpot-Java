@@ -96,6 +96,16 @@
                         <!-- Description -->
                         <Label fx:id="descriptionLabel" styleClass="ticket-description" style="-fx-font-size: 16px;" text="Full ticket description goes here..." wrapText="true" />
 
+                        <!-- Consignes (Instructions) -->
+                        <VBox fx:id="consigneBox" spacing="10.0" style="-fx-background-color: #f8fafc; -fx-padding: 20; -fx-background-radius: 8; -fx-border-color: #e2e8f0; -fx-border-radius: 8;">
+                            <children>
+                                <Label style="-fx-font-weight: bold; -fx-text-fill: #475569; -fx-font-size: 14px;" text="📝 SPECIFIC INSTRUCTIONS" />
+                                <VBox fx:id="consignesDisplayContainer" spacing="8.0">
+                                    <!-- Dynamic labels will be added here -->
+                                </VBox>
+                            </children>
+                        </VBox>
+
                         <!-- Ticket Image -->
                         <VBox alignment="CENTER" spacing="10.0">
                             <children>
