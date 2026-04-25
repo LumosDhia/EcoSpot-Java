@@ -72,7 +72,12 @@
                                     <children>
                                         <Label text="Password" styleClass="field-label" />
                                         <PasswordField fx:id="passwordField" promptText="Enter your password" styleClass="login-input" />
-
+                                        <HBox alignment="CENTER_RIGHT">
+                                            <children>
+                                                <Button text="Forgot Password?" onAction="#handleForgotPassword" 
+                                                        styleClass="forgot-link" style="-fx-background-color: transparent; -fx-padding: 0;" />
+                                            </children>
+                                        </HBox>
                                     </children>
                                 </VBox>
 
@@ -80,6 +85,8 @@
                                     <children>
                                         <Button fx:id="signInBtn" text="Sign in" styleClass="btn-signin" maxWidth="Infinity" onAction="#handleLogin" />
                                         <Button text="Register" styleClass="btn-register-outline" maxWidth="Infinity" onAction="#goToRegister" />
+                                        <Button text="🤖 Face ID Login" onAction="#handleFaceLogin" maxWidth="Infinity" 
+                                                style="-fx-background-color: #f7fafc; -fx-border-color: #cbd5e0; -fx-text-fill: #2d3748; -fx-font-weight: bold; -fx-padding: 10; -fx-background-radius: 4; -fx-border-radius: 4; -fx-cursor: hand;" />
                                     </children>
                                 </VBox>
 

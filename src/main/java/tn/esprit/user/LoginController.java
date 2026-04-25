@@ -9,6 +9,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 import java.io.IOException;
 import tn.esprit.services.UserService;
@@ -48,6 +49,26 @@ public class LoginController {
     @FXML
     void goToRegister(ActionEvent event) {
         navigate(event, "/user/Register.fxml");
+    }
+
+    @FXML
+    void handleForgotPassword(ActionEvent event) {
+        navigate(event, "/user/ForgotPassword.fxml");
+    }
+
+    @FXML
+    void handleFaceLogin(ActionEvent event) {
+        try {
+            Parent root = FXMLLoader.load(getClass().getResource("/user/FaceLogin.fxml"));
+            Stage stage = new Stage();
+            stage.initModality(Modality.APPLICATION_MODAL);
+            stage.setTitle("EcoSpot - Face ID Login");
+            stage.setScene(new Scene(root));
+            stage.show();
+        } catch (IOException e) {
+            e.printStackTrace();
+            showError("Could not load Face Login view.");
+        }
     }
 
     @FXML
