@@ -31,11 +31,21 @@ public class UserService {
                 "`username` VARCHAR(100)," +
                 "`email` VARCHAR(150) UNIQUE," +
                 "`password` VARCHAR(255)," +
-                "`role` VARCHAR(20)" +
+                "`role` VARCHAR(20)," +
+                "`reset_code` VARCHAR(10)," +
+                "`reset_expires_at` TIMESTAMP NULL" +
                 ")";
         try {
             Statement st = cnx.createStatement();
             st.execute(req);
+            
+            // Migration: Add reset columns if they don't exist
+            if (!hasColumn("user", "reset_code")) {
+                st.execute("ALTER TABLE `user` ADD COLUMN `reset_code` VARCHAR(10)");
+            }
+            if (!hasColumn("user", "reset_expires_at")) {
+                st.execute("ALTER TABLE `user` ADD COLUMN `reset_expires_at` TIMESTAMP NULL");
+            }
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -484,5 +494,48 @@ public class UserService {
             }
         }
         ensureQuickAppUser(trimmedEmail, firstName, lastName, role);
+    }
+    public boolean setResetCode(String email, String code) {
+        String req = "UPDATE `user` SET reset_code = ?, reset_expires_at = DATE_ADD(NOW(), INTERVAL 15 MINUTE) WHERE email = ?";
+        try (PreparedStatement ps = cnx.prepareStatement(req)) {
+            ps.setString(1, code);
+            ps.setString(2, email);
+            int updated = ps.executeUpdate();
+            return updated > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public boolean verifyResetCode(String email, String code) {
+        String req = "SELECT 1 FROM `user` WHERE email = ? AND reset_code = ? AND reset_expires_at > NOW()";
+        try (PreparedStatement ps = cnx.prepareStatement(req)) {
+            ps.setString(1, email);
+            ps.setString(2, code);
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next();
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public boolean updatePassword(String email, String newPassword) {
+        String req = "UPDATE `user` SET password = ?, reset_code = NULL WHERE email = ?";
+        try (PreparedStatement ps = cnx.prepareStatement(req)) {
+            ps.setString(1, newPassword);
+            ps.setString(2, email);
+            int updated = ps.executeUpdate();
+            if (updated > 0) {
+                loadUsersFromDb();
+                return true;
+            }
+            return false;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 }

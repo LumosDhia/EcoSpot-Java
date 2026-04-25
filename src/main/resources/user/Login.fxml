@@ -72,7 +72,12 @@
                                     <children>
                                         <Label text="Password" styleClass="field-label" />
                                         <PasswordField fx:id="passwordField" promptText="Enter your password" styleClass="login-input" />
-
+                                        <HBox alignment="CENTER_RIGHT">
+                                            <children>
+                                                <Button text="Forgot Password?" onAction="#handleForgotPassword" 
+                                                        styleClass="forgot-link" style="-fx-background-color: transparent; -fx-padding: 0;" />
+                                            </children>
+                                        </HBox>
                                     </children>
                                 </VBox>
 

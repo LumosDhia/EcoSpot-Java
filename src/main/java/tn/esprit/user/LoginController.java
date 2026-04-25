@@ -51,6 +51,11 @@ public class LoginController {
     }
 
     @FXML
+    void handleForgotPassword(ActionEvent event) {
+        navigate(event, "/user/ForgotPassword.fxml");
+    }
+
+    @FXML
     void handleLogin(ActionEvent event) {
         performLogin(emailField.getText(), passwordField.getText(), event);
     }
