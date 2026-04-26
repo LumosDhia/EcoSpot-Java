@@ -37,6 +37,8 @@ public class CreateTicketController {
     @FXML private ListView<GeocodingService.Place> locationResultsList;
     @FXML private Label fileNameLabel;
     @FXML private Label errorLabel;
+    @FXML private Label timeoutLabel;
+    @FXML private Button submitBtn;
 
     private File selectedFile;
     private final TicketService ticketService = new TicketService();
@@ -51,6 +53,10 @@ public class CreateTicketController {
         if (SessionManager.isLoggedIn()) {
             User u = SessionManager.getCurrentUser();
             userNameLabel.setText(u.getUsername());
+            
+            if (u.isTimedOut()) {
+                showTimeoutWarning(u);
+            }
         } else {
             userNameLabel.setText("Guest");
         }
@@ -63,6 +69,20 @@ public class CreateTicketController {
         }
 
         setupLocationSearch();
+    }
+
+    private void showTimeoutWarning(User u) {
+        if (timeoutLabel != null) {
+            timeoutLabel.setText("⚠️ Your account is temporarily in timeout until " + 
+                u.getTimeoutUntil().format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")) + 
+                ". You cannot submit new tickets.");
+            timeoutLabel.setVisible(true);
+            timeoutLabel.setManaged(true);
+        }
+        if (submitBtn != null) {
+            submitBtn.setDisable(true);
+            submitBtn.setOpacity(0.5);
+        }
     }
 
     private void setupLocationSearch() {
@@ -316,6 +336,11 @@ public class CreateTicketController {
                     } else {
                         ticketService.add(t);
                     }
+                    
+                    if (t.isSpam()) {
+                        ticketService.checkAndApplyTimeout(t.getUserId());
+                    }
+                    
                     goToMyTickets(event);
                 } catch (RuntimeException ex) {
                     showError(ex.getMessage());

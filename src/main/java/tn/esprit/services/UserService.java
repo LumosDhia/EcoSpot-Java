@@ -4,6 +4,7 @@ import tn.esprit.user.User;
 import tn.esprit.util.MyConnection;
 import tn.esprit.util.SessionManager;
 import java.sql.*;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -46,6 +47,9 @@ public class UserService {
             if (!hasColumn("user", "reset_expires_at")) {
                 st.execute("ALTER TABLE `user` ADD COLUMN `reset_expires_at` TIMESTAMP NULL");
             }
+            if (!hasColumn("user", "timeout_until")) {
+                st.execute("ALTER TABLE `user` ADD COLUMN `timeout_until` DATETIME DEFAULT NULL");
+            }
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -64,7 +68,8 @@ public class UserService {
                     rs.getString("username"),
                     rs.getString("email"),
                     rs.getString("password"),
-                    rs.getString("role")
+                    rs.getString("role"),
+                    rs.getTimestamp("timeout_until") != null ? rs.getTimestamp("timeout_until").toLocalDateTime() : null
                 ));
             }
         } catch (SQLException e) {
@@ -547,6 +552,28 @@ public class UserService {
         } catch (SQLException e) {
             e.printStackTrace();
             return false;
+        }
+    }
+
+    public void updateTimeout(int id, LocalDateTime until) {
+        String req = "UPDATE `user` SET timeout_until = ? WHERE id = ?";
+        try (PreparedStatement ps = cnx.prepareStatement(req)) {
+            if (until == null) {
+                ps.setNull(1, Types.TIMESTAMP);
+            } else {
+                ps.setTimestamp(1, Timestamp.valueOf(until));
+            }
+            ps.setInt(2, id);
+            ps.executeUpdate();
+            loadUsersFromDb();
+            
+            // Sync with active session if applicable
+            tn.esprit.user.User current = SessionManager.getCurrentUser();
+            if (current != null && current.getId() == id) {
+                current.setTimeoutUntil(until);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
     }
 }

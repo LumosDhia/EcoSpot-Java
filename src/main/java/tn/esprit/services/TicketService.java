@@ -9,10 +9,12 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.StringJoiner;
+import java.time.LocalDateTime;
 
 public class TicketService implements GlobalInterface<Ticket> {
     private Connection cnx;
     private final ConsigneService consigneService = new ConsigneService();
+    private final UserService userService = new UserService();
 
     public TicketService() {
         cnx = MyConnection.getInstance().getCnx();
@@ -389,5 +391,27 @@ public class TicketService implements GlobalInterface<Ticket> {
         } catch (SQLException ignored) {
         }
         return null;
+    }
+
+    public int countRecentSpamByUser(int userId, java.time.LocalDateTime since) {
+        String req = "SELECT COUNT(*) FROM `ticket` WHERE user_id = ? AND is_spam = 1 AND created_at > ?";
+        try (PreparedStatement ps = cnx.prepareStatement(req)) {
+            ps.setInt(1, userId);
+            ps.setTimestamp(2, java.sql.Timestamp.valueOf(since));
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) return rs.getInt(1);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
+    public void checkAndApplyTimeout(int userId) {
+        java.time.LocalDateTime since = java.time.LocalDateTime.now().minusHours(24);
+        int spamCount = countRecentSpamByUser(userId, since);
+        if (spamCount > 3) {
+            userService.updateTimeout(userId, java.time.LocalDateTime.now().plusHours(24));
+        }
     }
 }
