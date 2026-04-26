@@ -147,13 +147,21 @@ public class AdminAllTicketsController {
         deleteBtn.setOnAction(e -> deleteTicket(t));
 
         if (t.isSpam() && t.getUserId() > 0) {
-            Button timeoutBtn = new Button("Timeout User");
-            timeoutBtn.setStyle("-fx-background-color: #f97316; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;");
-            timeoutBtn.setOnAction(e -> {
-                userService.updateTimeout(t.getUserId(), java.time.LocalDateTime.now().plusHours(24));
-                new Alert(Alert.AlertType.INFORMATION, "User has been put in a 24-hour timeout.").show();
-            });
-            actions.getChildren().add(timeoutBtn);
+            tn.esprit.user.User owner = userService.getAllUsers().stream()
+                    .filter(u -> u.getId() == t.getUserId())
+                    .findFirst().orElse(null);
+            
+            boolean canBeTimedOut = owner != null && !"ADMIN".equalsIgnoreCase(owner.getRole()) && !"NGO".equalsIgnoreCase(owner.getRole());
+
+            if (canBeTimedOut) {
+                Button timeoutBtn = new Button("Timeout User");
+                timeoutBtn.setStyle("-fx-background-color: #f97316; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;");
+                timeoutBtn.setOnAction(e -> {
+                    userService.updateTimeout(t.getUserId(), java.time.LocalDateTime.now().plusHours(24));
+                    new Alert(Alert.AlertType.INFORMATION, "User has been put in a 24-hour timeout.").show();
+                });
+                actions.getChildren().add(timeoutBtn);
+            }
         }
 
         actions.getChildren().addAll(deleteBtn, viewBtn);

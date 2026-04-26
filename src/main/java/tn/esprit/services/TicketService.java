@@ -408,6 +408,22 @@ public class TicketService implements GlobalInterface<Ticket> {
     }
 
     public void checkAndApplyTimeout(int userId) {
+        // Exemption check: Admins and NGOs cannot be timed out
+        String roleReq = "SELECT role FROM `user` WHERE id = ?";
+        try (PreparedStatement psRole = cnx.prepareStatement(roleReq)) {
+            psRole.setInt(1, userId);
+            try (ResultSet rsRole = psRole.executeQuery()) {
+                if (rsRole.next()) {
+                    String role = rsRole.getString(1);
+                    if ("ADMIN".equalsIgnoreCase(role) || "NGO".equalsIgnoreCase(role)) {
+                        return;
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
         java.time.LocalDateTime since = java.time.LocalDateTime.now().minusHours(24);
         int spamCount = countRecentSpamByUser(userId, since);
         if (spamCount > 3) {
