@@ -37,6 +37,19 @@
             </children>
         </HBox>
 
+        <!-- TIMEOUT BANNER -->
+        <HBox fx:id="timeoutBanner" alignment="CENTER_LEFT" spacing="15.0" style="-fx-background-color: linear-gradient(to right, #fef2f2, #fee2e2); -fx-border-color: #fca5a5; -fx-border-width: 0 0 1 0; -fx-padding: 12 30; -fx-min-height: 50;" visible="false" managed="false">
+            <children>
+                <Label style="-fx-font-size: 20px; -fx-text-fill: #b91c1c;" text="⚠️" />
+                <VBox HBox.hgrow="ALWAYS">
+                    <children>
+                        <Label style="-fx-font-weight: bold; -fx-text-fill: #991b1b; -fx-font-size: 14px;" text="Account Restricted" />
+                        <Label fx:id="timeoutLabel" style="-fx-text-fill: #b91c1c; -fx-font-size: 13px;" text="Your account is temporarily in timeout due to multiple spam flags. Restored at: ..." />
+                    </children>
+                </VBox>
+            </children>
+        </HBox>
+
         <VBox VBox.vgrow="ALWAYS">
             <padding><Insets bottom="40.0" left="40.0" right="40.0" top="30.0" /></padding>
             <children>
@@ -54,7 +67,7 @@
                     <children>
                         <Label style="-fx-text-fill: #6c757d; -fx-font-size: 16px;" text="Create and manage your tickets. Pending tickets are reviewed by the administration." wrapText="true" />
                         <Region HBox.hgrow="ALWAYS" />
-                        <Button onAction="#goToCreateTicket" style="-fx-background-color: #52a472; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 20; -fx-padding: 10 20; -fx-cursor: hand;" text="✚ New ticket" />
+                        <Button fx:id="newTicketBtn" onAction="#goToCreateTicket" style="-fx-background-color: #52a472; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 20; -fx-padding: 10 20; -fx-cursor: hand;" text="✚ New ticket" />
                     </children>
                 </HBox>
 

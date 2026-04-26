@@ -57,7 +57,7 @@
                         <VBox fx:id="userSidebarLinks" spacing="5.0" visible="false" managed="false">
                             <children>
                                 <Button onAction="#goToMyTickets" styleClass="sidebar-item" text="📋 My tickets" />
-                                <Button onAction="#goToCreateTicket" styleClass="sidebar-item" text="➕ New ticket" />
+                                <Button fx:id="sidebarCreateTicketBtn" onAction="#goToCreateTicket" styleClass="sidebar-item" text="➕ New ticket" />
                                 <Button onAction="#goToPendingTickets" styleClass="sidebar-item" text="🌐 Community tickets" />
                             </children>
                         </VBox>
@@ -72,6 +72,20 @@
         <!-- MAIN CONTENT -->
         <VBox styleClass="admin-content-bg" HBox.hgrow="ALWAYS">
             <children>
+                <!-- TIMEOUT BANNER -->
+                <HBox fx:id="timeoutBanner" alignment="CENTER_LEFT" spacing="15.0" style="-fx-background-color: linear-gradient(to right, #fef2f2, #fee2e2); -fx-border-color: #fca5a5; -fx-border-width: 0 0 1 0; -fx-padding: 12 30; -fx-min-height: 50;" visible="false" managed="false">
+                    <children>
+                        <Label style="-fx-font-size: 20px; -fx-text-fill: #b91c1c;" text="⚠️" />
+                        <VBox HBox.hgrow="ALWAYS">
+                            <children>
+                                <Label style="-fx-font-weight: bold; -fx-text-fill: #991b1b; -fx-font-size: 14px;" text="Account Restricted" />
+                                <Label fx:id="timeoutLabel" style="-fx-text-fill: #b91c1c; -fx-font-size: 13px;" text="Your account is temporarily in timeout due to multiple spam flags. Restored at: ..." />
+                            </children>
+                        </VBox>
+                        <Button onAction="#goToMyTickets" style="-fx-background-color: #ef4444; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 6 15; -fx-background-radius: 4; -fx-cursor: hand;" text="View My Tickets" />
+                    </children>
+                </HBox>
+
                 <!-- TOP HEADER -->
                 <HBox alignment="CENTER_LEFT" styleClass="admin-top-bar">
                     <children>
@@ -369,19 +383,30 @@
                                                 </StackPane>
                                             </children>
                                         </VBox>
-                                        <VBox onMouseClicked="#goToCreateTicketGrid" styleClass="stat-card">
+                                        <VBox fx:id="createTicketCard" onMouseClicked="#goToCreateTicketGrid" styleClass="stat-card">
                                             <children>
-                                                <VBox alignment="CENTER" spacing="15.0">
+                                                <StackPane>
                                                     <children>
-                                                        <StackPane styleClass="dashboard-icon-container">
+                                                        <VBox alignment="CENTER" spacing="15.0">
                                                             <children>
-                                                                <Label styleClass="dashboard-icon" text="&#xE710;" />
+                                                                <StackPane styleClass="dashboard-icon-container">
+                                                                    <children>
+                                                                        <Label styleClass="dashboard-icon" text="&#xE710;" />
+                                                                    </children>
+                                                                </StackPane>
+                                                                <Label styleClass="card-title-lg" text="Create a ticket" />
+                                                                <Label styleClass="card-subtitle" text="Report an environmental issue or suggestion quickly" textAlignment="CENTER" wrapText="true" />
                                                             </children>
-                                                        </StackPane>
-                                                        <Label styleClass="card-title-lg" text="Create a ticket" />
-                                                        <Label styleClass="card-subtitle" text="Report an environmental issue or suggestion quickly" textAlignment="CENTER" wrapText="true" />
+                                                        </VBox>
+                                                        <VBox fx:id="createTicketLockOverlay" alignment="CENTER" style="-fx-background-color: rgba(255,255,255,0.75); -fx-background-radius: 15;" visible="false" managed="false">
+                                                            <children>
+                                                                <Label style="-fx-font-size: 44px;" text="🔒" />
+                                                                <Label style="-fx-text-fill: #7f1d1d; -fx-font-weight: bold; -fx-font-size: 16px; -fx-padding: 5 0 0 0;" text="RESTRICTED" />
+                                                                <Label style="-fx-text-fill: #991b1b; -fx-font-size: 11px;" text="Feature Locked" />
+                                                            </children>
+                                                        </VBox>
                                                     </children>
-                                                </VBox>
+                                                </StackPane>
                                             </children>
                                         </VBox>
                                         <VBox onMouseClicked="#goToPendingTicketsGrid" styleClass="stat-card">

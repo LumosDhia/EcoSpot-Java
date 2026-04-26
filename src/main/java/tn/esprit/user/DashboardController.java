@@ -9,6 +9,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.control.Label;
+import javafx.scene.effect.ColorAdjust;
 import javafx.scene.effect.DropShadow;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.FlowPane;
@@ -25,10 +26,15 @@ public class DashboardController {
     @FXML private Label userNameLabel;
     @FXML private Label breadcrumbLabel;
     @FXML private Label dashboardInstructionLabel;
+    @FXML private javafx.scene.layout.HBox timeoutBanner;
+    @FXML private Label timeoutLabel;
+    @FXML private VBox createTicketCard;
+    @FXML private VBox createTicketLockOverlay;
 
     @FXML private VBox adminSidebarLinks;
     @FXML private VBox ngoSidebarLinks;
     @FXML private VBox userSidebarLinks;
+    @FXML private javafx.scene.control.Button sidebarCreateTicketBtn;
     
     @FXML private FlowPane adminCardsGrid;
     @FXML private FlowPane ngoCardsGrid;
@@ -51,6 +57,50 @@ public class DashboardController {
         String username = user.getUsername();
 
         userNameLabel.setText(username);
+        
+        // Handle Timeout Banner
+        if (user.isTimedOut()) {
+            timeoutBanner.setVisible(true);
+            timeoutBanner.setManaged(true);
+            timeoutLabel.setText("Your account is temporarily restricted from submitting or editing tickets due to multiple spam flags. Activities will be restored after " + 
+                user.getTimeoutUntil().format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")));
+            
+            // Subtle pulse animation
+            Timeline pulse = new Timeline(
+                new KeyFrame(Duration.ZERO, new KeyValue(timeoutBanner.opacityProperty(), 0.7)),
+                new KeyFrame(Duration.seconds(1), new KeyValue(timeoutBanner.opacityProperty(), 1.0)),
+                new KeyFrame(Duration.seconds(2), new KeyValue(timeoutBanner.opacityProperty(), 0.7))
+            );
+            pulse.setCycleCount(Timeline.INDEFINITE);
+            pulse.play();
+
+            if (createTicketCard != null) {
+                createTicketLockOverlay.setVisible(true);
+                createTicketLockOverlay.setManaged(true);
+                createTicketCard.setDisable(true);
+                createTicketCard.setEffect(new ColorAdjust(0, -0.8, -0.1, 0));
+                createTicketCard.setOpacity(1.0); // Keep opacity high for clarity
+            }
+            if (sidebarCreateTicketBtn != null) {
+                sidebarCreateTicketBtn.setDisable(true);
+                sidebarCreateTicketBtn.setOpacity(0.4);
+            }
+        } else {
+            timeoutBanner.setVisible(false);
+            timeoutBanner.setManaged(false);
+
+            if (createTicketCard != null) {
+                createTicketLockOverlay.setVisible(false);
+                createTicketLockOverlay.setManaged(false);
+                createTicketCard.setDisable(false);
+                createTicketCard.setEffect(new DropShadow(10, Color.rgb(0, 0, 0, 0.05)));
+                createTicketCard.setOpacity(1.0);
+            }
+            if (sidebarCreateTicketBtn != null) {
+                sidebarCreateTicketBtn.setDisable(false);
+                sidebarCreateTicketBtn.setOpacity(1.0);
+            }
+        }
         
         // Reset all
         hideAllGrids();
@@ -201,11 +251,19 @@ public class DashboardController {
 
     @FXML
     void goToCreateTicket(ActionEvent event) {
+        User u = tn.esprit.util.SessionManager.getCurrentUser();
+        if (u != null && u.isTimedOut()) {
+            return; // Safety check
+        }
         navigate(event, "/ticket/CreateTicket.fxml");
     }
 
     @FXML
     void goToCreateTicketGrid(MouseEvent event) {
+        User u = tn.esprit.util.SessionManager.getCurrentUser();
+        if (u != null && u.isTimedOut()) {
+            return; // Safety check
+        }
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/ticket/CreateTicket.fxml"));
             Parent root = loader.load();
