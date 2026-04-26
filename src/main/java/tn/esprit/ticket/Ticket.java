@@ -27,6 +27,11 @@ public class Ticket {
     private LocalDateTime achievedAt;
     private List<Consigne> consignes = new ArrayList<>();
 
+    // AI Analysis fields
+    private String aiCategory;
+    private String aiSuggestedNgo;
+    private String spamReason;
+
     public Ticket() {
         this.status = TicketStatus.PENDING;
         this.priority = TicketPriority.MEDIUM;
@@ -88,4 +93,14 @@ public class Ticket {
 
     public List<Consigne> getConsignes() { return consignes; }
     public void setConsignes(List<Consigne> consignes) { this.consignes = consignes; }
+
+    public String getAiCategory() { return aiCategory; }
+    public void setAiCategory(String aiCategory) { this.aiCategory = aiCategory; }
+    
+    public String getAiSuggestedNgo() { return aiSuggestedNgo; }
+    public void setAiSuggestedNgo(String aiSuggestedNgo) { this.aiSuggestedNgo = aiSuggestedNgo; }
+    
+    public String getSpamReason() { return spamReason; }
+    public void setSpamReason(String spamReason) { this.spamReason = spamReason; }
 }
+

@@ -464,8 +464,39 @@ public class DashboardController {
         }
     }
 
+    @FXML
+    void goToAnalytics(ActionEvent event) {
+        navigate(event, "/ticket/TicketAnalytics.fxml");
+    }
+
+    @FXML
+    void goToAnalyticsGrid(MouseEvent event) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/ticket/TicketAnalytics.fxml"));
+            Parent root = loader.load();
+            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+            stage.getScene().setRoot(root);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @FXML
+    void goToMapGrid(MouseEvent event) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/ticket/TicketMap.fxml"));
+            Parent root = loader.load();
+            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+            stage.getScene().setRoot(root);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     private boolean isAdminUser() {
         User current = tn.esprit.util.SessionManager.getCurrentUser();
         return current != null && "ADMIN".equalsIgnoreCase(current.getRole());
     }
 }
+
+

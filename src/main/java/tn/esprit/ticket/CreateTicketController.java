@@ -289,6 +289,11 @@ public class CreateTicketController {
                 t.setSpam(result.isSpam);
                 if (result.isSpam) {
                     System.out.println("AI Flagged as SPAM: " + result.reason);
+                    t.setSpamReason(result.reason);
+                } else {
+                    t.setAiCategory(result.category);
+                    t.setAiSuggestedNgo(result.suggestedNgo);
+                    System.out.println("AI Categorized as: " + result.category + " | Suggested NGO: " + result.suggestedNgo);
                 }
 
                 // Collect Consignes

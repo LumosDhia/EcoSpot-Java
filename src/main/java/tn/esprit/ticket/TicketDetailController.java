@@ -33,6 +33,10 @@ public class TicketDetailController {
     @FXML private HBox userLinks;
     @FXML private HBox completionBox;
     @FXML private VBox consigneBox;
+    @FXML private VBox aiInsightsBox;
+    @FXML private Label aiCategoryLabel;
+    @FXML private Label aiNgoLabel;
+    @FXML private Label aiSpamLabel;
     @FXML private VBox consignesDisplayContainer;
     @FXML private VBox weatherBox;
     @FXML private HBox forecastContainer;
@@ -82,6 +86,45 @@ public class TicketDetailController {
         dateLabel.setText("Created " + (t.getCreatedAt() != null ? t.getCreatedAt().format(formatter) : "Unknown"));
         statusBadge.setText(t.getStatus().name());
         priorityBadge.setText(t.getPriority().name());
+
+        // Handle AI Insights display
+        boolean hasAiData = false;
+        
+        if (t.isSpam() && t.getSpamReason() != null && !t.getSpamReason().isEmpty()) {
+            aiSpamLabel.setText("Reason: " + t.getSpamReason());
+            aiSpamLabel.setVisible(true);
+            aiSpamLabel.setManaged(true);
+            
+            aiCategoryLabel.setVisible(false);
+            aiCategoryLabel.setManaged(false);
+            aiNgoLabel.setVisible(false);
+            aiNgoLabel.setManaged(false);
+            hasAiData = true;
+        } else {
+            aiSpamLabel.setVisible(false);
+            aiSpamLabel.setManaged(false);
+            
+            if (t.getAiCategory() != null && !t.getAiCategory().isEmpty()) {
+                aiCategoryLabel.setText("Suggested Category: " + t.getAiCategory());
+                aiCategoryLabel.setVisible(true);
+                aiCategoryLabel.setManaged(true);
+                hasAiData = true;
+            }
+            if (t.getAiSuggestedNgo() != null && !t.getAiSuggestedNgo().isEmpty()) {
+                aiNgoLabel.setText("Recommended Routing: " + t.getAiSuggestedNgo());
+                aiNgoLabel.setVisible(true);
+                aiNgoLabel.setManaged(true);
+                hasAiData = true;
+            }
+        }
+        
+        if (hasAiData) {
+            aiInsightsBox.setVisible(true);
+            aiInsightsBox.setManaged(true);
+        } else {
+            aiInsightsBox.setVisible(false);
+            aiInsightsBox.setManaged(false);
+        }
 
         consignesDisplayContainer.getChildren().clear();
         if (t.getConsignes() != null && !t.getConsignes().isEmpty()) {

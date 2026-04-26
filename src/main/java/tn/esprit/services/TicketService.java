@@ -40,6 +40,9 @@ public class TicketService implements GlobalInterface<Ticket> {
                 "`completion_message` TEXT," +
                 "`completion_image` VARCHAR(255)," +
                 "`is_spam` TINYINT(1) DEFAULT 0," +
+                "`ai_category` VARCHAR(100)," +
+                "`ai_suggested_ngo` VARCHAR(255)," +
+                "`spam_reason` TEXT," +
                 "`created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP," +
                 "`achieved_at` TIMESTAMP NULL" +
                 ")";
@@ -75,6 +78,9 @@ public class TicketService implements GlobalInterface<Ticket> {
         columns.add("completion_message"); values.add("?");
         columns.add("completion_image"); values.add("?");
         columns.add("is_spam"); values.add("?");
+        columns.add("ai_category"); values.add("?");
+        columns.add("ai_suggested_ngo"); values.add("?");
+        columns.add("spam_reason"); values.add("?");
         columns.add("created_at"); values.add("?");
         columns.add("achieved_at"); values.add("?");
 
@@ -108,6 +114,9 @@ public class TicketService implements GlobalInterface<Ticket> {
             ps.setString(idx++, ticket.getCompletionMessage());
             ps.setString(idx++, ticket.getCompletionImage());
             ps.setBoolean(idx++, ticket.isSpam());
+            ps.setString(idx++, ticket.getAiCategory());
+            ps.setString(idx++, ticket.getAiSuggestedNgo());
+            ps.setString(idx++, ticket.getSpamReason());
             ps.setTimestamp(idx++, java.sql.Timestamp.valueOf(java.time.LocalDateTime.now()));
             if (ticket.getAchievedAt() != null) ps.setTimestamp(idx++, Timestamp.valueOf(ticket.getAchievedAt()));
             else ps.setNull(idx++, Types.TIMESTAMP);
@@ -152,7 +161,7 @@ public class TicketService implements GlobalInterface<Ticket> {
 
     @Override
     public void update(Ticket ticket) {
-        String req = "UPDATE `ticket` SET title=?, description=?, location=?, image=?, status=?, priority=?, domain=?, latitude=?, longitude=?, assigned_ngo_id=?, admin_notes=?, completed_by_id=?, completion_message=?, completion_image=?, is_spam=?, achieved_at=? WHERE id=?";
+        String req = "UPDATE `ticket` SET title=?, description=?, location=?, image=?, status=?, priority=?, domain=?, latitude=?, longitude=?, assigned_ngo_id=?, admin_notes=?, completed_by_id=?, completion_message=?, completion_image=?, is_spam=?, ai_category=?, ai_suggested_ngo=?, spam_reason=?, achieved_at=? WHERE id=?";
         try (PreparedStatement ps = cnx.prepareStatement(req)) {
             ps.setString(1, ticket.getTitle());
             ps.setString(2, ticket.getDescription());
@@ -164,7 +173,7 @@ public class TicketService implements GlobalInterface<Ticket> {
             ps.setDouble(8, ticket.getLatitude());
             ps.setDouble(9, ticket.getLongitude());
             
-            if (ticket.getAssignedNgoId() != null) ps.setInt(10, ticket.getAssignedNgoId());
+            if (ticket.getAssignedNgoId() != null && ticket.getAssignedNgoId() > 0) ps.setInt(10, ticket.getAssignedNgoId());
             else ps.setNull(10, Types.INTEGER);
             
             ps.setString(11, ticket.getAdminNotes());
@@ -175,11 +184,14 @@ public class TicketService implements GlobalInterface<Ticket> {
             ps.setString(13, ticket.getCompletionMessage());
             ps.setString(14, ticket.getCompletionImage());
             ps.setBoolean(15, ticket.isSpam());
+            ps.setString(16, ticket.getAiCategory());
+            ps.setString(17, ticket.getAiSuggestedNgo());
+            ps.setString(18, ticket.getSpamReason());
             
-            if (ticket.getAchievedAt() != null) ps.setTimestamp(16, Timestamp.valueOf(ticket.getAchievedAt()));
-            else ps.setNull(16, Types.TIMESTAMP);
+            if (ticket.getAchievedAt() != null) ps.setTimestamp(19, Timestamp.valueOf(ticket.getAchievedAt()));
+            else ps.setNull(19, Types.TIMESTAMP);
             
-            ps.setInt(17, ticket.getId());
+            ps.setInt(20, ticket.getId());
             ps.executeUpdate();
 
             // Update Consignes: Delete and Re-add
@@ -295,6 +307,9 @@ public class TicketService implements GlobalInterface<Ticket> {
         t.setCompletionImage(rs.getString("completion_image"));
         t.setConsignes(consigneService.getByTicketId(t.getId()));
         t.setSpam(rs.getBoolean("is_spam"));
+        t.setAiCategory(rs.getString("ai_category"));
+        t.setAiSuggestedNgo(rs.getString("ai_suggested_ngo"));
+        t.setSpamReason(rs.getString("spam_reason"));
         t.setCreatedAt(rs.getTimestamp("created_at").toLocalDateTime());
         Timestamp ach = rs.getTimestamp("achieved_at");
         if (ach != null) t.setAchievedAt(ach.toLocalDateTime());
@@ -430,4 +445,64 @@ public class TicketService implements GlobalInterface<Ticket> {
             userService.updateTimeout(userId, java.time.LocalDateTime.now().plusHours(24));
         }
     }
+
+    // --- ANALYTICS DASHBOARD METHODS ---
+
+    public java.util.Map<java.time.LocalDate, Integer> getSpamTrends(int days) {
+        java.util.Map<java.time.LocalDate, Integer> trends = new java.util.LinkedHashMap<>();
+        java.time.LocalDate startDate = java.time.LocalDate.now().minusDays(days - 1);
+        
+        // Initialize map with 0s for all dates to ensure continuous line chart
+        for (int i = 0; i < days; i++) {
+            trends.put(startDate.plusDays(i), 0);
+        }
+
+        String req = "SELECT DATE(created_at) as d, COUNT(*) as c FROM ticket WHERE is_spam = 1 AND created_at >= ? GROUP BY DATE(created_at)";
+        try (PreparedStatement ps = cnx.prepareStatement(req)) {
+            ps.setTimestamp(1, java.sql.Timestamp.valueOf(startDate.atStartOfDay()));
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    java.sql.Date sqlDate = rs.getDate("d");
+                    if (sqlDate != null) {
+                        trends.put(sqlDate.toLocalDate(), rs.getInt("c"));
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return trends;
+    }
+
+    public java.util.Map<String, Integer> getTicketsPerLocation() {
+        java.util.Map<String, Integer> map = new java.util.HashMap<>();
+        String req = "SELECT location, COUNT(*) as c FROM ticket WHERE location IS NOT NULL AND location != '' GROUP BY location ORDER BY c DESC LIMIT 10";
+        try (Statement st = cnx.createStatement(); ResultSet rs = st.executeQuery(req)) {
+            while (rs.next()) {
+                map.put(rs.getString("location"), rs.getInt("c"));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return map;
+    }
+
+    public java.util.Map<String, Integer> getResolvedTicketsPerNgo() {
+        java.util.Map<String, Integer> map = new java.util.HashMap<>();
+        String req = "SELECT u.username, COUNT(t.id) as c " +
+                     "FROM ticket t " +
+                     "JOIN user u ON t.assigned_ngo_id = u.id " +
+                     "WHERE t.status = 'COMPLETED' " +
+                     "GROUP BY t.assigned_ngo_id, u.username " +
+                     "ORDER BY c DESC";
+        try (Statement st = cnx.createStatement(); ResultSet rs = st.executeQuery(req)) {
+            while (rs.next()) {
+                map.put(rs.getString("username"), rs.getInt("c"));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return map;
+    }
 }
+
