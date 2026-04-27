@@ -5,6 +5,7 @@
 <?import javafx.scene.image.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
+<?import javafx.scene.web.*?>
 
 <BorderPane style="-fx-background-color: white;" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="tn.esprit.event.EventDetailController">
     <stylesheets>
@@ -19,6 +20,11 @@
                 <children>
                     <Label onMouseClicked="#goToHome" style="-fx-cursor: hand;" styleClass="top-bar-brand" text="🌿 EcoSpot" />
                     <Region HBox.hgrow="ALWAYS" />
+                    <HBox alignment="CENTER_RIGHT" spacing="0">
+                        <Button onAction="#handleMinimize" styleClass="win-btn" text="—" />
+                        <Button onAction="#handleMaximize" styleClass="win-btn" text="❐" />
+                        <Button onAction="#handleClose" styleClass="win-btn, win-close" text="✕" />
+                    </HBox>
                 </children>
             </HBox>
 
@@ -75,6 +81,27 @@
 
                                 <Label text="About this Event" styleClass="section-title" />
                                 <Text fx:id="descriptionText" wrappingWidth="800.0" style="-fx-font-size: 16; -fx-fill: #444;" />
+
+                                <!-- AI Insights Section -->
+                                <VBox spacing="10.0" style="-fx-background-color: #f0f7f4; -fx-padding: 20; -fx-background-radius: 10; -fx-border-color: #2d6a4f; -fx-border-width: 0.5;">
+                                    <children>
+                                        <HBox alignment="CENTER_LEFT" spacing="10.0">
+                                            <children>
+                                                <Label style="-fx-font-weight: bold; -fx-text-fill: #2d6a4f; -fx-font-size: 16;" text="✨ EcoSpot AI Insights" />
+                                                <Region HBox.hgrow="ALWAYS" />
+                                                <Label fx:id="aiSuccessLabel" style="-fx-font-weight: bold; -fx-padding: 3 10; -fx-background-radius: 10; -fx-background-color: #2d6a4f; -fx-text-fill: white;" text="ANALYZING..." />
+                                            </children>
+                                        </HBox>
+                                        <Label fx:id="aiAnalysisLabel" style="-fx-text-fill: #444; -fx-font-size: 14; -fx-font-style: italic;" text="Our AI is currently analyzing this event's impact and success potential..." wrapText="true" />
+                                    </children>
+                                </VBox>
+                                
+                                <Label text="Location Map" styleClass="section-title" />
+                                <VBox style="-fx-border-color: #ddd; -fx-border-width: 1; -fx-background-color: #eee;">
+                                    <children>
+                                        <WebView fx:id="mapView" minHeight="300.0" prefHeight="300.0" prefWidth="800.0" />
+                                    </children>
+                                </VBox>
                                 
                                 <VBox spacing="10.0">
                                     <children>
@@ -90,6 +117,16 @@
                                         <VBox fx:id="participantContainer" spacing="4.0">
                                             <children>
                                                 <Label style="-fx-text-fill: gray; -fx-font-style: italic;" text="No participants yet." />
+                                            </children>
+                                        </VBox>
+                                    </children>
+                                </VBox>
+                                <VBox spacing="8.0">
+                                    <children>
+                                        <Label style="-fx-font-weight: bold; -fx-text-fill: #2d6a4f; -fx-font-size: 14;" text="Nearby Events" />
+                                        <VBox fx:id="nearbyEventsContainer" spacing="10.0">
+                                            <children>
+                                                <Label style="-fx-text-fill: gray; -fx-font-style: italic;" text="No other events nearby." />
                                             </children>
                                         </VBox>
                                     </children>
