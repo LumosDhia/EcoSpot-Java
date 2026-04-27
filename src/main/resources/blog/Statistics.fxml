@@ -62,8 +62,11 @@
         <HBox spacing="20">
             <!-- Top Articles -->
             <VBox HBox.hgrow="ALWAYS" style="-fx-background-color: white; -fx-padding: 24; -fx-background-radius: 12; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 10, 0, 0, 4);" prefWidth="400">
-                <Label style="-fx-font-size: 18; -fx-font-weight: bold; -fx-text-fill: #2d3748; -fx-padding: 0 0 15 0;" text="Top Articles" />
-                <ListView fx:id="topArticlesList" VBox.vgrow="ALWAYS" prefHeight="300" style="-fx-background-insets: 0; -fx-padding: 0;" />
+                <Label style="-fx-font-size: 18; -fx-font-weight: bold; -fx-text-fill: #2d3748; -fx-padding: 0 0 10 0;" text="Top Articles" />
+                <ListView fx:id="topArticlesList" prefHeight="150" style="-fx-background-insets: 0; -fx-padding: 0;" />
+                
+                <Label style="-fx-font-size: 18; -fx-font-weight: bold; -fx-text-fill: #2d3748; -fx-padding: 20 0 10 0;" text="All Articles" />
+                <Pagination fx:id="articlesPagination" VBox.vgrow="ALWAYS" maxPageIndicatorCount="3" />
             </VBox>
             
             <!-- Views by Category -->
