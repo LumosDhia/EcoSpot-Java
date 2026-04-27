@@ -506,7 +506,7 @@ public class StatisticsService {
     // Phase 4.5 Per-Article Drilldown
     public Map<String, Object> getArticleBasicStats(int articleId) {
         Map<String, Object> result = new HashMap<>();
-        String sql = "SELECT a.title, COALESCE(u.username, 'Unknown') as author, a.published_at, " +
+        String sql = "SELECT a.title, COALESCE(u.username, 'EcoSpot Contributor') as author, a.published_at, " +
                      "(SELECT COUNT(*) FROM article_view_event WHERE article_id = a.id) as views, " +
                      "(SELECT COUNT(*) FROM article_reaction_event WHERE article_id = a.id AND reaction = 'LIKE') as likes, " +
                      "(SELECT COUNT(*) FROM article_reaction_event WHERE article_id = a.id AND reaction = 'DISLIKE') as dislikes, " +
@@ -526,7 +526,7 @@ public class StatisticsService {
             } else {
                 // Article not found — still return something so the UI doesn't blank out
                 result.put("title", "Article #" + articleId);
-                result.put("author", "Unknown");
+                result.put("author", "EcoSpot Contributor");
                 result.put("published_at", null);
                 result.put("views", 0);
                 result.put("likes", 0);
@@ -559,7 +559,7 @@ public class StatisticsService {
 
     public List<Map<String, Object>> getAllArticlesWithStats() {
         List<Map<String, Object>> result = new ArrayList<>();
-        String sql = "SELECT a.id, a.title, COALESCE(u.username, 'Unknown') as author, " +
+        String sql = "SELECT a.id, a.title, COALESCE(u.username, 'EcoSpot Contributor') as author, " +
                      "(SELECT COUNT(*) FROM article_view_event WHERE article_id = a.id) as views, " +
                      "(SELECT COUNT(*) FROM article_reaction_event WHERE article_id = a.id AND reaction = 'LIKE') as likes, " +
                      "(SELECT COUNT(*) FROM article_reaction_event WHERE article_id = a.id AND reaction = 'DISLIKE') as dislikes, " +
@@ -601,13 +601,13 @@ public class StatisticsService {
     public List<Map<String, Object>> getDetailedArticleStats(LocalDate from, LocalDate to, String ownerEmail) {
         List<Map<String, Object>> result = new ArrayList<>();
         String sql = ownerEmail == null
-            ? "SELECT a.id, a.title, a.published_at, " +
+            ? "SELECT a.id, a.title, a.published_at, COALESCE(u.username, 'EcoSpot Contributor') as author, " +
               "(SELECT COUNT(*) FROM article_view_event WHERE article_id = a.id AND DATE(viewed_at) BETWEEN ? AND ?) as views, " +
               "(SELECT COUNT(*) FROM article_reaction_event WHERE article_id = a.id AND reaction = 'LIKE' AND DATE(acted_at) BETWEEN ? AND ?) as likes, " +
               "(SELECT COUNT(*) FROM article_reaction_event WHERE article_id = a.id AND reaction = 'DISLIKE' AND DATE(acted_at) BETWEEN ? AND ?) as dislikes, " +
               "(SELECT COUNT(*) FROM comment WHERE article_id = a.id AND DATE(created_at) BETWEEN ? AND ?) as comments " +
-              "FROM article a"
-            : "SELECT a.id, a.title, a.published_at, " +
+              "FROM article a LEFT JOIN user u ON u.id = a.created_by_id"
+            : "SELECT a.id, a.title, a.published_at, COALESCE(u.username, 'EcoSpot Contributor') as author, " +
               "(SELECT COUNT(*) FROM article_view_event WHERE article_id = a.id AND DATE(viewed_at) BETWEEN ? AND ?) as views, " +
               "(SELECT COUNT(*) FROM article_reaction_event WHERE article_id = a.id AND reaction = 'LIKE' AND DATE(acted_at) BETWEEN ? AND ?) as likes, " +
               "(SELECT COUNT(*) FROM article_reaction_event WHERE article_id = a.id AND reaction = 'DISLIKE' AND DATE(acted_at) BETWEEN ? AND ?) as dislikes, " +
@@ -639,6 +639,7 @@ public class StatisticsService {
                 Map<String, Object> map = new HashMap<>();
                 map.put("id", rs.getInt("id"));
                 map.put("title", rs.getString("title"));
+                map.put("author", rs.getString("author"));
                 map.put("published_at", rs.getTimestamp("published_at"));
                 map.put("views", rs.getInt("views"));
                 map.put("likes", rs.getInt("likes"));
