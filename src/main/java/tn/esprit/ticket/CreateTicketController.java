@@ -332,7 +332,16 @@ public class CreateTicketController {
                 }
 
                 if (selectedFile != null) {
-                    t.setImage(selectedFile.toURI().toString());
+                    try {
+                        String fileName = tn.esprit.util.ImageUploadUtils.saveImage(selectedFile, "tickets");
+                        t.setImage(fileName);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                        showError("Failed to upload image: " + e.getMessage());
+                        submitBtn.setDisable(false);
+                        submitBtn.setText(originalText);
+                        return;
+                    }
                 }
 
                 try {

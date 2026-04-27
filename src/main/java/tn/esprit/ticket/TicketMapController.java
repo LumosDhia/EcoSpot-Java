@@ -39,16 +39,16 @@ public class TicketMapController {
         List<Ticket> tickets = ticketService.getAll();
         
         StringBuilder markersJson = new StringBuilder("[");
-        for (int i = 0; i < tickets.size(); i++) {
-            Ticket t = tickets.get(i);
+        boolean first = true;
+        for (Ticket t : tickets) {
             if (t.getLatitude() != 0 && t.getLongitude() != 0) {
+                if (!first) markersJson.append(",");
                 String color = t.getStatus() == TicketStatus.COMPLETED || t.getStatus() == TicketStatus.PUBLISHED ? "green" : "red";
                 String title = t.getTitle().replace("'", "\\'").replace("\"", "\\\"");
                 
                 markersJson.append(String.format("{\"lat\": %f, \"lng\": %f, \"title\": \"%s\", \"color\": \"%s\"}", 
                         t.getLatitude(), t.getLongitude(), title, color));
-                
-                if (i < tickets.size() - 1) markersJson.append(",");
+                first = false;
             }
         }
         markersJson.append("]");

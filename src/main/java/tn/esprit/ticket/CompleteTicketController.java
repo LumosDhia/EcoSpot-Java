@@ -77,7 +77,16 @@ public class CompleteTicketController {
         }
 
         currentTicket.setCompletionMessage(message);
-        currentTicket.setCompletionImage(selectedFile.toURI().toString());
+        if (selectedFile != null) {
+            try {
+                String fileName = tn.esprit.util.ImageUploadUtils.saveImage(selectedFile, "tickets");
+                currentTicket.setCompletionImage(fileName);
+            } catch (IOException e) {
+                e.printStackTrace();
+                showError("Failed to save proof image: " + e.getMessage());
+                return;
+            }
+        }
         if (SessionManager.isLoggedIn() && SessionManager.getCurrentUser() != null) {
             currentTicket.setCompletedById(SessionManager.getCurrentUser().getId());
         }

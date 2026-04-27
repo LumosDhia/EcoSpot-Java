@@ -225,16 +225,27 @@ public class TicketManagementController {
 
     private void loadImageRobustly(String rawPath, ImageView view) {
         try {
-            String imgPath = rawPath.startsWith("/uploads/") ? "http://127.0.0.1:8000" + rawPath : rawPath;
-            javafx.scene.image.Image img = new javafx.scene.image.Image(imgPath, true);
+            // 1. Try local Java-uploaded image first
+            String localUrl = tn.esprit.util.ImageUploadUtils.getImageUrl("tickets", rawPath);
+            javafx.scene.image.Image img = new javafx.scene.image.Image(localUrl, true);
             view.setImage(img);
+            view.setManaged(true);
+            view.setVisible(true);
+
+            // 2. Fallback sequence
             img.errorProperty().addListener((obs, o, n) -> {
                 if (n) {
-                    try {
-                        javafx.scene.image.Image fb = new javafx.scene.image.Image("http://localhost/ecospot-web/public" + rawPath, true);
-                        view.setImage(fb);
-                        fb.errorProperty().addListener((o2, old, nw) -> { if (nw) { view.setManaged(false); view.setVisible(false); } });
-                    } catch (Exception ex) { view.setManaged(false); view.setVisible(false); }
+                    String symfonyUrl = rawPath.startsWith("/uploads/") ? "http://127.0.0.1:8000" + rawPath : rawPath;
+                    javafx.scene.image.Image sf = new javafx.scene.image.Image(symfonyUrl, true);
+                    view.setImage(sf);
+                    
+                    sf.errorProperty().addListener((o2, ov2, nv2) -> {
+                        if (nv2) {
+                            javafx.scene.image.Image fb = new javafx.scene.image.Image("http://localhost/ecospot-web/public" + rawPath, true);
+                            view.setImage(fb);
+                            fb.errorProperty().addListener((o3, ov3, nv3) -> { if (nv3) { view.setManaged(false); view.setVisible(false); } });
+                        }
+                    });
                 }
             });
         } catch (Exception e) { view.setManaged(false); view.setVisible(false); }
