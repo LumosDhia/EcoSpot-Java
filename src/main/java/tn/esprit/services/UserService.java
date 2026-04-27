@@ -380,7 +380,7 @@ public class UserService {
         // 6. Terms Validation
         if (!termsAccepted) return "You should agree to our terms.";
 
-        // 7. Duplicate Check (Check LAST so other validations run first for unit tests)
+        // 7. Duplicate Check
         for (User u : users) {
             if (u.getEmail().equals(email)) return "Email already exists.";
         }
@@ -399,7 +399,6 @@ public class UserService {
             loadUsersFromDb();
             return "SUCCESS";
         } catch (SQLException e) {
-            // e.printStackTrace();
             return "Database Error: " + e.getMessage();
         }
     }
@@ -453,7 +452,6 @@ public class UserService {
         }
     }
 
-<<<<<<< HEAD
     private User findUserById(int id) {
         for (User u : users) {
             if (u.getId() == id) return u;
@@ -518,6 +516,7 @@ public class UserService {
         }
         ensureQuickAppUser(trimmedEmail, firstName, lastName, role);
     }
+
     public boolean setResetCode(String email, String code) {
         String req = "UPDATE `user` SET reset_code = ?, reset_expires_at = DATE_ADD(NOW(), INTERVAL 15 MINUTE) WHERE email = ?";
         try (PreparedStatement ps = cnx.prepareStatement(req)) {
