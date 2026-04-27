@@ -18,7 +18,7 @@ public class StatisticsService {
 
     private static final String NGO_ARTICLE_IDS =
         "SELECT a.id FROM article a " +
-        "JOIN app_user u ON u.id = a.created_by_id " +
+        "JOIN user u ON u.id = a.created_by_id " +
         "WHERE LOWER(u.email) = LOWER(?)";
 
     public int getTotalViews(LocalDate from, LocalDate to, String ownerEmail) {
@@ -109,7 +109,7 @@ public class StatisticsService {
               "LEFT JOIN article_view_event ave ON ave.article_id = a.id AND DATE(ave.viewed_at) BETWEEN ? AND ? " +
               "GROUP BY a.id, a.title ORDER BY view_count DESC LIMIT ?"
             : "SELECT a.id, a.title, COUNT(ave.id) AS view_count FROM article a " +
-              "JOIN app_user u ON u.id = a.created_by_id AND LOWER(u.email) = LOWER(?) " +
+              "JOIN user u ON u.id = a.created_by_id AND LOWER(u.email) = LOWER(?) " +
               "LEFT JOIN article_view_event ave ON ave.article_id = a.id AND DATE(ave.viewed_at) BETWEEN ? AND ? " +
               "GROUP BY a.id, a.title ORDER BY view_count DESC LIMIT ?";
         try (PreparedStatement ps = cnx.prepareStatement(sql)) {
@@ -139,7 +139,7 @@ public class StatisticsService {
     public int getTotalPublishedArticles(String ownerEmail) {
         String sql = ownerEmail == null
             ? "SELECT COUNT(*) FROM article"
-            : "SELECT COUNT(*) FROM article a JOIN app_user u ON u.id = a.created_by_id WHERE LOWER(u.email) = LOWER(?)";
+            : "SELECT COUNT(*) FROM article a JOIN user u ON u.id = a.created_by_id WHERE LOWER(u.email) = LOWER(?)";
         try (PreparedStatement ps = cnx.prepareStatement(sql)) {
             if (ownerEmail != null) ps.setString(1, ownerEmail);
             ResultSet rs = ps.executeQuery();
@@ -213,7 +213,7 @@ public class StatisticsService {
     public int getPublishedArticlesByPeriod(LocalDate from, LocalDate to, String ownerEmail) {
         String sql = ownerEmail == null
             ? "SELECT COUNT(*) FROM article WHERE DATE(published_at) BETWEEN ? AND ?"
-            : "SELECT COUNT(*) FROM article a JOIN app_user u ON u.id = a.created_by_id WHERE DATE(a.published_at) BETWEEN ? AND ? AND LOWER(u.email) = LOWER(?)";
+            : "SELECT COUNT(*) FROM article a JOIN user u ON u.id = a.created_by_id WHERE DATE(a.published_at) BETWEEN ? AND ? AND LOWER(u.email) = LOWER(?)";
         try (PreparedStatement ps = cnx.prepareStatement(sql)) {
             ps.setDate(1, java.sql.Date.valueOf(from));
             ps.setDate(2, java.sql.Date.valueOf(to));
@@ -227,7 +227,7 @@ public class StatisticsService {
     public int getCommentsByPeriod(LocalDate from, LocalDate to, String ownerEmail) {
         String sql = ownerEmail == null
             ? "SELECT COUNT(*) FROM comment WHERE DATE(created_at) BETWEEN ? AND ?"
-            : "SELECT COUNT(*) FROM comment c JOIN article a ON a.id = c.article_id JOIN app_user u ON u.id = a.created_by_id WHERE DATE(c.created_at) BETWEEN ? AND ? AND LOWER(u.email) = LOWER(?)";
+            : "SELECT COUNT(*) FROM comment c JOIN article a ON a.id = c.article_id JOIN user u ON u.id = a.created_by_id WHERE DATE(c.created_at) BETWEEN ? AND ? AND LOWER(u.email) = LOWER(?)";
         try (PreparedStatement ps = cnx.prepareStatement(sql)) {
             ps.setDate(1, java.sql.Date.valueOf(from));
             ps.setDate(2, java.sql.Date.valueOf(to));
@@ -266,7 +266,7 @@ public class StatisticsService {
 
         String commentsSql = ownerEmail == null
             ? "SELECT HOUR(created_at) AS hr, COUNT(*) AS cnt FROM `comment` WHERE DATE(created_at) = ? GROUP BY hr"
-            : "SELECT HOUR(c.created_at) AS hr, COUNT(*) AS cnt FROM `comment` c JOIN article a ON a.id = c.article_id JOIN app_user u ON u.id = a.created_by_id WHERE DATE(c.created_at) = ? AND LOWER(u.email) = LOWER(?) GROUP BY hr";
+            : "SELECT HOUR(c.created_at) AS hr, COUNT(*) AS cnt FROM `comment` c JOIN article a ON a.id = c.article_id JOIN user u ON u.id = a.created_by_id WHERE DATE(c.created_at) = ? AND LOWER(u.email) = LOWER(?) GROUP BY hr";
         try (PreparedStatement ps = cnx.prepareStatement(commentsSql)) {
             ps.setDate(1, java.sql.Date.valueOf(date));
             if (ownerEmail != null) ps.setString(2, ownerEmail);
@@ -428,14 +428,14 @@ public class StatisticsService {
     // Phase 3.1.4 Author Stats
     public List<Map<String, Object>> getAuthorStats(LocalDate from, LocalDate to) {
         List<Map<String, Object>> result = new ArrayList<>();
-        String sql = "SELECT COALESCE(u.firstname, u.email, 'Unknown') AS username, " +
+        String sql = "SELECT COALESCE(u.username, u.email, 'Unknown') AS username, " +
                      "COUNT(DISTINCT a.id) as article_count, " +
                      "COUNT(ave.id) as total_views " +
-                     "FROM app_user u " +
+                     "FROM user u " +
                      "JOIN article a ON a.created_by_id = u.id " +
                      "LEFT JOIN article_view_event ave ON ave.article_id = a.id " +
                      "AND DATE(ave.viewed_at) BETWEEN ? AND ? " +
-                     "GROUP BY u.id, u.firstname, u.email ORDER BY total_views DESC";
+                     "GROUP BY u.id, u.username, u.email ORDER BY total_views DESC";
         try (PreparedStatement ps = cnx.prepareStatement(sql)) {
             ps.setDate(1, java.sql.Date.valueOf(from));
             ps.setDate(2, java.sql.Date.valueOf(to));
@@ -454,9 +454,8 @@ public class StatisticsService {
     // Phase 3.1.5 Category & Tag Stats (Tag part)
     public List<Map<String, Object>> getTagStats(int limit) {
         List<Map<String, Object>> result = new ArrayList<>();
-        // Assuming a many-to-many relationship table article_tags exists
         String sql = "SELECT t.name, COUNT(at.article_id) as article_count " +
-                     "FROM tag t JOIN article_tags at ON t.id = at.tag_id " +
+                     "FROM tag t JOIN article_tag at ON t.id = at.tag_id " +
                      "GROUP BY t.id, t.name ORDER BY article_count DESC LIMIT ?";
         try (PreparedStatement ps = cnx.prepareStatement(sql)) {
             ps.setInt(1, limit);
@@ -507,12 +506,12 @@ public class StatisticsService {
     // Phase 4.5 Per-Article Drilldown
     public Map<String, Object> getArticleBasicStats(int articleId) {
         Map<String, Object> result = new HashMap<>();
-        String sql = "SELECT a.title, COALESCE(u.firstname, 'Unknown') as author, a.published_at, " +
+        String sql = "SELECT a.title, COALESCE(u.username, 'Unknown') as author, a.published_at, " +
                      "(SELECT COUNT(*) FROM article_view_event WHERE article_id = a.id) as views, " +
                      "(SELECT COUNT(*) FROM article_reaction_event WHERE article_id = a.id AND reaction = 'LIKE') as likes, " +
                      "(SELECT COUNT(*) FROM article_reaction_event WHERE article_id = a.id AND reaction = 'DISLIKE') as dislikes, " +
                      "(SELECT COUNT(*) FROM `comment` WHERE article_id = a.id) as comments " +
-                     "FROM article a LEFT JOIN app_user u ON a.created_by_id = u.id WHERE a.id = ?";
+                     "FROM article a LEFT JOIN user u ON a.created_by_id = u.id WHERE a.id = ?";
         try (PreparedStatement ps = cnx.prepareStatement(sql)) {
             ps.setInt(1, articleId);
             ResultSet rs = ps.executeQuery();
@@ -560,12 +559,12 @@ public class StatisticsService {
 
     public List<Map<String, Object>> getAllArticlesWithStats() {
         List<Map<String, Object>> result = new ArrayList<>();
-        String sql = "SELECT a.id, a.title, COALESCE(u.firstname, 'Unknown') as author, " +
+        String sql = "SELECT a.id, a.title, COALESCE(u.username, 'Unknown') as author, " +
                      "(SELECT COUNT(*) FROM article_view_event WHERE article_id = a.id) as views, " +
                      "(SELECT COUNT(*) FROM article_reaction_event WHERE article_id = a.id AND reaction = 'LIKE') as likes, " +
                      "(SELECT COUNT(*) FROM article_reaction_event WHERE article_id = a.id AND reaction = 'DISLIKE') as dislikes, " +
                      "(SELECT COUNT(*) FROM `comment` WHERE article_id = a.id) as comments " +
-                     "FROM article a LEFT JOIN app_user u ON a.created_by_id = u.id ORDER BY views DESC";
+                     "FROM article a LEFT JOIN user u ON a.created_by_id = u.id ORDER BY views DESC";
         try (Statement st = cnx.createStatement(); ResultSet rs = st.executeQuery(sql)) {
             while (rs.next()) {
                 Map<String, Object> map = new HashMap<>();
@@ -613,7 +612,7 @@ public class StatisticsService {
               "(SELECT COUNT(*) FROM article_reaction_event WHERE article_id = a.id AND reaction = 'LIKE' AND DATE(acted_at) BETWEEN ? AND ?) as likes, " +
               "(SELECT COUNT(*) FROM article_reaction_event WHERE article_id = a.id AND reaction = 'DISLIKE' AND DATE(acted_at) BETWEEN ? AND ?) as dislikes, " +
               "(SELECT COUNT(*) FROM comment WHERE article_id = a.id AND DATE(created_at) BETWEEN ? AND ?) as comments " +
-              "FROM article a JOIN app_user u ON u.id = a.created_by_id WHERE LOWER(u.email) = LOWER(?)";
+              "FROM article a JOIN user u ON u.id = a.created_by_id WHERE LOWER(u.email) = LOWER(?)";
         try (PreparedStatement ps = cnx.prepareStatement(sql)) {
             if (ownerEmail == null) {
                 ps.setDate(1, java.sql.Date.valueOf(from));
