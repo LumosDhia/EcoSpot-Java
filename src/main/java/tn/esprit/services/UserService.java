@@ -35,7 +35,10 @@ public class UserService {
                 "`role` VARCHAR(20)," +
                 "`reset_code` VARCHAR(10)," +
                 "`reset_expires_at` TIMESTAMP NULL," +
-                "`avatar_style` VARCHAR(50) DEFAULT 'avataaars'" +
+                "`avatar_style` VARCHAR(50) DEFAULT 'avataaars'," +
+                "`address` VARCHAR(255)," +
+                "`city` VARCHAR(150)," +
+                "`zipcode` VARCHAR(10)" +
                 ")";
         try {
             Statement st = cnx.createStatement();
@@ -50,6 +53,15 @@ public class UserService {
             }
             if (!hasColumn("user", "timeout_until")) {
                 st.execute("ALTER TABLE `user` ADD COLUMN `timeout_until` DATETIME DEFAULT NULL");
+            }
+            if (!hasColumn("user", "address")) {
+                st.execute("ALTER TABLE `user` ADD COLUMN `address` VARCHAR(255)");
+            }
+            if (!hasColumn("user", "city")) {
+                st.execute("ALTER TABLE `user` ADD COLUMN `city` VARCHAR(150)");
+            }
+            if (!hasColumn("user", "zipcode")) {
+                st.execute("ALTER TABLE `user` ADD COLUMN `zipcode` VARCHAR(10)");
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -73,6 +85,9 @@ public class UserService {
                     rs.getTimestamp("timeout_until") != null ? rs.getTimestamp("timeout_until").toLocalDateTime() : null
                 );
                 user.setAvatarStyle(rs.getString("avatar_style"));
+                user.setAddress(rs.getString("address"));
+                user.setCity(rs.getString("city"));
+                user.setZipcode(rs.getString("zipcode"));
                 users.add(user);
             }
         } catch (SQLException e) {
@@ -386,7 +401,7 @@ public class UserService {
         }
 
         // 8. Save to DB
-        String req = "INSERT INTO `user` (`username`, `email`, `password`, `role`, `avatar_style`) VALUES (?, ?, ?, ?, ?)";
+        String req = "INSERT INTO `user` (`username`, `email`, `password`, `role`, `avatar_style`, `address`, `city`, `zipcode`) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
         try {
             PreparedStatement ps = cnx.prepareStatement(req);
             ps.setString(1, firstName + " " + lastName);
@@ -394,6 +409,9 @@ public class UserService {
             ps.setString(3, password);
             ps.setString(4, "USER");
             ps.setString(5, AvatarService.getRandomStyle());
+            ps.setString(6, address);
+            ps.setString(7, city);
+            ps.setString(8, zipCode);
             ps.executeUpdate();
             upsertAppUserRoleByEmail(email, "ROLE_USER");
             loadUsersFromDb();

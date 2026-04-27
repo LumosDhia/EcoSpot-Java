@@ -9,6 +9,7 @@ import javafx.scene.layout.*;
 import javafx.stage.Stage;
 import tn.esprit.services.EventService;
 import tn.esprit.event.Sponsor;
+import tn.esprit.services.OpenRouterEventService;
 
 import java.io.File;
 import java.io.IOException;
@@ -29,9 +30,15 @@ public class EventFormController {
     @FXML private TextArea descriptionArea;
     @FXML private Button saveBtn;
     @FXML private javafx.scene.layout.FlowPane selectedSponsorsFlow;
+    
+    // AI Elements
+    @FXML private VBox aiResultBox;
+    @FXML private Label aiSuccessLabel;
+    @FXML private Label aiAnalysisLabel;
 
     private tn.esprit.services.EventService eventService = new tn.esprit.services.EventService();
     private tn.esprit.services.SponsorService sponsorService = new tn.esprit.services.SponsorService();
+    private OpenRouterEventService aiService = new OpenRouterEventService();
     private Event currentEvent;
     private boolean isEdit = false;
     private java.util.List<Sponsor> selectedSponsors = new java.util.ArrayList<>();
@@ -115,6 +122,47 @@ public class EventFormController {
         // Load sponsors
         this.selectedSponsors = sponsorService.getSponsorsForEvent(event.getId());
         updateSponsorsFlow();
+    }
+
+    @FXML
+    private void handleAiPredict() {
+        if (nameField.getText().isEmpty() || descriptionArea.getText().isEmpty()) {
+            showAlert("Missing Data", "Please enter at least a Name and Description for AI analysis.");
+            return;
+        }
+
+        // Create a temp event for AI to analyze
+        Event temp = new Event();
+        temp.setName(nameField.getText());
+        temp.setDescription(descriptionArea.getText());
+        temp.setLocation(locationField.getText());
+        try {
+            temp.setCapacity(Integer.parseInt(capacityField.getText()));
+        } catch (Exception e) {
+            temp.setCapacity(100);
+        }
+        temp.setStartedAt(startDatePicker.getValue() != null ? 
+            LocalDateTime.of(startDatePicker.getValue(), LocalTime.of(9, 0)) : LocalDateTime.now());
+
+        saveBtn.setDisable(true); // Disable save during AI call
+        aiAnalysisLabel.setText("Analyzing event potential... please wait...");
+        aiResultBox.setVisible(true);
+        aiResultBox.setManaged(true);
+
+        new Thread(() -> {
+            OpenRouterEventService.PredictionResult result = aiService.predictAttendance(temp);
+            javafx.application.Platform.runLater(() -> {
+                aiSuccessLabel.setText(result.successLevel);
+                aiAnalysisLabel.setText(result.analysis);
+                
+                // Color code based on level
+                if ("HIGH".equals(result.successLevel)) aiSuccessLabel.setStyle("-fx-text-fill: #2d6a4f; -fx-font-weight: bold;");
+                else if ("LOW".equals(result.successLevel)) aiSuccessLabel.setStyle("-fx-text-fill: #e63946; -fx-font-weight: bold;");
+                else aiSuccessLabel.setStyle("-fx-text-fill: #fca311; -fx-font-weight: bold;");
+                
+                saveBtn.setDisable(false);
+            });
+        }).start();
     }
 
     @FXML
