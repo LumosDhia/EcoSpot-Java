@@ -18,11 +18,6 @@
                 <children>
                     <Label onMouseClicked="#goToHome" style="-fx-cursor: hand;" styleClass="top-bar-brand" text="🌿 EcoSpot | Sponsor Management" />
                     <Region HBox.hgrow="ALWAYS" />
-                    <HBox alignment="CENTER_RIGHT" spacing="5.0">
-                        <Button onAction="#handleMinimize" styleClass="win-btn" text="—" />
-                        <Button onAction="#handleMaximize" styleClass="win-btn" text="▢" />
-                        <Button onAction="#handleClose" styleClass="win-btn, win-btn-close" text="✕" />
-                    </HBox>
                 </children>
             </HBox>
 
@@ -47,6 +42,7 @@
             <children>
                 <HBox alignment="CENTER_LEFT" spacing="20.0">
                     <children>
+                        <Button onAction="#goBack" styleClass="nav-link-btn" text="← Back to previous" />
                         <Label styleClass="section-title" text="Event Sponsors" />
                         <Region HBox.hgrow="ALWAYS" />
                         <Button onAction="#openAddSponsor" styleClass="btn-hero-primary" text="+ Add New Sponsor" />

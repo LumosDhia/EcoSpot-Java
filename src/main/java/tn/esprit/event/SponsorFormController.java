@@ -1,5 +1,6 @@
 package tn.esprit.event;
 
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -26,6 +27,11 @@ public class SponsorFormController {
     private Sponsor currentSponsor;
     private boolean isEdit = false;
     private File selectedImageFile;
+
+    @FXML
+    public void initialize() {
+        tn.esprit.util.NavigationHistory.track(saveBtn, "/event/SponsorForm.fxml");
+    }
 
     public void setSponsor(Sponsor sponsor) {
         this.currentSponsor = sponsor;
@@ -72,7 +78,7 @@ public class SponsorFormController {
                 sponsorService.add(currentSponsor);
             }
 
-            goBack();
+            goBack(null);
         }
     }
 
@@ -91,9 +97,45 @@ public class SponsorFormController {
     }
 
     private boolean validate() {
-        if (nameField.getText().trim().isEmpty() || sectorField.getText().trim().isEmpty() || 
-            locationField.getText().trim().isEmpty() || descriptionArea.getText().trim().isEmpty()) {
+        String name = nameField.getText() == null ? "" : nameField.getText().trim();
+        String sector = sectorField.getText() == null ? "" : sectorField.getText().trim();
+        String location = locationField.getText() == null ? "" : locationField.getText().trim();
+        String description = descriptionArea.getText() == null ? "" : descriptionArea.getText().trim();
+
+        if (name.isEmpty() || sector.isEmpty() || location.isEmpty() || description.isEmpty()) {
             showAlert("Missing Information", "All fields marked with (*) are required.");
+            return false;
+        }
+        if (name.length() < 3 || name.length() > 80) {
+            showAlert("Invalid Name", "Sponsor name must be between 3 and 80 characters.");
+            return false;
+        }
+        if (!name.matches("^[A-Za-z].*")) {
+            showAlert("Invalid Name", "Sponsor name must start with a letter (not a number or symbol).");
+            return false;
+        }
+        if (sector.length() < 3 || sector.length() > 60) {
+            showAlert("Invalid Sector", "Sector must be between 3 and 60 characters.");
+            return false;
+        }
+        if (!sector.matches("^[A-Za-z].*")) {
+            showAlert("Invalid Sector", "Sector must start with a letter (not a number or symbol).");
+            return false;
+        }
+        if (location.length() < 3 || location.length() > 100) {
+            showAlert("Invalid Location", "Location must be between 3 and 100 characters.");
+            return false;
+        }
+        if (!location.matches("^[A-Za-z].*")) {
+            showAlert("Invalid Location", "Location must start with a letter (not a number or symbol).");
+            return false;
+        }
+        if (description.length() < 20 || description.length() > 1000) {
+            showAlert("Invalid Description", "Description must be between 20 and 1000 characters.");
+            return false;
+        }
+        if (!description.matches("^[A-Za-z].*")) {
+            showAlert("Invalid Description", "Description must start with a letter (not a number or symbol).");
             return false;
         }
         
@@ -112,9 +154,15 @@ public class SponsorFormController {
         alert.show();
     }
 
-    @FXML private void cancel() { goBack(); }
+    @FXML private void cancel() { goBack(null); }
 
-    private void goBack() { switchScene("/event/SponsorManagement.fxml"); }
+    @FXML
+    private void goBack(ActionEvent event) {
+        if (event != null && tn.esprit.util.NavigationHistory.goBack(event)) {
+            return;
+        }
+        switchScene("/event/SponsorManagement.fxml");
+    }
 
     @FXML private void goToHome() { switchScene("/home/Home.fxml"); }
 

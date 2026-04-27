@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.net.URL?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.FlowPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+
+<BorderPane prefHeight="800.0" prefWidth="1000.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="tn.esprit.ticket.AchievementsController">
+    <stylesheets>
+        <URL value="@../style.css" />
+    </stylesheets>
+
+    <top>
+        <VBox>
+            <!-- ===== TOP DARK BAR ===== -->
+            <HBox alignment="CENTER_LEFT" spacing="20.0" styleClass="top-bar">
+                <padding><Insets bottom="8.0" left="20.0" right="20.0" top="8.0" /></padding>
+                <children>
+                    <Label onMouseClicked="#goToHome" style="-fx-cursor: hand;" styleClass="top-bar-brand" text="🌿 EcoSpot" />
+                    
+                    <!-- Guest Links -->
+                    <HBox fx:id="authLinks" alignment="CENTER_LEFT" spacing="20.0">
+                        <children>
+                            <Button onAction="#goToLogin" styleClass="top-bar-link" text="🔑 Login" />
+                            <Button onAction="#goToRegister" styleClass="top-bar-link" text="👤 Register" />
+                        </children>
+                    </HBox>
+
+                    <!-- Logged-in Links -->
+                    <HBox fx:id="userLinks" alignment="CENTER_LEFT" managed="false" spacing="20.0" visible="false">
+                        <children>
+                            <Button fx:id="dashboardTopBtn" onAction="#goToDashboard" styleClass="top-bar-link" text="📊 Dashboard" />
+                            <Button onAction="#handleLogout" styleClass="top-bar-link" text="🚪 Logout" />
+                        </children>
+                    </HBox>
+
+                    <Region HBox.hgrow="ALWAYS" />
+                </children>
+            </HBox>
+
+            <!-- ===== WHITE SECONDARY NAV ===== -->
+            <HBox alignment="CENTER_LEFT" spacing="10.0" styleClass="main-nav">
+                <padding><Insets bottom="12.0" left="20.0" right="20.0" top="12.0" /></padding>
+                <children>
+                    <Label onMouseClicked="#goToHome" style="-fx-cursor: hand;" styleClass="brand-name" text="EcoSpot" />
+                    <Region HBox.hgrow="ALWAYS" />
+                    <Button onAction="#goToHome" styleClass="nav-link-btn" text="Home" />
+                    <Button onAction="#goToEvents" styleClass="nav-link-btn" text="Events" />
+                    <Button onAction="#goToTickets" styleClass="nav-link-btn" text="🎟 Tickets" />
+                    <Button styleClass="nav-link-btn-active" text="Achievements" />
+                    <Button onAction="#goToBlog" styleClass="nav-btn-blog" text="Blog" />
+                </children>
+            </HBox>
+        </VBox>
+    </top>
+
+    <center>
+        <ScrollPane fitToWidth="true" style="-fx-background-color: #f0f7f4; -fx-background: #f0f7f4;">
+            <content>
+                <VBox spacing="0.0">
+                    <!-- ===== HERO SECTION ===== -->
+                    <VBox alignment="CENTER" spacing="0.0" styleClass="hero-banner">
+                        <children>
+                            <VBox alignment="CENTER" maxWidth="Infinity" spacing="18.0" styleClass="hero-overlay" VBox.vgrow="ALWAYS">
+                                <padding><Insets bottom="100.0" left="40.0" right="40.0" top="100.0" /></padding>
+                                <children>
+                                    <Label styleClass="hero-title" text="Achievements" />
+                                    <Label alignment="CENTER" maxWidth="700.0" styleClass="hero-subtitle" text="Tickets completed by the community and approved by our team." textAlignment="CENTER" wrapText="true" />
+                                    <Label style="-fx-text-fill: #fca311; -fx-font-weight: bold; -fx-padding: 20 0 0 0;" text="Home / Achievements" />
+                                    <Button onAction="#goBack" styleClass="btn-hero-outline" text="← Back to Dashboard" />
+                                </children>
+                            </VBox>
+                        </children>
+                    </VBox>
+
+                    <!-- Achievements Cards Container -->
+                    <VBox alignment="CENTER" spacing="25.0" style="-fx-background-color: #f0f7f4;">
+                        <padding><Insets bottom="40.0" left="60.0" right="60.0" top="50.0" /></padding>
+                        <children>
+                            <FlowPane fx:id="achievementsFlowPane" hgap="20.0" vgap="20.0" alignment="CENTER" />
+
+                            <!-- Pagination Bar -->
+                            <HBox alignment="CENTER" spacing="12.0" style="-fx-background-color: white; -fx-background-radius: 10; -fx-padding: 14 20; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.05), 10, 0, 0, 2);">
+                                <children>
+                                    <Button fx:id="prevBtn" onAction="#goToPrevPage" styleClass="page-btn" text="← Prev" />
+                                    <HBox fx:id="pageButtonsBox" alignment="CENTER" spacing="6.0" />
+                                    <Button fx:id="nextBtn" onAction="#goToNextPage" styleClass="page-btn" text="Next →" />
+                                    <Label fx:id="pageInfoLabel" styleClass="article-date" text="" />
+                                </children>
+                            </HBox>
+                        </children>
+                    </VBox>
+                </VBox>
+            </content>
+        </ScrollPane>
+    </center>
+</BorderPane>

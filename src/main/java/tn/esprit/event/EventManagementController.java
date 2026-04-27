@@ -1,149 +1,215 @@
 package tn.esprit.event;
 
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
+import javafx.concurrent.Task;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.Parent;
-import javafx.scene.Scene;
+import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
+import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.FlowPane;
+import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
 import tn.esprit.services.EventService;
 
-import javafx.concurrent.Task;
-import javafx.application.Platform;
 import java.io.IOException;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 public class EventManagementController {
 
+    @FXML private HBox authLinks;
+    @FXML private HBox userLinks;
+    @FXML private Button dashboardTopBtn;
     @FXML private TextField searchField;
     @FXML private ChoiceBox<String> sortChoice;
     @FXML private FlowPane eventsGrid;
+    @FXML private Button manageEventsBtn;
+    @FXML private Button manageSponsorsBtn;
 
-    private EventService eventService = new EventService();
-    private List<Event> allEvents;
+    // Pagination
+    @FXML private Button prevBtn;
+    @FXML private Button nextBtn;
+    @FXML private HBox pageButtonsBox;
+    @FXML private Label pageInfoLabel;
+
+    private static final int PAGE_SIZE = 8;
+
+    private final EventService eventService = new EventService();
+    private List<Event> allEvents = new ArrayList<>();
+    private List<Event> filteredEvents = new ArrayList<>();
+    private int currentPage = 0;
 
     @FXML
     public void initialize() {
-        sortChoice.setItems(FXCollections.observableArrayList("Next Events", "Capacity High", "Name A-Z"));
-        sortChoice.setValue("Next Events");
+        boolean isAdmin = false;
+        boolean isNgo = false;
+
+        if (tn.esprit.util.SessionManager.isLoggedIn()) {
+            if (authLinks != null) { authLinks.setVisible(false); authLinks.setManaged(false); }
+            if (userLinks != null) { userLinks.setVisible(true); userLinks.setManaged(true); }
+
+            tn.esprit.user.User user = tn.esprit.util.SessionManager.getCurrentUser();
+            if (dashboardTopBtn != null) {
+                if (user.getRole().equalsIgnoreCase("ADMIN")) { dashboardTopBtn.setText("📊 Admin Dashboard"); isAdmin = true; }
+                else if (user.getRole().equalsIgnoreCase("NGO")) { dashboardTopBtn.setText("📊 NGO Dashboard"); isNgo = true; }
+                else { dashboardTopBtn.setText("📊 My Dashboard"); }
+            }
+        } else {
+            if (authLinks != null) { authLinks.setVisible(true); authLinks.setManaged(true); }
+            if (userLinks != null) { userLinks.setVisible(false); userLinks.setManaged(false); }
+        }
+
+        boolean canManage = isAdmin || isNgo;
+        if (manageEventsBtn != null) { manageEventsBtn.setVisible(canManage); manageEventsBtn.setManaged(canManage); }
+        if (manageSponsorsBtn != null) { manageSponsorsBtn.setVisible(isAdmin); manageSponsorsBtn.setManaged(isAdmin); }
+
+        if (sortChoice != null) {
+            sortChoice.setItems(FXCollections.observableArrayList("Next Events", "Capacity High", "Name A-Z"));
+            sortChoice.setValue("Next Events");
+            sortChoice.getSelectionModel().selectedItemProperty().addListener((obs, o, n) -> { currentPage = 0; filterAndDisplay(); });
+        }
 
         refreshData();
 
-        searchField.textProperty().addListener((obs, oldVal, newVal) -> filterAndDisplay());
-        sortChoice.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> filterAndDisplay());
+        if (searchField != null) {
+            searchField.textProperty().addListener((obs, o, n) -> { currentPage = 0; filterAndDisplay(); });
+            tn.esprit.util.NavigationHistory.track(searchField, "/event/EventManagement.fxml");
+        }
     }
 
     private void refreshData() {
         allEvents = eventService.getAll();
+        currentPage = 0;
         filterAndDisplay();
     }
 
     private void filterAndDisplay() {
+        if (searchField == null || sortChoice == null || eventsGrid == null) return;
         String query = searchField.getText().toLowerCase();
-        List<Event> filtered = allEvents.stream()
+        filteredEvents = allEvents.stream()
                 .filter(e -> e.getName().toLowerCase().contains(query) || e.getLocation().toLowerCase().contains(query))
                 .collect(Collectors.toList());
 
         String sort = sortChoice.getValue();
-        if ("Next Events".equals(sort)) {
-            filtered.sort((e1, e2) -> e1.getStartedAt().compareTo(e2.getStartedAt()));
-        } else if ("Capacity High".equals(sort)) {
-            filtered.sort((e1, e2) -> Integer.compare(e2.getCapacity(), e1.getCapacity()));
-        } else if ("Name A-Z".equals(sort)) {
-            filtered.sort((e1, e2) -> e1.getName().compareToIgnoreCase(e2.getName()));
-        }
+        if ("Next Events".equals(sort)) filteredEvents.sort((a, b) -> a.getStartedAt().compareTo(b.getStartedAt()));
+        else if ("Capacity High".equals(sort)) filteredEvents.sort((a, b) -> Integer.compare(b.getCapacity(), a.getCapacity()));
+        else if ("Name A-Z".equals(sort)) filteredEvents.sort((a, b) -> a.getName().compareToIgnoreCase(b.getName()));
 
-        displayEvents(filtered);
+        displayCurrentPage();
     }
 
-    private void displayEvents(List<Event> events) {
+    private void displayCurrentPage() {
+        int totalPages = getTotalPages();
+        if (currentPage >= totalPages && totalPages > 0) currentPage = totalPages - 1;
+
+        int from = currentPage * PAGE_SIZE;
+        int to = Math.min(from + PAGE_SIZE, filteredEvents.size());
+        List<Event> pageEvents = filteredEvents.subList(from, to);
+
         eventsGrid.getChildren().clear();
+
         Task<Void> loadTask = new Task<>() {
             @Override
             protected Void call() throws Exception {
-                for (Event e : events) {
+                for (Event e : pageEvents) {
                     FXMLLoader loader = new FXMLLoader(getClass().getResource("/event/EventCard.fxml"));
                     Node card = loader.load();
-                    EventCardController controller = loader.getController();
-                    controller.setData(e, () -> Platform.runLater(() -> refreshData()));
-                    
+                    EventCardController ctrl = loader.getController();
+                    ctrl.setData(e, () -> Platform.runLater(() -> refreshData()));
                     Platform.runLater(() -> eventsGrid.getChildren().add(card));
-                    Thread.sleep(5); 
+                    Thread.sleep(5);
                 }
                 return null;
             }
         };
         new Thread(loadTask).start();
+
+        updatePaginationControls(totalPages);
     }
 
-    private void addMockData() {
-        allEvents = new ArrayList<>();
-        allEvents.add(new Event(1, "Eco-Green Summit 2026", "eco-green-summit", 
-            "A massive summit for ecology and green tech innovations.", 500, "Tunis, TN", 
-            LocalDateTime.now().plusMonths(2), LocalDateTime.now().plusMonths(2).plusDays(2), 
-            "https://images.unsplash.com/photo-1540575861501-7ad060e39fe5?w=800"));
-        
-        allEvents.add(new Event(2, "Forest Cleanup Day", "forest-cleanup", 
-            "Join volunteers to clean the local forest areas.", 100, "Nabeul, TN", 
-            LocalDateTime.now().plusDays(15), LocalDateTime.now().plusDays(15).plusHours(6), 
-            "https://images.unsplash.com/photo-1528190336454-13cd56b45b5a?w=800"));
+    private void updatePaginationControls(int totalPages) {
+        if (prevBtn == null) return;
+        prevBtn.setDisable(currentPage == 0);
+        nextBtn.setDisable(currentPage >= totalPages - 1);
 
-        allEvents.add(new Event(3, "Organic Farming Workshop", "organic-farming", 
-            "Learn how to grow your own organic food at home.", 30, "Bizerte, TN", 
-            LocalDateTime.now().plusDays(5), LocalDateTime.now().plusDays(5).plusHours(4), 
-            "https://images.unsplash.com/photo-1500651230702-0e2d8a49d4ad?w=800"));
+        int shown = Math.min((currentPage + 1) * PAGE_SIZE, filteredEvents.size());
+        int from = filteredEvents.isEmpty() ? 0 : currentPage * PAGE_SIZE + 1;
+        pageInfoLabel.setText(filteredEvents.isEmpty()
+                ? "No events found"
+                : String.format("Showing %d–%d of %d", from, shown, filteredEvents.size()));
+
+        pageButtonsBox.getChildren().clear();
+        for (int i = 0; i < totalPages; i++) {
+            final int page = i;
+            Button btn = new Button(String.valueOf(i + 1));
+            btn.getStyleClass().add(i == currentPage ? "page-btn-active" : "page-btn");
+            btn.setOnAction(e -> { currentPage = page; displayCurrentPage(); });
+            pageButtonsBox.getChildren().add(btn);
+        }
     }
 
-    @FXML
-    private void goToHome() {
-        switchScene("/home/Home.fxml");
+    private int getTotalPages() {
+        return (int) Math.ceil((double) filteredEvents.size() / PAGE_SIZE);
     }
 
-    @FXML
-    private void goToBlog() {
-        switchScene("/blog/BlogManagement.fxml");
-    }
-
-    @FXML
-    private void goToAdmin() {
-        switchScene("/event/EventAdmin.fxml");
-    }
+    @FXML private void goToPrevPage() { if (currentPage > 0) { currentPage--; displayCurrentPage(); } }
+    @FXML private void goToNextPage() { if (currentPage < getTotalPages() - 1) { currentPage++; displayCurrentPage(); } }
 
     @FXML
-    private void goToSponsors() {
-        switchScene("/event/SponsorManagement.fxml");
+    private void goToDashboard(ActionEvent event) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/user/Dashboard.fxml"));
+            Parent root = loader.load();
+            tn.esprit.user.DashboardController ctrl = loader.getController();
+            if (ctrl != null) ctrl.setUser(tn.esprit.util.SessionManager.getCurrentUser());
+            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+            stage.getScene().setRoot(root);
+        } catch (IOException e) { e.printStackTrace(); }
     }
+
+    @FXML private void goBack(ActionEvent event) { if (!tn.esprit.util.NavigationHistory.goBack(event)) goToDashboard(event); }
+
+    @FXML void handleLogout(ActionEvent event) {
+        tn.esprit.util.SessionManager.logout();
+        navigate(event, "/home/Home.fxml");
+    }
+
+    @FXML private void goToLogin(ActionEvent e) { navigate(e, "/user/Login.fxml"); }
+    @FXML private void goToRegister(ActionEvent e) { navigate(e, "/user/Register.fxml"); }
+    @FXML private void goToHome() { switchScene("/home/Home.fxml"); }
+    @FXML private void goToTickets(ActionEvent e) { navigate(e, "/ticket/TicketManagement.fxml"); }
+    @FXML private void goToBlog() { switchScene("/blog/BlogManagement.fxml"); }
+    @FXML private void goToAchievements(ActionEvent e) { navigate(e, "/ticket/Achievements.fxml"); }
+    @FXML private void goToAdmin() { switchScene("/event/EventAdmin.fxml"); }
+    @FXML private void goToSponsors() { switchScene("/event/SponsorManagement.fxml"); }
 
     private void switchScene(String fxmlPath) {
         try {
             Parent root = FXMLLoader.load(getClass().getResource(fxmlPath));
-            Stage stage = (Stage) searchField.getScene().getWindow();
+            Stage stage;
+            if (searchField != null && searchField.getScene() != null) stage = (Stage) searchField.getScene().getWindow();
+            else return;
             stage.getScene().setRoot(root);
             tn.esprit.util.WindowUtils.makeDraggable(stage, root);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        } catch (IOException e) { e.printStackTrace(); }
     }
 
-    @FXML
-    private void handleMinimize() {
-        tn.esprit.util.WindowUtils.minimize(searchField);
+    private void navigate(ActionEvent event, String fxmlPath) {
+        try {
+            Parent root = FXMLLoader.load(getClass().getResource(fxmlPath));
+            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+            stage.getScene().setRoot(root);
+        } catch (IOException e) { e.printStackTrace(); }
     }
 
-    @FXML
-    private void handleMaximize() {
-        tn.esprit.util.WindowUtils.toggleFullScreen(searchField);
-    }
-
-    @FXML
-    private void handleClose() {
-        tn.esprit.util.WindowUtils.close(searchField);
-    }
+    @FXML private void handleMinimize() { tn.esprit.util.WindowUtils.minimize(searchField); }
+    @FXML private void handleMaximize() { tn.esprit.util.WindowUtils.toggleFullScreen(searchField); }
+    @FXML private void handleClose() { tn.esprit.util.WindowUtils.close(searchField); }
 }

@@ -1,5 +1,6 @@
 package tn.esprit.event;
 
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -35,6 +36,11 @@ public class EventFormController {
     private boolean isEdit = false;
     private java.util.List<Sponsor> selectedSponsors = new java.util.ArrayList<>();
     private File selectedImageFile;
+
+    @FXML
+    public void initialize() {
+        tn.esprit.util.NavigationHistory.track(saveBtn, "/event/EventForm.fxml");
+    }
 
     private void updateSponsorsFlow() {
         selectedSponsorsFlow.getChildren().clear();
@@ -159,7 +165,7 @@ public class EventFormController {
                 sponsorService.assignSponsorToEvent(currentEvent.getId(), s.getId());
             }
 
-            goBack();
+            goBack(null);
         }
     }
 
@@ -244,10 +250,14 @@ public class EventFormController {
 
     @FXML
     private void cancel() {
-        goBack();
+        goBack(null);
     }
 
-    private void goBack() {
+    @FXML
+    private void goBack(ActionEvent event) {
+        if (event != null && tn.esprit.util.NavigationHistory.goBack(event)) {
+            return;
+        }
         switchScene("/event/EventManagement.fxml");
     }
 
@@ -264,6 +274,16 @@ public class EventFormController {
     @FXML
     private void goToEvents() {
         switchScene("/event/EventManagement.fxml");
+    }
+
+    @FXML
+    private void goToTickets() {
+        switchScene("/ticket/TicketManagement.fxml");
+    }
+
+    @FXML
+    private void goToAchievements() {
+        switchScene("/ticket/Achievements.fxml");
     }
 
     private void switchScene(String fxmlPath) {

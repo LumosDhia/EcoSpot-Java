@@ -5,11 +5,12 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 
 public class MyConnection {
+    // Singleton: one shared database connection manager instance in the app.
 
     // DB properties
-    final String URL = "jdbc:mysql://localhost:3306/projetdev";
-    final String USR = "root";
-    final String PWD = "";
+    final String URL = Config.get("DB_URL", "jdbc:mysql://localhost:3306/projetdev");
+    final String USR = Config.get("DB_USER", "root");
+    final String PWD = Config.get("DB_PASS", "root");
 
     // Attributes
     // 2. static instance

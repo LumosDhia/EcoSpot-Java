@@ -5,7 +5,6 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
-import javafx.stage.StageStyle;
 
 import javafx.scene.image.Image;
 import java.io.IOException;
@@ -13,7 +12,20 @@ import java.io.IOException;
 public class MainFX extends Application {
 
     public static void main(String[] args) {
+        killOtherInstances();
         launch(args);
+    }
+
+    private static void killOtherInstances() {
+        try {
+            // For Windows: Kill other windows with the same title
+            // Use taskkill to find and terminate processes with our app title
+            new ProcessBuilder("taskkill", "/F", "/FI", "WINDOWTITLE eq EcoSpot Desktop App", "/T").start();
+            // Small delay to let the OS release the process
+            Thread.sleep(500);
+        } catch (Exception e) {
+            // Silently fail if taskkill is not available or fails
+        }
     }
 
     @Override
@@ -23,15 +35,11 @@ public class MainFX extends Application {
             Parent root = FXMLLoader.load(getClass().getResource("/home/Home.fxml"));
             Scene scene = new Scene(root, 1000, 800);
             primaryStage.setTitle("EcoSpot Desktop App");
-            primaryStage.initStyle(StageStyle.UNDECORATED);
             
             // Set App Icon
             primaryStage.getIcons().add(new Image(getClass().getResourceAsStream("/images/leaf.png")));
             
             primaryStage.setScene(scene);
-            
-            // Handle window dragging
-            tn.esprit.util.WindowUtils.makeDraggable(primaryStage, root);
             
             primaryStage.show();
 

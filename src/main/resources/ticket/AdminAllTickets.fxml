@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.net.URL?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox prefHeight="720.0" prefWidth="1280.0" style="-fx-background-color: #f8faf9;" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="tn.esprit.ticket.AdminAllTicketsController">
+    <stylesheets>
+        <URL value="@../style.css" />
+        <URL value="@../ticket-style.css" />
+    </stylesheets>
+
+    <children>
+        <HBox alignment="CENTER_LEFT" styleClass="admin-top-bar" spacing="15.0">
+            <padding>
+                <Insets left="20.0" right="20.0" top="10.0" bottom="10.0" />
+            </padding>
+            <children>
+                <Label styleClass="breadcrumb-text" text="Admin  ›  All Tickets" />
+                <Region HBox.hgrow="ALWAYS" />
+                <HBox alignment="CENTER" spacing="15.0">
+                    <children>
+                        <VBox alignment="CENTER_RIGHT">
+                            <children>
+                                <Label fx:id="userNameLabel" styleClass="admin-profile-name" text="Admin" />
+                            </children>
+                        </VBox>
+                        <Label text="👤" style="-fx-font-size: 32px; -fx-background-color: #fca311; -fx-text-fill: white; -fx-padding: 5; -fx-background-radius: 50;" />
+                    </children>
+                </HBox>
+            </children>
+        </HBox>
+
+        <VBox style="-fx-background-color: white; -fx-background-radius: 15;">
+            <VBox.margin>
+                <Insets left="40.0" right="40.0" top="30.0" bottom="20.0" />
+            </VBox.margin>
+            <padding>
+                <Insets top="25.0" bottom="25.0" left="30.0" right="30.0" />
+            </padding>
+            <children>
+                <HBox alignment="CENTER_LEFT" spacing="20.0">
+                    <children>
+                        <VBox spacing="5.0">
+                            <children>
+                                <Label style="-fx-font-size: 28px; -fx-font-weight: bold; -fx-text-fill: #1a4a38;" text="All Tickets" />
+                                <Label style="-fx-font-size: 14px; -fx-text-fill: #6c757d;" text="Review every ticket in the system. You can view details or delete tickets." />
+                            </children>
+                        </VBox>
+                        <Region HBox.hgrow="ALWAYS" />
+                        <VBox spacing="5.0">
+                            <children>
+                                <Label style="-fx-font-weight: bold; -fx-text-fill: #4b5563; -fx-font-size: 12px;" text="FILTER BY STATUS" />
+                                <javafx.scene.control.ComboBox fx:id="statusFilter" prefWidth="180.0" promptText="Select Status" style="-fx-background-color: white; -fx-border-color: #d1d5db; -fx-border-radius: 4; -fx-padding: 2;" />
+                            </children>
+                        </VBox>
+                    </children>
+                </HBox>
+
+                <Region prefHeight="20.0" />
+
+                <ScrollPane fx:id="mainScrollPane" fitToWidth="true" style="-fx-background-color: transparent;" VBox.vgrow="ALWAYS">
+                    <content>
+                        <VBox fx:id="ticketsListContainer" spacing="12.0" />
+                    </content>
+                </ScrollPane>
+            </children>
+        </VBox>
+
+        <HBox alignment="CENTER_LEFT" spacing="15.0">
+            <padding>
+                <Insets left="40.0" bottom="20.0" />
+            </padding>
+            <children>
+                <Button onAction="#goBack" text="⬅ Back to Dashboard" style="-fx-background-color: white; -fx-border-color: #d1d5db; -fx-border-radius: 4; -fx-text-fill: #4b5563; -fx-cursor: hand;" />
+            </children>
+        </HBox>
+    </children>
+</VBox>

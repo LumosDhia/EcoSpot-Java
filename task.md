@@ -1,0 +1,22 @@
+# AI Recommendation Engine Implementation
+
+- [x] 1. Backend: Entities and Repositories
+  - [x] Create `ChallengeDifficultyProfile` entity
+  - [x] Create `UserSkillProfile` entity
+  - [x] Create `ChallengeDifficultyProfileRepository`
+  - [x] Create `UserSkillProfileRepository`
+- [x] 2. Backend: DTOs
+  - [x] Create `RecommendationDto`, `UserSkillProfileDto`, `ChallengeDifficultyDto`
+- [x] 3. Backend: Services (The AI Algorithms)
+  - [x] Implement `DifficultyPredictorService` (Naive Bayes)
+  - [x] Implement `SkillProfileService` (Skill parsing from tags/submissions)
+  - [x] Implement `RecommendationService` (Collaborative filtering)
+  - [x] Implement `AiTrainingScheduler`
+- [x] 4. Backend: Controllers
+  - [x] Create `AiRecommendationController`
+- [x] 5. Frontend: Services & Integration
+  - [x] Add AI endpoint calls in Angular services
+- [x] 6. Frontend: UI Components
+  - [x] Update Challenge List to show "🧠 AI Picks"
+  - [x] Update Challenge Detail to show AI Difficulty
+  - [x] Create Skill Radar UI

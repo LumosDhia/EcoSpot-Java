@@ -17,11 +17,6 @@
                 <children>
                     <Label onMouseClicked="#goToHome" style="-fx-cursor: hand;" styleClass="top-bar-brand" text="🌿 EcoSpot | Event Editor" />
                     <Region HBox.hgrow="ALWAYS" />
-                    <HBox alignment="CENTER_RIGHT" spacing="5.0">
-                        <Button onAction="#handleMinimize" styleClass="win-btn" text="—" />
-                        <Button onAction="#handleMaximize" styleClass="win-btn" text="▢" />
-                        <Button onAction="#handleClose" styleClass="win-btn, win-btn-close" text="✕" />
-                    </HBox>
                 </children>
             </HBox>
 
@@ -33,8 +28,8 @@
                     <Region HBox.hgrow="ALWAYS" />
                     <Button onAction="#goToHome" styleClass="nav-link-btn" text="Home" />
                     <Button onAction="#goToEvents" styleClass="nav-link-btn-active" text="Events" />
-                    <Button styleClass="nav-link-btn" text="🎟 Tickets" />
-                    <Button styleClass="nav-link-btn" text="Achievements" />
+                    <Button onAction="#goToTickets" styleClass="nav-link-btn" text="🎟 Tickets" />
+                    <Button onAction="#goToAchievements" styleClass="nav-link-btn" text="Achievements" />
                     <Button onAction="#goToBlog" styleClass="nav-btn-blog" text="Blog" />
                 </children>
             </HBox>
@@ -47,20 +42,21 @@
                 <VBox alignment="CENTER" spacing="25.0">
                     <padding><Insets bottom="40.0" left="60.0" right="60.0" top="40.0" /></padding>
                     <children>
-                        <VBox maxWidth="600.0" spacing="20.0" style="-fx-background-color: white; -fx-padding: 30; -fx-background-radius: 15; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 10, 0, 0, 5);">
+                        <VBox maxWidth="600.0" spacing="20.0" styleClass="section-card">
+                            <padding><Insets top="30.0" bottom="30.0" left="30.0" right="30.0" /></padding>
                             <children>
                                 <Label fx:id="formTitle" styleClass="section-title" text="Add New Event" />
-                                
+
                                 <VBox spacing="10.0">
                                     <children>
-                                        <Label text="Event Name (*)" style="-fx-font-weight: bold; -fx-text-fill: #2d6a4f;" />
+                                        <Label styleClass="form-label" text="Event Name (*)" />
                                         <TextField fx:id="nameField" promptText="Enter event name (min 5 chars)..." styleClass="search-field" />
                                     </children>
                                 </VBox>
-                                
+
                                 <VBox spacing="10.0">
                                     <children>
-                                        <Label text="Location (*)" style="-fx-font-weight: bold; -fx-text-fill: #2d6a4f;" />
+                                        <Label styleClass="form-label" text="Location (*)" />
                                         <TextField fx:id="locationField" promptText="City, Country..." styleClass="search-field" />
                                     </children>
                                 </VBox>
@@ -69,17 +65,17 @@
                                     <children>
                                         <VBox spacing="10.0" HBox.hgrow="ALWAYS">
                                             <children>
-                                                <Label text="Capacity (*)" style="-fx-font-weight: bold; -fx-text-fill: #2d6a4f;" />
+                                                <Label styleClass="form-label" text="Capacity (*)" />
                                                 <TextField fx:id="capacityField" promptText="Max participants (number)" styleClass="search-field" />
                                             </children>
                                         </VBox>
                                         <VBox spacing="10.0" HBox.hgrow="ALWAYS">
                                             <children>
-                                                <Label style="-fx-font-weight: bold; -fx-text-fill: #2d6a4f;" text="Event Image (*)" />
+                                                <Label styleClass="form-label" text="Event Image (*)" />
                                                 <HBox alignment="CENTER_LEFT" spacing="10.0">
                                                     <children>
                                                         <Button onAction="#importImage" styleClass="nav-link-btn" text="📁 Import" />
-                                                        <Label fx:id="imageNameLabel" style="-fx-text-fill: #666;" text="No image selected" />
+                                                        <Label fx:id="imageNameLabel" styleClass="card-text" text="No image selected" />
                                                     </children>
                                                 </HBox>
                                             </children>
@@ -91,13 +87,13 @@
                                     <children>
                                         <VBox spacing="10.0" HBox.hgrow="ALWAYS">
                                             <children>
-                                                <Label text="Start Date (*)" style="-fx-font-weight: bold; -fx-text-fill: #2d6a4f;" />
+                                                <Label styleClass="form-label" text="Start Date (*)" />
                                                 <DatePicker fx:id="startDatePicker" editable="false" maxWidth="Infinity" styleClass="search-field" />
                                             </children>
                                         </VBox>
                                         <VBox spacing="10.0" HBox.hgrow="ALWAYS">
                                             <children>
-                                                <Label text="End Date (*)" style="-fx-font-weight: bold; -fx-text-fill: #2d6a4f;" />
+                                                <Label styleClass="form-label" text="End Date (*)" />
                                                 <DatePicker fx:id="endDatePicker" editable="false" maxWidth="Infinity" styleClass="search-field" />
                                             </children>
                                         </VBox>
@@ -106,7 +102,7 @@
 
                                 <VBox spacing="10.0">
                                     <children>
-                                        <Label text="Description (*)" style="-fx-font-weight: bold; -fx-text-fill: #2d6a4f;" />
+                                        <Label styleClass="form-label" text="Description (*)" />
                                         <TextArea fx:id="descriptionArea" prefHeight="120.0" promptText="Describe the event goals and activities (min 20 chars)..." styleClass="search-field" wrapText="true" />
                                     </children>
                                 </VBox>
@@ -115,14 +111,9 @@
                                     <children>
                                         <HBox alignment="CENTER_LEFT" spacing="10.0">
                                             <children>
-                                                <Label text="Sponsors" style="-fx-font-weight: bold; -fx-text-fill: #2d6a4f;" />
+                                                <Label styleClass="form-label" text="Sponsors" />
                                                 <Region HBox.hgrow="ALWAYS" />
-                                                <HBox spacing="10.0">
-                                                    <children>
-                                                        
-                                                        <Button onAction="#openSponsorPicker" styleClass="btn-secondary" text="+ Select Sponsors" />
-                                                    </children>
-                                                </HBox>
+                                                <Button onAction="#openSponsorPicker" styleClass="btn-secondary" text="+ Select Sponsors" />
                                             </children>
                                         </HBox>
                                         <FlowPane fx:id="selectedSponsorsFlow" hgap="10.0" vgap="10.0" />
@@ -131,8 +122,8 @@
 
                                 <HBox alignment="CENTER_RIGHT" spacing="15.0">
                                     <children>
-                                        <Button onAction="#cancel" styleClass="nav-link-btn" text="Cancel" />
-                                        <Button fx:id="saveBtn" onAction="#save" prefWidth="120.0" styleClass="btn-hero-primary" text="Save Event" />
+                                        <Button onAction="#cancel" styleClass="btn-outline" text="Cancel" />
+                                        <Button fx:id="saveBtn" onAction="#save" styleClass="btn-hero-primary" text="Save Event" />
                                     </children>
                                 </HBox>
                             </children>

@@ -17,11 +17,6 @@
                 <children>
                     <Label onMouseClicked="#goToHome" style="-fx-cursor: hand;" styleClass="top-bar-brand" text="🌿 EcoSpot | Admin Dashboard" />
                     <Region HBox.hgrow="ALWAYS" />
-                    <HBox alignment="CENTER_RIGHT" spacing="10.0">
-                        <Button onAction="#handleMinimize" styleClass="win-btn" text="—" />
-                        <Button onAction="#handleMaximize" styleClass="win-btn" text="▢" />
-                        <Button onAction="#handleClose" styleClass="win-btn, win-btn-close" text="✕" />
-                    </HBox>
                 </children>
             </HBox>
 
@@ -45,6 +40,7 @@
             <children>
                 <HBox alignment="CENTER_LEFT" spacing="20.0">
                     <children>
+                        <Button onAction="#goBack" styleClass="nav-link-btn" text="← Back to previous" />
                         <Label styleClass="section-title" text="Event Management" />
                         <Region HBox.hgrow="ALWAYS" />
                         <Button onAction="#openAddEvent" styleClass="btn-hero-primary" text="+ Create New Event" />

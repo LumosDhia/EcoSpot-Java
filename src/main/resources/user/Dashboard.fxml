@@ -1,0 +1,517 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.net.URL?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.layout.FlowPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.shape.Circle?>
+
+<HBox prefHeight="720.0" prefWidth="1280.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="tn.esprit.user.DashboardController">
+    <stylesheets>
+        <URL value="@../style.css" />
+    </stylesheets>
+    
+    <children>
+        <!-- SIDEBAR -->
+        <VBox styleClass="admin-sidebar" HBox.hgrow="NEVER">
+            <children>
+                <Label styleClass="sidebar-logo-text" text="EcoSpot" />
+                <Label fx:id="sidebarRoleLabel" styleClass="sidebar-role-text" text="DASHBOARD" />
+                
+                <VBox spacing="5.0">
+                    <children>
+                        <Button onAction="#goToPublicSite" styleClass="sidebar-item" text="⬅ Public site" />
+                        <Region prefHeight="20.0" />
+                        <Button styleClass="sidebar-item-active" text="🏠 Dashboard" />
+                        
+                        <!-- ADMIN SIDEBAR LINKS -->
+                        <VBox fx:id="adminSidebarLinks" spacing="5.0" visible="false" managed="false">
+                            <children>
+                                <Button onAction="#goToBlogManagement" styleClass="sidebar-item" text="📰 Articles" />
+                                <Button onAction="#goToCommentsManagement" styleClass="sidebar-item" text="💬 Comments" />
+                                <Button onAction="#goToEventManagement" styleClass="sidebar-item" text="📅 Events" />
+                                <Button onAction="#goToPendingTickets" styleClass="sidebar-item" text="🎫 Pending tickets" />
+                                <Button onAction="#goToAllTickets" styleClass="sidebar-item" text="📋 All tickets" />
+                                <Button onAction="#goToCompletions" styleClass="sidebar-item" text="✅ Completions" />
+                                <Button onAction="#goToUserManagement" styleClass="sidebar-item" text="👥 Users" />
+                                <Button onAction="#goToSponsorManagement" styleClass="sidebar-item" text="🤝 Sponsors" />
+                                <Button onAction="#goToAnalytics" styleClass="sidebar-item" text="📊 AI Analytics" />
+                            </children>
+                        </VBox>
+
+                        <!-- NGO SIDEBAR LINKS -->
+                        <VBox fx:id="ngoSidebarLinks" spacing="5.0" visible="false" managed="false">
+                            <children>
+                                <Button onAction="#goToBlogManagement" styleClass="sidebar-item" text="📰 My articles" />
+                                <Button onAction="#goToCommentsManagement" styleClass="sidebar-item" text="💬 Comments" />
+                                <Button onAction="#goToStatistics" styleClass="sidebar-item" text="📊 My statistics" />
+                                <Button onAction="#goToEventManagement" styleClass="sidebar-item" text="📅 My events" />
+                                <Button onAction="#goToAchievements" styleClass="sidebar-item" text="🏆 My achievements" />
+                            </children>
+                        </VBox>
+
+                        <!-- USER SIDEBAR LINKS -->
+                        <VBox fx:id="userSidebarLinks" spacing="5.0" visible="false" managed="false">
+                            <children>
+                                <Button onAction="#goToMyTickets" styleClass="sidebar-item" text="📋 My tickets" />
+                                <Button fx:id="sidebarCreateTicketBtn" onAction="#goToCreateTicket" styleClass="sidebar-item" text="➕ New ticket" />
+                                <Button onAction="#goToPendingTickets" styleClass="sidebar-item" text="🌐 Community tickets" />
+                            </children>
+                        </VBox>
+                    </children>
+                    <padding>
+                        <Insets left="15.0" right="15.0" />
+                    </padding>
+                </VBox>
+            </children>
+        </VBox>
+
+        <!-- MAIN CONTENT -->
+        <VBox styleClass="admin-content-bg" HBox.hgrow="ALWAYS">
+            <children>
+                <!-- TIMEOUT BANNER -->
+                <HBox fx:id="timeoutBanner" alignment="CENTER_LEFT" spacing="15.0" style="-fx-background-color: linear-gradient(to right, #fef2f2, #fee2e2); -fx-border-color: #fca5a5; -fx-border-width: 0 0 1 0; -fx-padding: 12 30; -fx-min-height: 50;" visible="false" managed="false">
+                    <children>
+                        <Label style="-fx-font-size: 20px; -fx-text-fill: #b91c1c;" text="⚠️" />
+                        <VBox HBox.hgrow="ALWAYS">
+                            <children>
+                                <Label style="-fx-font-weight: bold; -fx-text-fill: #991b1b; -fx-font-size: 14px;" text="Account Restricted" />
+                                <Label fx:id="timeoutLabel" style="-fx-text-fill: #b91c1c; -fx-font-size: 13px;" text="Your account is temporarily in timeout due to multiple spam flags. Restored at: ..." />
+                            </children>
+                        </VBox>
+                        <Button onAction="#goToMyTickets" style="-fx-background-color: #ef4444; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 6 15; -fx-background-radius: 4; -fx-cursor: hand;" text="View My Tickets" />
+                    </children>
+                </HBox>
+
+                <!-- TOP HEADER -->
+                <HBox alignment="CENTER_LEFT" styleClass="admin-top-bar">
+                    <children>
+                        <Label fx:id="breadcrumbLabel" styleClass="breadcrumb-text" text="Admin  ›  Dashboard" />
+                        <Region HBox.hgrow="ALWAYS" />
+                        <HBox alignment="CENTER" spacing="15.0">
+                            <children>
+                                <VBox alignment="CENTER_RIGHT">
+                                    <children>
+                                        <Label fx:id="userNameLabel" styleClass="admin-profile-name" text="User" />
+                                    </children>
+                                </VBox>
+                                <VBox alignment="CENTER" spacing="10.0">
+                                   <children>
+                                      <StackPane style="-fx-background-color: #f0f7f4; -fx-background-radius: 40; -fx-padding: 2;">
+                                         <children>
+                                            <ImageView fx:id="userAvatarImageView" fitHeight="64.0" fitWidth="64.0" onMouseClicked="#toggleAvatarGallery" pickOnBounds="true" preserveRatio="true" style="-fx-cursor: hand;" />
+                                         </children>
+                                      </StackPane>
+                                      <Label style="-fx-font-size: 10px; -fx-text-fill: #666;" text="Click to change" />
+                                      <ScrollPane fx:id="avatarGalleryScroll" fitToHeight="true" managed="false" minHeight="80.0" prefHeight="80.0" prefWidth="300.0" style="-fx-background-color: transparent; -fx-background: transparent; -fx-border-color: #ddd; -fx-border-radius: 5;" visible="false">
+                                         <content>
+                                            <HBox fx:id="avatarGallery" alignment="CENTER_LEFT" spacing="10.0" style="-fx-padding: 5;" />
+                                         </content>
+                                      </ScrollPane>
+                                   </children>
+                                </VBox>
+                            </children>
+                        </HBox>
+                    </children>
+                </HBox>
+
+                <Label fx:id="dashboardInstructionLabel" styleClass="admin-dashboard-title" text="..." />
+
+                <ScrollPane fitToWidth="true" focusTraversable="false" pannable="true" style="-fx-background-color: transparent; -fx-background: transparent;" VBox.vgrow="ALWAYS">
+                    <content>
+                        <StackPane>
+                            <children>
+                                <!-- ADMIN CARDS GRID -->
+                                <FlowPane fx:id="adminCardsGrid" hgap="25.0" vgap="25.0" styleClass="dashboard-grid" visible="false" managed="false">
+                                    <children>
+                                        <VBox onMouseClicked="#goToPendingTicketsGrid" styleClass="stat-card">
+                                            <children>
+                                                <VBox alignment="CENTER" spacing="15.0">
+                                                    <children>
+                                                        <StackPane styleClass="dashboard-icon-container">
+                                                            <children>
+                                                                <Label styleClass="dashboard-icon" text="&#xE823;" />
+                                                            </children>
+                                                        </StackPane>
+                                                        <Label styleClass="card-title-lg" text="Pending tickets" />
+                                                        <Label styleClass="card-subtitle" text="Review, publish, refuse or send back tickets" textAlignment="CENTER" wrapText="true" />
+                                                    </children>
+                                                </VBox>
+                                            </children>
+                                        </VBox>
+                                        <VBox onMouseClicked="#goToCompletionsGrid" styleClass="stat-card">
+                                            <children>
+                                                <VBox alignment="CENTER" spacing="15.0">
+                                                    <children>
+                                                        <StackPane styleClass="dashboard-icon-container">
+                                                            <children>
+                                                                <Label styleClass="dashboard-icon" text="&#xE73E;" />
+                                                            </children>
+                                                        </StackPane>
+                                                        <Label styleClass="card-title-lg" text="Completions" />
+                                                        <Label styleClass="card-subtitle" text="Mark ticket completions as achieved" textAlignment="CENTER" wrapText="true" />
+                                                    </children>
+                                                </VBox>
+                                            </children>
+                                        </VBox>
+                                        <VBox onMouseClicked="#goToBlogManagementGrid" styleClass="stat-card">
+                                            <children>
+                                                <StackPane alignment="TOP_RIGHT">
+                                                    <children>
+                                                        <VBox alignment="CENTER" spacing="15.0">
+                                                            <children>
+                                                                <StackPane styleClass="dashboard-icon-container">
+                                                                    <children>
+                                                                        <Label styleClass="dashboard-icon" text="&#xE8A5;" />
+                                                                    </children>
+                                                                </StackPane>
+                                                                <Label styleClass="card-title-lg" text="Articles" />
+                                                                <Label styleClass="card-subtitle" text="Manage blog articles (all authors)" textAlignment="CENTER" wrapText="true" />
+                                                            </children>
+                                                        </VBox>
+                                                    </children>
+                                                </StackPane>
+                                            </children>
+                                        </VBox>
+                                        <VBox onMouseClicked="#goToCommentsManagementGrid" styleClass="stat-card">
+                                            <children>
+                                                <VBox alignment="CENTER" spacing="15.0">
+                                                    <children>
+                                                        <StackPane styleClass="dashboard-icon-container">
+                                                            <children>
+                                                                <Label styleClass="dashboard-icon" text="&#xE8BD;" />
+                                                            </children>
+                                                        </StackPane>
+                                                        <Label styleClass="card-title-lg" text="Comments" />
+                                                        <Label styleClass="card-subtitle" text="View and manage blog comments" textAlignment="CENTER" wrapText="true" />
+                                                    </children>
+                                                </VBox>
+                                            </children>
+                                        </VBox>
+                                        <VBox onMouseClicked="#goToStatisticsGrid" styleClass="stat-card">
+                                            <children>
+                                                <VBox alignment="CENTER" spacing="15.0">
+                                                    <children>
+                                                        <StackPane styleClass="dashboard-icon-container">
+                                                            <children>
+                                                                <Label styleClass="dashboard-icon" text="&#xE9D9;" />
+                                                            </children>
+                                                        </StackPane>
+                                                        <Label styleClass="card-title-lg" text="Statistics" />
+                                                        <Label styleClass="card-subtitle" text="View blog and analytics metrics" textAlignment="CENTER" wrapText="true" />
+                                                    </children>
+                                                </VBox>
+                                            </children>
+                                        </VBox>
+                                        <VBox onMouseClicked="#goToEventManagementGrid" styleClass="stat-card">
+                                            <children>
+                                                <StackPane alignment="TOP_RIGHT">
+                                                    <children>
+                                                        <VBox alignment="CENTER" spacing="15.0">
+                                                            <children>
+                                                                <StackPane styleClass="dashboard-icon-container">
+                                                                    <children>
+                                                                        <Label styleClass="dashboard-icon" text="&#xE787;" />
+                                                                    </children>
+                                                                </StackPane>
+                                                                <Label styleClass="card-title-lg" text="Manage events" />
+                                                                <Label styleClass="card-subtitle" text="Create and manage events" textAlignment="CENTER" wrapText="true" />
+                                                            </children>
+                                                        </VBox>
+                                                    </children>
+                                                </StackPane>
+                                            </children>
+                                        </VBox>
+                                        <VBox onMouseClicked="#handleCardClick" styleClass="stat-card">
+                                            <children>
+                                                <StackPane alignment="TOP_RIGHT">
+                                                    <children>
+                                                        <VBox alignment="CENTER" spacing="15.0">
+                                                            <children>
+                                                                <StackPane styleClass="dashboard-icon-container">
+                                                                    <children>
+                                                                        <Label styleClass="dashboard-icon" text="&#xE716;" />
+                                                                    </children>
+                                                                </StackPane>
+                                                                <Label styleClass="card-title-lg" text="Users" />
+                                                                <Label styleClass="card-subtitle" text="Create users and manage roles" textAlignment="CENTER" wrapText="true" />
+                                                            </children>
+                                                        </VBox>
+                                                    </children>
+                                                </StackPane>
+                                            </children>
+                                        </VBox>
+                                        <VBox onMouseClicked="#goToSponsorManagementGrid" styleClass="stat-card">
+                                            <children>
+                                                <VBox alignment="CENTER" spacing="15.0">
+                                                    <children>
+                                                        <StackPane styleClass="dashboard-icon-container">
+                                                            <children>
+                                                                <Label styleClass="dashboard-icon" text="&#xE12B;" />
+                                                            </children>
+                                                        </StackPane>
+                                                        <Label styleClass="card-title-lg" text="Manage sponsors" />
+                                                        <Label styleClass="card-subtitle" text="Manage sponsors" textAlignment="CENTER" wrapText="true" />
+                                                    </children>
+                                                </VBox>
+                                            </children>
+                                        </VBox>
+                                        <VBox onMouseClicked="#goToCategoriesManagementGrid" styleClass="stat-card">
+                                            <children>
+                                                <VBox alignment="CENTER" spacing="15.0">
+                                                    <children>
+                                                        <StackPane styleClass="dashboard-icon-container">
+                                                            <children>
+                                                                <Label styleClass="dashboard-icon" text="&#xE8FD;" />
+                                                            </children>
+                                                        </StackPane>
+                                                        <Label styleClass="card-title-lg" text="Categories" />
+                                                        <Label styleClass="card-subtitle" text="Manage blog categories" textAlignment="CENTER" wrapText="true" />
+                                                    </children>
+                                                </VBox>
+                                            </children>
+                                        </VBox>
+                                        <VBox onMouseClicked="#goToTagsManagementGrid" styleClass="stat-card">
+                                            <children>
+                                                <VBox alignment="CENTER" spacing="15.0">
+                                                    <children>
+                                                        <StackPane styleClass="dashboard-icon-container">
+                                                            <children>
+                                                                <Label styleClass="dashboard-icon" text="&#xE8EC;" />
+                                                            </children>
+                                                        </StackPane>
+                                                        <Label styleClass="card-title-lg" text="Tags" />
+                                                        <Label styleClass="card-subtitle" text="Manage blog tags" textAlignment="CENTER" wrapText="true" />
+                                                    </children>
+                                                </VBox>
+                                            </children>
+                                        </VBox>
+                                        <VBox onMouseClicked="#goToAnalyticsGrid" styleClass="stat-card" style="-fx-border-color: #52a472; -fx-border-width: 2; -fx-border-radius: 12; -fx-background-color: #f0fdf4;">
+                                            <children>
+                                                <VBox alignment="CENTER" spacing="15.0">
+                                                    <children>
+                                                        <StackPane styleClass="dashboard-icon-container" style="-fx-background-color: #dcfce7;">
+                                                            <children>
+                                                                <Label styleClass="dashboard-icon" style="-fx-text-fill: #166534;" text="&#xE9D9;" />
+                                                            </children>
+                                                        </StackPane>
+                                                        <Label styleClass="card-title-lg" style="-fx-text-fill: #166534;" text="AI Analytics" />
+                                                        <Label styleClass="card-subtitle" style="-fx-text-fill: #15803d;" text="Real-time ticket trends &amp; impact" textAlignment="CENTER" wrapText="true" />
+                                                    </children>
+                                                </VBox>
+                                            </children>
+                                        </VBox>
+                                        <VBox onMouseClicked="#goToMapGrid" styleClass="stat-card" style="-fx-border-color: #3b82f6; -fx-border-width: 2; -fx-border-radius: 12; -fx-background-color: #eff6ff;">
+                                            <children>
+                                                <VBox alignment="CENTER" spacing="15.0">
+                                                    <children>
+                                                        <StackPane styleClass="dashboard-icon-container" style="-fx-background-color: #dbeafe;">
+                                                            <children>
+                                                                <Label styleClass="dashboard-icon" style="-fx-text-fill: #1d4ed8;" text="&#xE707;" />
+                                                            </children>
+                                                        </StackPane>
+                                                        <Label styleClass="card-title-lg" style="-fx-text-fill: #1d4ed8;" text="Global Map" />
+                                                        <Label styleClass="card-subtitle" style="-fx-text-fill: #1e40af;" text="Interactive view of report hotspots" textAlignment="CENTER" wrapText="true" />
+                                                    </children>
+                                                </VBox>
+                                            </children>
+                                        </VBox>
+                                    </children>
+                                </FlowPane>
+
+                                <!-- NGO CARDS GRID -->
+                                <FlowPane fx:id="ngoCardsGrid" hgap="25.0" vgap="25.0" styleClass="dashboard-grid" visible="false" managed="false">
+                                    <children>
+                                        <!-- My articles -->
+                                        <VBox onMouseClicked="#goToBlogManagementGrid" styleClass="stat-card">
+                                            <children>
+                                                <StackPane alignment="TOP_RIGHT">
+                                                    <children>
+                                                        <VBox alignment="CENTER" spacing="15.0">
+                                                            <children>
+                                                                <StackPane styleClass="dashboard-icon-container">
+                                                                    <children>
+                                                                        <Label styleClass="dashboard-icon" text="&#xE8A5;" />
+                                                                    </children>
+                                                                </StackPane>
+                                                                <Label styleClass="card-title-lg" text="My articles" />
+                                                                <Label styleClass="card-subtitle" text="View and manage your own articles" textAlignment="CENTER" wrapText="true" />
+                                                            </children>
+                                                        </VBox>
+                                                    </children>
+                                                </StackPane>
+                                            </children>
+                                        </VBox>
+
+                                        <!-- Create article -->
+                                        <VBox onMouseClicked="#goToCreateArticleGrid" styleClass="stat-card">
+                                            <children>
+                                                <VBox alignment="CENTER" spacing="15.0">
+                                                    <children>
+                                                        <StackPane styleClass="dashboard-icon-container">
+                                                            <children>
+                                                                <Label styleClass="dashboard-icon" text="&#xE710;" />
+                                                            </children>
+                                                        </StackPane>
+                                                        <Label styleClass="card-title-lg" text="Create article" />
+                                                        <Label styleClass="card-subtitle" text="Publish a new blog article" textAlignment="CENTER" wrapText="true" />
+                                                    </children>
+                                                </VBox>
+                                            </children>
+                                        </VBox>
+
+                                        <!-- Comments -->
+                                        <VBox onMouseClicked="#goToCommentsManagementGrid" styleClass="stat-card">
+                                            <children>
+                                                <VBox alignment="CENTER" spacing="15.0">
+                                                    <children>
+                                                        <StackPane styleClass="dashboard-icon-container">
+                                                            <children>
+                                                                <Label styleClass="dashboard-icon" text="&#xE8BD;" />
+                                                            </children>
+                                                        </StackPane>
+                                                        <Label styleClass="card-title-lg" text="Comments" />
+                                                        <Label styleClass="card-subtitle" text="View and flag comments" textAlignment="CENTER" wrapText="true" />
+                                                    </children>
+                                                </VBox>
+                                            </children>
+                                        </VBox>
+
+                                        <!-- Create event -->
+                                        <VBox onMouseClicked="#goToEventManagementGrid" styleClass="stat-card">
+                                            <children>
+                                                <StackPane alignment="TOP_RIGHT">
+                                                    <children>
+                                                        <VBox alignment="CENTER" spacing="15.0">
+                                                            <children>
+                                                                <StackPane styleClass="dashboard-icon-container">
+                                                                    <children>
+                                                                        <Label styleClass="dashboard-icon" text="&#xE787;" />
+                                                                    </children>
+                                                                </StackPane>
+                                                                <Label styleClass="card-title-lg" text="Manage events" />
+                                                                <Label styleClass="card-subtitle" text="Manage your events" textAlignment="CENTER" wrapText="true" />
+                                                            </children>
+                                                        </VBox>
+                                                    </children>
+                                                </StackPane>
+                                            </children>
+                                        </VBox>
+
+                                        <!-- My Statistics -->
+                                        <VBox onMouseClicked="#goToStatisticsGrid" styleClass="stat-card">
+                                            <children>
+                                                <VBox alignment="CENTER" spacing="15.0">
+                                                    <children>
+                                                        <StackPane styleClass="dashboard-icon-container">
+                                                            <children>
+                                                                <Label styleClass="dashboard-icon" text="&#xE9D9;" />
+                                                            </children>
+                                                        </StackPane>
+                                                        <Label styleClass="card-title-lg" text="My Statistics" />
+                                                        <Label styleClass="card-subtitle" text="Views, likes and comments on your articles" textAlignment="CENTER" wrapText="true" />
+                                                    </children>
+                                                </VBox>
+                                            </children>
+                                        </VBox>
+
+                                        <!-- My Achievements -->
+                                        <VBox onMouseClicked="#goToAchievementsGrid" styleClass="stat-card">
+                                            <children>
+                                                <VBox alignment="CENTER" spacing="15.0">
+                                                    <children>
+                                                        <StackPane styleClass="dashboard-icon-container">
+                                                            <children>
+                                                                <Label styleClass="dashboard-icon" text="&#xE734;" />
+                                                            </children>
+                                                        </StackPane>
+                                                        <Label styleClass="card-title-lg" text="My Achievements" />
+                                                        <Label styleClass="card-subtitle" text="Review your history of successfully resolved tickets." textAlignment="CENTER" wrapText="true" />
+                                                    </children>
+                                                </VBox>
+                                            </children>
+                                        </VBox>
+                                    </children>
+                                </FlowPane>
+
+                                <!-- USER CARDS GRID -->
+                                <FlowPane fx:id="userCardsGrid" hgap="25.0" vgap="25.0" styleClass="dashboard-grid" visible="false" managed="false">
+                                    <children>
+                                        <VBox onMouseClicked="#goToMyTicketsGrid" styleClass="stat-card">
+                                            <children>
+                                                <StackPane alignment="TOP_RIGHT">
+                                                    <children>
+                                                        <VBox alignment="CENTER" spacing="15.0">
+                                                            <children>
+                                                                <StackPane styleClass="dashboard-icon-container">
+                                                                    <children>
+                                                                        <Label styleClass="dashboard-icon" text="&#xEBE7;" />
+                                                                    </children>
+                                                                </StackPane>
+                                                                <Label styleClass="card-title-lg" text="My tickets" />
+                                                                <Label styleClass="card-subtitle" text="View and manage your submitted environmental tickets" textAlignment="CENTER" wrapText="true" />
+                                                            </children>
+                                                        </VBox>
+                                                    </children>
+                                                </StackPane>
+                                            </children>
+                                        </VBox>
+                                        <VBox fx:id="createTicketCard" onMouseClicked="#goToCreateTicketGrid" styleClass="stat-card">
+                                            <children>
+                                                <StackPane>
+                                                    <children>
+                                                        <VBox alignment="CENTER" spacing="15.0">
+                                                            <children>
+                                                                <StackPane styleClass="dashboard-icon-container">
+                                                                    <children>
+                                                                        <Label styleClass="dashboard-icon" text="&#xE710;" />
+                                                                    </children>
+                                                                </StackPane>
+                                                                <Label styleClass="card-title-lg" text="Create a ticket" />
+                                                                <Label styleClass="card-subtitle" text="Report an environmental issue or suggestion quickly" textAlignment="CENTER" wrapText="true" />
+                                                            </children>
+                                                        </VBox>
+                                                        <VBox fx:id="createTicketLockOverlay" alignment="CENTER" style="-fx-background-color: rgba(255,255,255,0.75); -fx-background-radius: 15;" visible="false" managed="false">
+                                                            <children>
+                                                                <Label style="-fx-font-size: 44px;" text="🔒" />
+                                                                <Label style="-fx-text-fill: #7f1d1d; -fx-font-weight: bold; -fx-font-size: 16px; -fx-padding: 5 0 0 0;" text="RESTRICTED" />
+                                                                <Label style="-fx-text-fill: #991b1b; -fx-font-size: 11px;" text="Feature Locked" />
+                                                            </children>
+                                                        </VBox>
+                                                    </children>
+                                                </StackPane>
+                                            </children>
+                                        </VBox>
+                                        <VBox onMouseClicked="#goToPendingTicketsGrid" styleClass="stat-card">
+                                            <children>
+                                                <VBox alignment="CENTER" spacing="15.0">
+                                                    <children>
+                                                        <StackPane styleClass="dashboard-icon-container">
+                                                            <children>
+                                                                <Label styleClass="dashboard-icon" text="&#xE81C;" />
+                                                            </children>
+                                                        </StackPane>
+                                                        <Label styleClass="card-title-lg" text="Community tickets" />
+                                                        <Label styleClass="card-subtitle" text="Browse and complete eco-tickets from the community" textAlignment="CENTER" wrapText="true" />
+                                                    </children>
+                                                </VBox>
+                                            </children>
+                                        </VBox>
+                                    </children>
+                                </FlowPane>
+                            </children>
+                        </StackPane>
+                    </content>
+                </ScrollPane>
+            </children>
+        </VBox>
+    </children>
+</HBox>

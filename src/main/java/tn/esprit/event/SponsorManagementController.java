@@ -1,6 +1,7 @@
 package tn.esprit.event;
 
 import javafx.application.Platform;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -25,6 +26,7 @@ public class SponsorManagementController {
     public void initialize() {
         refreshData();
         searchField.textProperty().addListener((obs, oldVal, newVal) -> filterAndDisplay());
+        tn.esprit.util.NavigationHistory.track(searchField, "/event/SponsorManagement.fxml");
     }
 
     private void refreshData() {
@@ -60,6 +62,13 @@ public class SponsorManagementController {
     @FXML
     private void openAddSponsor() {
         switchScene("/event/SponsorForm.fxml");
+    }
+
+    @FXML
+    private void goBack(ActionEvent event) {
+        if (!tn.esprit.util.NavigationHistory.goBack(event)) {
+            switchScene("/event/EventManagement.fxml");
+        }
     }
 
     @FXML private void goToHome() { switchScene("/home/Home.fxml"); }
