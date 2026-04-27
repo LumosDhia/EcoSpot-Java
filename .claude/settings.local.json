@@ -15,7 +15,8 @@
       "Bash(powershell *)",
       "Bash(wsl bash *)",
       "Bash(xargs grep *)",
-      "Bash(xargs cat *)"
+      "Bash(xargs cat *)",
+      "Bash(mvn test *)"
     ]
   }
 }

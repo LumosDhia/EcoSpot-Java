@@ -107,7 +107,7 @@
                                      <VBox spacing="0.0" styleClass="article-detail-card">
                                    <children>
                                        <!-- Image -->
-                                       <ImageView fx:id="articleImg" fitHeight="420.0" fitWidth="800.0" pickOnBounds="true" preserveRatio="false" styleClass="detail-main-img" />
+                                       <ImageView fx:id="articleImg" fitHeight="420.0" pickOnBounds="true" preserveRatio="true" styleClass="detail-main-img" />
                                        
                                        <!-- Article body -->
                                        <VBox spacing="18.0" styleClass="article-detail-body">
@@ -173,7 +173,7 @@
                                              </HBox>
 
                                              <!-- Article Content -->
-                                             <WebView fx:id="contentWebView" prefHeight="450.0" minHeight="300.0" />
+                                             <WebView fx:id="contentWebView" minHeight="100.0" prefHeight="200.0" />
                                           </children>
                                        </VBox>
                                    </children>
