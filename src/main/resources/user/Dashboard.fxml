@@ -3,6 +3,7 @@
 <?import java.net.URL?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.layout.FlowPane?>
@@ -10,6 +11,8 @@
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.shape.Circle?>
 
 <HBox prefHeight="720.0" prefWidth="1280.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="tn.esprit.user.DashboardController">
     <stylesheets>
@@ -49,6 +52,7 @@
                             <children>
                                 <Button onAction="#goToBlogManagement" styleClass="sidebar-item" text="📰 My articles" />
                                 <Button onAction="#goToCommentsManagement" styleClass="sidebar-item" text="💬 Comments" />
+                                <Button onAction="#goToStatistics" styleClass="sidebar-item" text="📊 My statistics" />
                                 <Button onAction="#goToEventManagement" styleClass="sidebar-item" text="📅 My events" />
                                 <Button onAction="#goToAchievements" styleClass="sidebar-item" text="🏆 My achievements" />
                             </children>
@@ -99,7 +103,21 @@
                                         <Label fx:id="userNameLabel" styleClass="admin-profile-name" text="User" />
                                     </children>
                                 </VBox>
-                                <Label text="👤" style="-fx-font-size: 32px; -fx-background-color: #fca311; -fx-text-fill: white; -fx-padding: 5; -fx-background-radius: 50;" />
+                                <VBox alignment="CENTER" spacing="10.0">
+                                   <children>
+                                      <StackPane style="-fx-background-color: #f0f7f4; -fx-background-radius: 40; -fx-padding: 2;">
+                                         <children>
+                                            <ImageView fx:id="userAvatarImageView" fitHeight="64.0" fitWidth="64.0" onMouseClicked="#toggleAvatarGallery" pickOnBounds="true" preserveRatio="true" style="-fx-cursor: hand;" />
+                                         </children>
+                                      </StackPane>
+                                      <Label style="-fx-font-size: 10px; -fx-text-fill: #666;" text="Click to change" />
+                                      <ScrollPane fx:id="avatarGalleryScroll" fitToHeight="true" managed="false" minHeight="80.0" prefHeight="80.0" prefWidth="300.0" style="-fx-background-color: transparent; -fx-background: transparent; -fx-border-color: #ddd; -fx-border-radius: 5;" visible="false">
+                                         <content>
+                                            <HBox fx:id="avatarGallery" alignment="CENTER_LEFT" spacing="10.0" style="-fx-padding: 5;" />
+                                         </content>
+                                      </ScrollPane>
+                                   </children>
+                                </VBox>
                             </children>
                         </HBox>
                     </children>
@@ -174,6 +192,21 @@
                                                         </StackPane>
                                                         <Label styleClass="card-title-lg" text="Comments" />
                                                         <Label styleClass="card-subtitle" text="View and manage blog comments" textAlignment="CENTER" wrapText="true" />
+                                                    </children>
+                                                </VBox>
+                                            </children>
+                                        </VBox>
+                                        <VBox onMouseClicked="#goToStatisticsGrid" styleClass="stat-card">
+                                            <children>
+                                                <VBox alignment="CENTER" spacing="15.0">
+                                                    <children>
+                                                        <StackPane styleClass="dashboard-icon-container">
+                                                            <children>
+                                                                <Label styleClass="dashboard-icon" text="&#xE9D9;" />
+                                                            </children>
+                                                        </StackPane>
+                                                        <Label styleClass="card-title-lg" text="Statistics" />
+                                                        <Label styleClass="card-subtitle" text="View blog and analytics metrics" textAlignment="CENTER" wrapText="true" />
                                                     </children>
                                                 </VBox>
                                             </children>
@@ -370,6 +403,23 @@
                                                         </VBox>
                                                     </children>
                                                 </StackPane>
+                                            </children>
+                                        </VBox>
+
+                                        <!-- My Statistics -->
+                                        <VBox onMouseClicked="#goToStatisticsGrid" styleClass="stat-card">
+                                            <children>
+                                                <VBox alignment="CENTER" spacing="15.0">
+                                                    <children>
+                                                        <StackPane styleClass="dashboard-icon-container">
+                                                            <children>
+                                                                <Label styleClass="dashboard-icon" text="&#xE9D9;" />
+                                                            </children>
+                                                        </StackPane>
+                                                        <Label styleClass="card-title-lg" text="My Statistics" />
+                                                        <Label styleClass="card-subtitle" text="Views, likes and comments on your articles" textAlignment="CENTER" wrapText="true" />
+                                                    </children>
+                                                </VBox>
                                             </children>
                                         </VBox>
 

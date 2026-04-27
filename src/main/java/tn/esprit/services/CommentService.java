@@ -112,11 +112,11 @@ public class CommentService {
             }
             if (hasAuthorUserId) {
                 byte[] appUserId = resolveAppUserIdForComment(conn, currentUser);
-                if (appUserId == null) {
-                    lastErrorMessage = "No valid app_user UUID found for comment author.";
-                    return false;
+                if (appUserId != null) {
+                    ps.setBytes(idx++, appUserId);
+                } else {
+                    ps.setNull(idx++, Types.BLOB);
                 }
-                ps.setBytes(idx++, appUserId);
             }
             if (hasAuthorId) {
                 ps.setNull(idx++, Types.VARCHAR);
@@ -154,7 +154,11 @@ public class CommentService {
             visibilityFilter = "";
         }
 
-        String req = "SELECT * FROM `comment` WHERE article_id = ?" + visibilityFilter + " ORDER BY created_at DESC";
+        String authorCol = hasAuthorName ? "c.author_name" : (hasAuthor ? "c.author" : "'Anonymous'");
+        String req = "SELECT c.*, u.avatar_style FROM `comment` c " +
+                     "LEFT JOIN `user` u ON " + authorCol + " = u.username " +
+                     "WHERE c.article_id = ?" + visibilityFilter + " ORDER BY c.created_at DESC";
+        
         try (PreparedStatement ps = conn.prepareStatement(req)) {
             ps.setInt(1, articleId);
             ResultSet rs = ps.executeQuery();
@@ -165,25 +169,27 @@ public class CommentService {
 
                 String authorValue = "Anonymous User";
                 if (hasAuthorName) {
-                    String fromAuthorName = rs.getString("author_name");
-                    if (fromAuthorName != null && !fromAuthorName.isBlank()) {
-                        authorValue = fromAuthorName;
-                    }
-                }
-                if ((authorValue == null || authorValue.isBlank() || "Anonymous User".equals(authorValue)) && hasAuthor) {
-                    String fromAuthor = rs.getString("author");
-                    if (fromAuthor != null && !fromAuthor.isBlank()) {
-                        authorValue = fromAuthor;
-                    }
+                    authorValue = rs.getString("author_name");
+                } else if (hasAuthor) {
+                    authorValue = rs.getString("author");
                 }
                 
-                comments.add(new Comment(
+                if (authorValue == null || authorValue.isBlank()) authorValue = "Anonymous User";
+                
+                Comment comment = new Comment(
                     rs.getInt("id"),
                     rs.getInt("article_id"),
                     authorValue,
                     rs.getString("content"),
                     dt
-                ));
+                );
+                
+                // Set avatar style from join
+                try {
+                    comment.setAvatarStyle(rs.getString("avatar_style"));
+                } catch (Exception ignored) {}
+                
+                comments.add(comment);
             }
             System.out.println("DEBUG: Found " + comments.size() + " comments for article " + articleId);
         } catch (SQLException e) {
@@ -219,7 +225,6 @@ public class CommentService {
                      ", a.title AS article_title " +
                      "FROM `comment` c " +
                      "LEFT JOIN article a ON a.id = c.article_id " +
-                     moderationFilter +
                      "ORDER BY flagged_value DESC, c.created_at DESC";
 
         try (PreparedStatement ps = conn.prepareStatement(req);

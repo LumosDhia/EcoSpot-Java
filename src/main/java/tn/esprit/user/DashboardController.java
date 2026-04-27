@@ -8,15 +8,24 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.Parent;
-import javafx.scene.control.Label;
+import javafx.scene.control.ComboBox;
 import javafx.scene.effect.ColorAdjust;
+import javafx.scene.control.ScrollPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.shape.Circle;
+import javafx.scene.control.Label;
 import javafx.scene.effect.DropShadow;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import javafx.util.Duration;
+import tn.esprit.services.AvatarService;
+import tn.esprit.services.UserService;
+import tn.esprit.util.SessionManager;
 
 import java.io.IOException;
 
@@ -30,6 +39,10 @@ public class DashboardController {
     @FXML private Label timeoutLabel;
     @FXML private VBox createTicketCard;
     @FXML private VBox createTicketLockOverlay;
+    @FXML private Label notificationBadge;
+    @FXML private ImageView userAvatarImageView;
+    @FXML private ScrollPane avatarGalleryScroll;
+    @FXML private HBox avatarGallery;
 
     @FXML private VBox adminSidebarLinks;
     @FXML private VBox ngoSidebarLinks;
@@ -40,8 +53,13 @@ public class DashboardController {
     @FXML private FlowPane ngoCardsGrid;
     @FXML private FlowPane userCardsGrid;
 
+    private final UserService userService = new UserService();
+
     @FXML
     public void initialize() {
+        // Initialize Avatar Gallery
+        populateAvatarGallery();
+
         // When screens are restored via history, setUser(...) might not be called manually.
         // In that case, bind the dashboard from the active session automatically.
         if (tn.esprit.util.SessionManager.isLoggedIn() && tn.esprit.util.SessionManager.getCurrentUser() != null) {
@@ -52,12 +70,19 @@ public class DashboardController {
     }
 
     public void setUser(User user) {
+        if (user == null) return;
         tn.esprit.util.NavigationHistory.track(adminCardsGrid, "/user/Dashboard.fxml");
         String role = user.getRole();
         String username = user.getUsername();
 
         userNameLabel.setText(username);
         
+        // Load Avatar
+        String seed = (user.getAvatarStyle() != null && !user.getAvatarStyle().isEmpty()) ? user.getAvatarStyle() : username;
+        String avatarUrl = AvatarService.getAvatarUrl(username, seed);
+        Image img = new Image(avatarUrl, true);
+        userAvatarImageView.setImage(img);
+
         // Handle Timeout Banner
         if (user.isTimedOut()) {
             timeoutBanner.setVisible(true);
@@ -73,33 +98,18 @@ public class DashboardController {
             );
             pulse.setCycleCount(Timeline.INDEFINITE);
             pulse.play();
-
-            if (createTicketCard != null) {
+            
+            // Lock UI elements
+            if (createTicketLockOverlay != null) {
                 createTicketLockOverlay.setVisible(true);
                 createTicketLockOverlay.setManaged(true);
-                createTicketCard.setDisable(true);
-                createTicketCard.setEffect(new ColorAdjust(0, -0.8, -0.1, 0));
-                createTicketCard.setOpacity(1.0); // Keep opacity high for clarity
             }
             if (sidebarCreateTicketBtn != null) {
                 sidebarCreateTicketBtn.setDisable(true);
-                sidebarCreateTicketBtn.setOpacity(0.4);
             }
         } else {
             timeoutBanner.setVisible(false);
             timeoutBanner.setManaged(false);
-
-            if (createTicketCard != null) {
-                createTicketLockOverlay.setVisible(false);
-                createTicketLockOverlay.setManaged(false);
-                createTicketCard.setDisable(false);
-                createTicketCard.setEffect(new DropShadow(10, Color.rgb(0, 0, 0, 0.05)));
-                createTicketCard.setOpacity(1.0);
-            }
-            if (sidebarCreateTicketBtn != null) {
-                sidebarCreateTicketBtn.setDisable(false);
-                sidebarCreateTicketBtn.setOpacity(1.0);
-            }
         }
         
         // Reset all
@@ -356,6 +366,25 @@ public class DashboardController {
     }
 
     @FXML
+    void goToStatistics(ActionEvent event) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/blog/Statistics.fxml"));
+            Parent root = loader.load();
+            tn.esprit.blog.StatisticsController controller = loader.getController();
+            User current = tn.esprit.util.SessionManager.getCurrentUser();
+            if (current != null && "NGO".equalsIgnoreCase(current.getRole())) {
+                String ownerEmail = new tn.esprit.services.BlogService().resolveCurrentOwnerEmail();
+                if (ownerEmail == null) ownerEmail = current.getEmail();
+                controller.setOwnerEmail(ownerEmail);
+            }
+            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+            stage.getScene().setRoot(root);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @FXML
     void goToEventManagement(ActionEvent event) {
         navigate(event, "/event/EventManagement.fxml");
     }
@@ -399,6 +428,25 @@ public class DashboardController {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/blog/CommentsManagement.fxml"));
             Parent root = loader.load();
+            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+            stage.getScene().setRoot(root);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @FXML
+    void goToStatisticsGrid(MouseEvent event) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/blog/Statistics.fxml"));
+            Parent root = loader.load();
+            tn.esprit.blog.StatisticsController controller = loader.getController();
+            User current = tn.esprit.util.SessionManager.getCurrentUser();
+            if (current != null && "NGO".equalsIgnoreCase(current.getRole())) {
+                String ownerEmail = new tn.esprit.services.BlogService().resolveCurrentOwnerEmail();
+                if (ownerEmail == null) ownerEmail = current.getEmail();
+                controller.setOwnerEmail(ownerEmail);
+            }
             Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
             stage.getScene().setRoot(root);
         } catch (IOException e) {
@@ -496,6 +544,58 @@ public class DashboardController {
     private boolean isAdminUser() {
         User current = tn.esprit.util.SessionManager.getCurrentUser();
         return current != null && "ADMIN".equalsIgnoreCase(current.getRole());
+    }
+
+    @FXML
+    private void toggleAvatarGallery(MouseEvent event) {
+        boolean visible = !avatarGalleryScroll.isVisible();
+        avatarGalleryScroll.setVisible(visible);
+        avatarGalleryScroll.setManaged(visible);
+    }
+
+    private void populateAvatarGallery() {
+        avatarGallery.getChildren().clear();
+        String[] seeds = AvatarService.getPresetSeeds();
+        for (String seed : seeds) {
+            ImageView iv = new ImageView();
+            iv.setFitHeight(50);
+            iv.setFitWidth(50);
+            iv.setPreserveRatio(true);
+            iv.setPickOnBounds(true);
+            iv.setStyle("-fx-cursor: hand;");
+            
+            String url = AvatarService.getAvatarUrl("user", seed);
+            iv.setImage(new Image(url, true));
+            
+            // Clip to circle
+            Circle clip = new Circle(25, 25, 25);
+            iv.setClip(clip);
+            
+            iv.setOnMouseClicked(e -> handleAvatarSelection(seed));
+            
+            avatarGallery.getChildren().add(iv);
+        }
+    }
+
+    private void handleAvatarSelection(String seed) {
+        User user = SessionManager.getCurrentUser();
+        if (user != null) {
+            user.setAvatarStyle(seed); // Store chosen seed in the avatarStyle field
+            userService.updateAvatarStyle(user.getId(), seed);
+            
+            // Refresh main image
+            String avatarUrl = AvatarService.getAvatarUrl(user.getUsername(), seed);
+            userAvatarImageView.setImage(new Image(avatarUrl, true));
+            
+            // Hide gallery
+            avatarGalleryScroll.setVisible(false);
+            avatarGalleryScroll.setManaged(false);
+        }
+    }
+
+    @FXML
+    private void handleStyleChange(ActionEvent event) {
+        // Obsolete but kept for FXML compatibility if needed
     }
 }
 

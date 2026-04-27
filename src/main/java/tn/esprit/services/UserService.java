@@ -34,7 +34,8 @@ public class UserService {
                 "`password` VARCHAR(255)," +
                 "`role` VARCHAR(20)," +
                 "`reset_code` VARCHAR(10)," +
-                "`reset_expires_at` TIMESTAMP NULL" +
+                "`reset_expires_at` TIMESTAMP NULL," +
+                "`avatar_style` VARCHAR(50) DEFAULT 'avataaars'" +
                 ")";
         try {
             Statement st = cnx.createStatement();
@@ -63,14 +64,16 @@ public class UserService {
             Statement st = cnx.createStatement();
             ResultSet rs = st.executeQuery(req);
             while (rs.next()) {
-                users.add(new User(
+                User user = new User(
                     rs.getInt("id"),
                     rs.getString("username"),
                     rs.getString("email"),
                     rs.getString("password"),
                     rs.getString("role"),
                     rs.getTimestamp("timeout_until") != null ? rs.getTimestamp("timeout_until").toLocalDateTime() : null
-                ));
+                );
+                user.setAvatarStyle(rs.getString("avatar_style"));
+                users.add(user);
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -97,12 +100,13 @@ public class UserService {
             return;
         }
 
-        String insertReq = "INSERT INTO `user` (`username`, `email`, `password`, `role`) VALUES (?, ?, ?, ?)";
+        String insertReq = "INSERT INTO `user` (`username`, `email`, `password`, `role`, `avatar_style`) VALUES (?, ?, ?, ?, ?)";
         try (PreparedStatement insertPs = cnx.prepareStatement(insertReq)) {
             insertPs.setString(1, username);
             insertPs.setString(2, email);
             insertPs.setString(3, password);
             insertPs.setString(4, role);
+            insertPs.setString(5, AvatarService.getRandomStyle());
             insertPs.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -382,13 +386,14 @@ public class UserService {
         }
 
         // 8. Save to DB
-        String req = "INSERT INTO `user` (`username`, `email`, `password`, `role`) VALUES (?, ?, ?, ?)";
+        String req = "INSERT INTO `user` (`username`, `email`, `password`, `role`, `avatar_style`) VALUES (?, ?, ?, ?, ?)";
         try {
             PreparedStatement ps = cnx.prepareStatement(req);
             ps.setString(1, firstName + " " + lastName);
             ps.setString(2, email);
             ps.setString(3, password);
             ps.setString(4, "USER");
+            ps.setString(5, AvatarService.getRandomStyle());
             ps.executeUpdate();
             upsertAppUserRoleByEmail(email, "ROLE_USER");
             loadUsersFromDb();
@@ -431,13 +436,14 @@ public class UserService {
         }
 
         // 7. Save to DB
-        String req = "INSERT INTO `user` (`username`, `email`, `password`, `role`) VALUES (?, ?, ?, ?)";
+        String req = "INSERT INTO `user` (`username`, `email`, `password`, `role`, `avatar_style`) VALUES (?, ?, ?, ?, ?)";
         try {
             PreparedStatement ps = cnx.prepareStatement(req);
             ps.setString(1, firstName + " " + lastName);
             ps.setString(2, email);
             ps.setString(3, password);
             ps.setString(4, role);
+            ps.setString(5, AvatarService.getRandomStyle());
             ps.executeUpdate();
             upsertAppUserRoleByEmail(email, toAppUserRole(role));
             loadUsersFromDb();
@@ -447,6 +453,7 @@ public class UserService {
         }
     }
 
+<<<<<<< HEAD
     private User findUserById(int id) {
         for (User u : users) {
             if (u.getId() == id) return u;
@@ -572,6 +579,20 @@ public class UserService {
             if (current != null && current.getId() == id) {
                 current.setTimeoutUntil(until);
             }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void updateAvatarStyle(int id, String newStyle) {
+        if (id < 0) return;
+        String req = "UPDATE `user` SET avatar_style = ? WHERE id = ?";
+        try {
+            PreparedStatement ps = cnx.prepareStatement(req);
+            ps.setString(1, newStyle);
+            ps.setInt(2, id);
+            ps.executeUpdate();
+            loadUsersFromDb(); // Refresh cache
         } catch (SQLException e) {
             e.printStackTrace();
         }

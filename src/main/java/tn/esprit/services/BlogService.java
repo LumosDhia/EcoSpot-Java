@@ -185,6 +185,10 @@ public class BlogService implements GlobalInterface<Blog> {
             ps.setInt(1, articleId);
             ps.executeUpdate();
             viewHistory.put(cacheKey, now);
+            
+            // Record granular event
+            tn.esprit.util.StatisticsCollector.getInstance().recordView(articleId, viewerId, null);
+            
             return true;
         } catch (SQLException e) {
             e.printStackTrace();
@@ -250,6 +254,11 @@ public class BlogService implements GlobalInterface<Blog> {
                 b.setViews(rs.getInt("views"));
                 b.setReadingTime(b.getReadingTime());
                 b.setAdminRevisionNote(rs.getString("admin_revision_note"));
+                
+                // Fetch reaction counts
+                ReactionService rsrv = new ReactionService();
+                b.setLikesCount(rsrv.getLikes(b.getId()));
+                b.setDislikesCount(rsrv.getDislikes(b.getId()));
                 
                 // Fetch tags and comments for this blog
                 b.setTags(getTagsForArticle(b.getId()));

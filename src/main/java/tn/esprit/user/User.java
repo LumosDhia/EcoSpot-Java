@@ -9,6 +9,7 @@ public class User {
     private String password;
     private String role;
     private LocalDateTime timeoutUntil;
+    private String avatarStyle;
 
     public User() {}
 
@@ -43,4 +44,7 @@ public class User {
     public boolean isTimedOut() {
         return timeoutUntil != null && timeoutUntil.isAfter(LocalDateTime.now());
     }
+
+    public String getAvatarStyle() { return avatarStyle; }
+    public void setAvatarStyle(String avatarStyle) { this.avatarStyle = avatarStyle; }
 }

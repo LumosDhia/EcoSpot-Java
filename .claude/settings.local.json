@@ -13,7 +13,9 @@
       "Bash(wsl ls *)",
       "Bash(wsl -- ls /home/lumosdhia/EcoSpot-Web/)",
       "Bash(powershell *)",
-      "Bash(wsl bash *)"
+      "Bash(wsl bash *)",
+      "Bash(xargs grep *)",
+      "Bash(xargs cat *)"
     ]
   }
 }
