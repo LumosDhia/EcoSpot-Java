@@ -116,6 +116,9 @@ public class HomeController {
 
     @FXML
     private void goToBlog(ActionEvent event) {
+        tn.esprit.blog.BlogManagementController.selectedCategory = null;
+        tn.esprit.blog.BlogManagementController.selectedTag = null;
+        tn.esprit.blog.BlogManagementController.selectedAuthor = null;
         navigate(event, "/blog/BlogManagement.fxml");
     }
 
@@ -139,6 +142,9 @@ public class HomeController {
     @FXML
     private void goToBlogFromIcon() {
         try {
+            tn.esprit.blog.BlogManagementController.selectedCategory = null;
+            tn.esprit.blog.BlogManagementController.selectedTag = null;
+            tn.esprit.blog.BlogManagementController.selectedAuthor = null;
             Parent root = FXMLLoader.load(getClass().getResource("/blog/BlogManagement.fxml"));
             Stage stage = (Stage) (blogBtn != null ? blogBtn.getScene().getWindow() : dashboardTopBtn.getScene().getWindow());
             stage.getScene().setRoot(root);

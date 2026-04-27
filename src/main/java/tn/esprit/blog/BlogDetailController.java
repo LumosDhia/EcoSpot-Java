@@ -6,9 +6,11 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
@@ -92,6 +94,32 @@ public class BlogDetailController {
             guestPromptSection.setVisible(true);
             guestPromptSection.setManaged(true);
         }
+
+        // Fix trackpad/two-finger scrolling: WebView eats scroll events,
+        // so we intercept them and forward to the parent ScrollPane.
+        contentWebView.addEventFilter(ScrollEvent.SCROLL, event -> {
+            ScrollPane parentScroll = findParentScrollPane(contentWebView);
+            if (parentScroll != null) {
+                double deltaY = event.getDeltaY();
+                double vvalue = parentScroll.getVvalue();
+                double contentHeight = parentScroll.getContent().getBoundsInLocal().getHeight();
+                double viewportHeight = parentScroll.getViewportBounds().getHeight();
+                double scrollableHeight = contentHeight - viewportHeight;
+                if (scrollableHeight > 0) {
+                    parentScroll.setVvalue(vvalue - (deltaY / scrollableHeight));
+                }
+                event.consume();
+            }
+        });
+    }
+
+    private ScrollPane findParentScrollPane(javafx.scene.Node node) {
+        javafx.scene.Node current = node.getParent();
+        while (current != null) {
+            if (current instanceof ScrollPane) return (ScrollPane) current;
+            current = current.getParent();
+        }
+        return null;
     }
 
     private void loadCurrentUserAvatar() {
@@ -213,6 +241,26 @@ public class BlogDetailController {
         }
 
         contentWebView.getEngine().loadContent(blog.getContent());
+
+        // Auto-resize WebView to fit content (eliminates internal scrollbar)
+        contentWebView.getEngine().getLoadWorker().stateProperty().addListener((obs, oldState, newState) -> {
+            if (newState == javafx.concurrent.Worker.State.SUCCEEDED) {
+                Platform.runLater(() -> {
+                    try {
+                        Object heightObj = contentWebView.getEngine().executeScript(
+                            "Math.max(document.body.scrollHeight, document.documentElement.scrollHeight)"
+                        );
+                        if (heightObj instanceof Number) {
+                            double h = ((Number) heightObj).doubleValue() + 30;
+                            contentWebView.setPrefHeight(h);
+                            contentWebView.setMinHeight(h);
+                            contentWebView.setMaxHeight(h);
+                        }
+                    } catch (Exception ignored) {}
+                });
+            }
+        });
+
         loadComments();
 
             int userId = tn.esprit.util.SessionManager.isLoggedIn()
@@ -412,7 +460,18 @@ public class BlogDetailController {
 
     // ─── Navigation ─────────────────────────────────────────────────────────────
 
-    @FXML private void goToBlog() { stopTtsAndNavigate("/blog/BlogManagement.fxml", null); }
+    @FXML
+    private void goToBlog() {
+        stopTtsAndNavigate("/blog/BlogManagement.fxml", null);
+    }
+
+    @FXML
+    private void goToBlogReset() {
+        tn.esprit.blog.BlogManagementController.selectedCategory = null;
+        tn.esprit.blog.BlogManagementController.selectedTag = null;
+        tn.esprit.blog.BlogManagementController.selectedAuthor = null;
+        goToBlog();
+    }
     @FXML private void goToHome() { stopTtsAndNavigate("/home/Home.fxml", null); }
     @FXML private void goToArticles() { stopTtsAndNavigate("/blog/ArticlesManagement.fxml", null); }
     @FXML private void goToEvents(javafx.event.ActionEvent e) { handleTtsStop(); navigate(e, "/event/EventManagement.fxml"); }
