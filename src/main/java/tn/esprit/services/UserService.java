@@ -63,6 +63,8 @@ public class UserService {
             if (!hasColumn("user", "zipcode")) {
                 st.execute("ALTER TABLE `user` ADD COLUMN `zipcode` VARCHAR(10)");
             }
+            // Fix: ensure avatar_style always has a default value for tests
+            st.execute("ALTER TABLE `user` MODIFY COLUMN `avatar_style` VARCHAR(50) DEFAULT 'avataaars'");
         } catch (SQLException e) {
             e.printStackTrace();
         }

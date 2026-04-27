@@ -39,7 +39,10 @@ public class EventFormController {
     private tn.esprit.services.EventService eventService = new tn.esprit.services.EventService();
     private tn.esprit.services.SponsorService sponsorService = new tn.esprit.services.SponsorService();
     private OpenRouterEventService aiService = new OpenRouterEventService();
+    private tn.esprit.services.GeocodingService geocodingService = new tn.esprit.services.GeocodingService();
     private Event currentEvent;
+    private double currentLat = 0;
+    private double currentLon = 0;
     private boolean isEdit = false;
     private java.util.List<Sponsor> selectedSponsors = new java.util.ArrayList<>();
     private File selectedImageFile;
@@ -121,7 +124,40 @@ public class EventFormController {
         
         // Load sponsors
         this.selectedSponsors = sponsorService.getSponsorsForEvent(event.getId());
+        this.currentLat = event.getLatitude();
+        this.currentLon = event.getLongitude();
         updateSponsorsFlow();
+    }
+
+    @FXML
+    private void handleGeocode() {
+        String query = locationField.getText().trim();
+        if (query.isEmpty()) {
+            showAlert("Input Required", "Please enter a location name first.");
+            return;
+        }
+
+        saveBtn.setDisable(true);
+        new Thread(() -> {
+            java.util.List<tn.esprit.services.GeocodingService.Place> results = geocodingService.search(query);
+            javafx.application.Platform.runLater(() -> {
+                saveBtn.setDisable(false);
+                if (results.isEmpty()) {
+                    showAlert("Location Not Found", "Could not find coordinates for: " + query);
+                } else {
+                    tn.esprit.services.GeocodingService.Place top = results.get(0);
+                    this.currentLat = top.getLat();
+                    this.currentLon = top.getLon();
+                    
+                    // Show confirmation
+                    Alert ok = new Alert(Alert.AlertType.INFORMATION);
+                    ok.setTitle("Location Verified");
+                    ok.setHeaderText(top.getDisplayName());
+                    ok.setContentText(String.format("Coordinates captured: %.5f, %.5f", currentLat, currentLon));
+                    ok.show();
+                }
+            });
+        }).start();
     }
 
     @FXML
@@ -191,6 +227,8 @@ public class EventFormController {
             currentEvent.setStartedAt(LocalDateTime.of(startDatePicker.getValue(), LocalTime.of(9, 0)));
             currentEvent.setEndedAt(LocalDateTime.of(endDatePicker.getValue(), LocalTime.of(17, 0)));
             currentEvent.setDescription(descriptionArea.getText());
+            currentEvent.setLatitude(currentLat);
+            currentEvent.setLongitude(currentLon);
 
             if (isEdit) {
                 eventService.update(currentEvent);
@@ -199,18 +237,21 @@ public class EventFormController {
             }
 
             // Save Many-to-Many Sponsor links
-            // 1. Remove old links if editing
-            if (isEdit) {
-                // We need a method in SponsorService to clear all sponsors for an event
-                // or just unassign all.
-                for (Sponsor s : sponsorService.getSponsorsForEvent(currentEvent.getId())) {
+            // 1. Get current assigned sponsors to compare
+            java.util.List<Sponsor> currentlyAssigned = sponsorService.getSponsorsForEvent(currentEvent.getId());
+            
+            // 2. Remove those that are no longer selected
+            for (Sponsor s : currentlyAssigned) {
+                if (selectedSponsors.stream().noneMatch(sel -> sel.getId() == s.getId())) {
                     sponsorService.unassignSponsorFromEvent(currentEvent.getId(), s.getId());
                 }
             }
             
-            // 2. Add new links
-            for (Sponsor s : selectedSponsors) {
-                sponsorService.assignSponsorToEvent(currentEvent.getId(), s.getId());
+            // 3. Add new ones
+            for (Sponsor sel : selectedSponsors) {
+                if (currentlyAssigned.stream().noneMatch(cur -> cur.getId() == sel.getId())) {
+                    sponsorService.assignSponsorToEvent(currentEvent.getId(), sel.getId());
+                }
             }
 
             goBack(null);

@@ -88,12 +88,13 @@ public class EventParticipationFlowTest {
         assertNotNull(cnx, "Database connection should be available for tests");
 
         String username = "Participant " + System.currentTimeMillis();
-        String req = "INSERT INTO `user` (`username`, `email`, `password`, `role`) VALUES (?, ?, ?, ?)";
+        String req = "INSERT INTO `user` (`username`, `email`, `password`, `role`, `avatar_style`) VALUES (?, ?, ?, ?, ?)";
         try (PreparedStatement ps = cnx.prepareStatement(req, PreparedStatement.RETURN_GENERATED_KEYS)) {
             ps.setString(1, username);
             ps.setString(2, email);
             ps.setString(3, "123456");
             ps.setString(4, "USER");
+            ps.setString(5, "avataaars");
             ps.executeUpdate();
             try (ResultSet keys = ps.getGeneratedKeys()) {
                 if (keys.next()) {

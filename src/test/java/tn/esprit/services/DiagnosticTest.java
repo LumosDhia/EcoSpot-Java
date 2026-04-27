@@ -27,6 +27,12 @@ public class DiagnosticTest {
                 System.out.println("ArticleID: " + rs3.getInt("article_id") + " | Date: " + rs3.getTimestamp("viewed_at"));
             }
 
+            System.out.println("\n--- ACTUAL EVENTS ---");
+            ResultSet rs4 = cnx.createStatement().executeQuery("SELECT id, name, location, latitude, longitude FROM event LIMIT 10");
+            while (rs4.next()) {
+                System.out.println("ID: " + rs4.getInt("id") + " | Name: " + rs4.getString("name") + " | Loc: " + rs4.getString("location") + " | Lat: " + rs4.getDouble("latitude") + " | Lon: " + rs4.getDouble("longitude"));
+            }
+
         } catch (SQLException e) {
             e.printStackTrace();
         }

@@ -61,7 +61,13 @@
 
                                 <VBox spacing="10.0">
                                     <children>
-                                        <Label styleClass="form-label" text="Location (*)" />
+                                        <HBox alignment="CENTER_LEFT" spacing="10.0">
+                                            <children>
+                                                <Label styleClass="form-label" text="Location (*)" />
+                                                <Region HBox.hgrow="ALWAYS" />
+                                                <Button onAction="#handleGeocode" style="-fx-font-size: 10; -fx-padding: 2 8; -fx-background-color: #2d6a4f; -fx-text-fill: white; -fx-background-radius: 4; -fx-cursor: hand;" text="📍 Find on Map" />
+                                            </children>
+                                        </HBox>
                                         <TextField fx:id="locationField" promptText="City, Country..." styleClass="search-field" />
                                     </children>
                                 </VBox>
