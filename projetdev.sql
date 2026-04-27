@@ -33,7 +33,66 @@ CREATE TABLE `category` (
   UNIQUE KEY `name` (`name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- 4. Blog Table
+-- 4. Article Table (replaces blog as the canonical content table)
+DROP TABLE IF EXISTS `article`;
+CREATE TABLE `article` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `title` varchar(255) NOT NULL,
+  `content` text NOT NULL,
+  `image` varchar(255) DEFAULT NULL,
+  `slug` varchar(300) NOT NULL,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `published_at` datetime DEFAULT NULL,
+  `created_by_id` int(11) DEFAULT NULL,
+  `writer_id` int(11) DEFAULT NULL,
+  `category_id` int(11) DEFAULT NULL,
+  `views` int(11) NOT NULL DEFAULT 0,
+  `admin_revision_note` text DEFAULT NULL,
+  `status` varchar(50) NOT NULL DEFAULT 'draft',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `slug` (`slug`),
+  KEY `fk_article_category` (`category_id`),
+  KEY `fk_article_created_by` (`created_by_id`),
+  CONSTRAINT `fk_article_category` FOREIGN KEY (`category_id`) REFERENCES `category` (`id`) ON DELETE SET NULL,
+  CONSTRAINT `fk_article_created_by` FOREIGN KEY (`created_by_id`) REFERENCES `user` (`id`) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- 5. Tag Table
+DROP TABLE IF EXISTS `tag`;
+CREATE TABLE `tag` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(100) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `name` (`name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- 6. Article-Tag Junction Table
+DROP TABLE IF EXISTS `article_tag`;
+CREATE TABLE `article_tag` (
+  `article_id` int(11) NOT NULL,
+  `tag_id` int(11) NOT NULL,
+  PRIMARY KEY (`article_id`, `tag_id`),
+  KEY `fk_at_tag` (`tag_id`),
+  CONSTRAINT `fk_at_article` FOREIGN KEY (`article_id`) REFERENCES `article` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `fk_at_tag` FOREIGN KEY (`tag_id`) REFERENCES `tag` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- 7. Comment Table
+DROP TABLE IF EXISTS `comment`;
+CREATE TABLE `comment` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `article_id` int(11) NOT NULL,
+  `content` text NOT NULL,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `author_name` varchar(255) DEFAULT NULL,
+  `flagged` tinyint(1) NOT NULL DEFAULT 0,
+  `hidden_from_public` tinyint(1) NOT NULL DEFAULT 0,
+  PRIMARY KEY (`id`),
+  KEY `fk_comment_article` (`article_id`),
+  CONSTRAINT `fk_comment_article` FOREIGN KEY (`article_id`) REFERENCES `article` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- 8. Blog Table (kept for backward compatibility)
 DROP TABLE IF EXISTS `blog`;
 CREATE TABLE `blog` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
@@ -53,7 +112,7 @@ CREATE TABLE `blog` (
   CONSTRAINT `fk_blog_category` FOREIGN KEY (`category_id`) REFERENCES `category` (`id`) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- 5. Event Table
+-- 9. Event Table
 DROP TABLE IF EXISTS `event`;
 CREATE TABLE `event` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
@@ -73,7 +132,7 @@ CREATE TABLE `event` (
   KEY `started_at` (`started_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- 6. Sponsor Table
+-- 10. Sponsor Table
 DROP TABLE IF EXISTS `sponsor`;
 CREATE TABLE `sponsor` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
@@ -86,7 +145,7 @@ CREATE TABLE `sponsor` (
   KEY `name` (`name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- 7. Join Table: Event - Sponsor
+-- 11. Join Table: Event - Sponsor
 DROP TABLE IF EXISTS `event_sponsor`;
 CREATE TABLE `event_sponsor` (
   `event_id` int(11) NOT NULL,
@@ -97,7 +156,7 @@ CREATE TABLE `event_sponsor` (
   CONSTRAINT `fk_sponsor_id` FOREIGN KEY (`sponsor_id`) REFERENCES `sponsor` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- 8. Join Table: Event - Participation
+-- 12. Join Table: Event - Participation
 DROP TABLE IF EXISTS `event_participation`;
 CREATE TABLE `event_participation` (
   `event_id` int(11) NOT NULL,
@@ -108,7 +167,75 @@ CREATE TABLE `event_participation` (
   CONSTRAINT `fk_part_user` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- Data Injection
+-- 13. Article View Event Table
+DROP TABLE IF EXISTS `article_view_event`;
+CREATE TABLE `article_view_event` (
+    `id` bigint(20) NOT NULL AUTO_INCREMENT,
+    `article_id` int(11) NOT NULL,
+    `user_id` int(11) DEFAULT NULL,
+    `session_id` varchar(64) DEFAULT NULL,
+    `viewed_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (`id`),
+    KEY `idx_article_viewed` (`article_id`,`viewed_at`),
+    KEY `idx_viewed_at` (`viewed_at`),
+    CONSTRAINT `fk_view_event_article` FOREIGN KEY (`article_id`) REFERENCES `article` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- 14. Article Reaction Event Table
+DROP TABLE IF EXISTS `article_reaction_event`;
+CREATE TABLE `article_reaction_event` (
+    `id` bigint(20) NOT NULL AUTO_INCREMENT,
+    `article_id` int(11) NOT NULL,
+    `user_id` int(11) DEFAULT NULL,
+    `reaction` enum('LIKE','DISLIKE') NOT NULL,
+    `acted_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (`id`),
+    KEY `idx_article_reacted` (`article_id`,`acted_at`),
+    CONSTRAINT `fk_reaction_event_article` FOREIGN KEY (`article_id`) REFERENCES `article` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- 15. Search Term Log Table
+DROP TABLE IF EXISTS `search_term_log`;
+CREATE TABLE `search_term_log` (
+    `id` bigint(20) NOT NULL AUTO_INCREMENT,
+    `term` varchar(255) NOT NULL,
+    `result_count` int(11) NOT NULL DEFAULT 0,
+    `searched_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (`id`),
+    KEY `idx_searched_at` (`searched_at`),
+    KEY `idx_term` (`term`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- 16. Article Stats Daily Table
+DROP TABLE IF EXISTS `article_stats_daily`;
+CREATE TABLE `article_stats_daily` (
+    `id` bigint(20) NOT NULL AUTO_INCREMENT,
+    `article_id` int(11) NOT NULL,
+    `stat_date` date NOT NULL,
+    `views` int(11) NOT NULL DEFAULT 0,
+    `likes` int(11) NOT NULL DEFAULT 0,
+    `dislikes` int(11) NOT NULL DEFAULT 0,
+    `comments` int(11) NOT NULL DEFAULT 0,
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `uq_article_date` (`article_id`,`stat_date`),
+    KEY `idx_stat_date` (`stat_date`),
+    CONSTRAINT `fk_stats_article` FOREIGN KEY (`article_id`) REFERENCES `article` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- 17. Article Reaction Table (used by ReactionService)
+DROP TABLE IF EXISTS `article_reaction`;
+CREATE TABLE `article_reaction` (
+    `id` int(11) NOT NULL AUTO_INCREMENT,
+    `article_id` int(11) NOT NULL,
+    `user_id` int(11) NOT NULL,
+    `type` enum('like','dislike') NOT NULL,
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `uniq_article_user` (`article_id`, `user_id`),
+    CONSTRAINT `fk_reaction_article` FOREIGN KEY (`article_id`) REFERENCES `article` (`id`) ON DELETE CASCADE,
+    CONSTRAINT `fk_reaction_user` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Data
 INSERT INTO `user` (`username`, `email`, `password`, `role`) VALUES
 ('admin', 'admin@ecospot.tn', 'admin123', 'ADMIN'),
 ('dhia', 'dhia@gmail.com', 'password123', 'USER');
@@ -117,6 +244,27 @@ INSERT INTO `category` (`name`) VALUES
 ('Environment'),
 ('Workshops'),
 ('Community');
+
+-- Migrate blog data into article table
+INSERT INTO `article` (`title`, `content`, `image`, `slug`, `created_at`, `published_at`, `created_by_id`, `writer_id`, `category_id`, `views`, `status`)
+SELECT
+  b.title,
+  b.content,
+  b.image,
+  CONCAT(LOWER(REPLACE(REPLACE(b.title, ' ', '-'), '.', '')), '-', b.id) AS slug,
+  b.published_at,
+  b.published_at,
+  u.id,
+  u.id,
+  b.category_id,
+  b.views,
+  'published'
+FROM (
+  SELECT 1 AS id, 'Saving the Ocean' AS title, 'Litter in our oceans is a growing problem...' AS content, 'ocean.jpg' AS image, 1 AS category_id, 150 AS views, '2024-01-01 10:00:00' AS published_at, 'dhia' AS author
+  UNION ALL
+  SELECT 2, 'Future of Solar Energy', 'Solar panels are becoming more efficient every day...', 'solar.png', 3, 230, '2024-01-02 12:00:00', 'admin'
+) b
+LEFT JOIN `user` u ON u.username = b.author;
 
 INSERT INTO `blog` (`title`, `content`, `author`, `image`, `category_id`, `views`) VALUES
 ('Saving the Ocean', 'Litter in our oceans is a growing problem...', 'dhia', 'ocean.jpg', 1, 150),
@@ -137,57 +285,5 @@ INSERT INTO `event_sponsor` (`event_id`, `sponsor_id`) VALUES
 
 INSERT INTO `event_participation` (`event_id`, `user_id`) VALUES
 (1, 2);
-
--- 9. Article View Event Table
-DROP TABLE IF EXISTS `article_view_event`;
-CREATE TABLE `article_view_event` (
-    `id` bigint(20) NOT NULL AUTO_INCREMENT,
-    `article_id` int(11) NOT NULL,
-    `user_id` int(11) DEFAULT NULL,
-    `session_id` varchar(64) DEFAULT NULL,
-    `viewed_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    PRIMARY KEY (`id`),
-    KEY `idx_article_viewed` (`article_id`,`viewed_at`),
-    KEY `idx_viewed_at` (`viewed_at`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
--- 10. Article Reaction Event Table
-DROP TABLE IF EXISTS `article_reaction_event`;
-CREATE TABLE `article_reaction_event` (
-    `id` bigint(20) NOT NULL AUTO_INCREMENT,
-    `article_id` int(11) NOT NULL,
-    `user_id` int(11) DEFAULT NULL,
-    `reaction` enum('LIKE','DISLIKE') NOT NULL,
-    `acted_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    PRIMARY KEY (`id`),
-    KEY `idx_article_reacted` (`article_id`,`acted_at`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
--- 11. Search Term Log Table
-DROP TABLE IF EXISTS `search_term_log`;
-CREATE TABLE `search_term_log` (
-    `id` bigint(20) NOT NULL AUTO_INCREMENT,
-    `term` varchar(255) NOT NULL,
-    `result_count` int(11) NOT NULL DEFAULT 0,
-    `searched_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    PRIMARY KEY (`id`),
-    KEY `idx_searched_at` (`searched_at`),
-    KEY `idx_term` (`term`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
--- 12. Article Stats Daily Table
-DROP TABLE IF EXISTS `article_stats_daily`;
-CREATE TABLE `article_stats_daily` (
-    `id` bigint(20) NOT NULL AUTO_INCREMENT,
-    `article_id` int(11) NOT NULL,
-    `stat_date` date NOT NULL,
-    `views` int(11) NOT NULL DEFAULT 0,
-    `likes` int(11) NOT NULL DEFAULT 0,
-    `dislikes` int(11) NOT NULL DEFAULT 0,
-    `comments` int(11) NOT NULL DEFAULT 0,
-    PRIMARY KEY (`id`),
-    UNIQUE KEY `uq_article_date` (`article_id`,`stat_date`),
-    KEY `idx_stat_date` (`stat_date`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 COMMIT;
