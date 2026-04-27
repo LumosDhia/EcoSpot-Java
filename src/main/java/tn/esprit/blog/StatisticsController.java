@@ -42,10 +42,13 @@ public class StatisticsController {
     @FXML private BarChart<String, Number> searchTermsChart;
     @FXML private BarChart<String, Number> hourlyChart;
     @FXML private ListView<String> topArticlesList;
+    @FXML private Pagination articlesPagination;
     @FXML private Button manageArticlesBtn;
 
     private final StatisticsService statsService = new StatisticsService();
     private List<Integer> topArticleIds = new java.util.ArrayList<>();
+    private List<Map<String, Object>> currentAllArticles = new java.util.ArrayList<>();
+    private final int ARTICLES_PER_PAGE = 5;
     private String ownerEmail = null; // null = admin (all articles); non-null = NGO filter
 
     public void setOwnerEmail(String email) {
@@ -85,6 +88,34 @@ public class StatisticsController {
             Stage stage = (Stage) topArticlesList.getScene().getWindow();
             stage.getScene().setRoot(root);
         } catch (IOException e) { e.printStackTrace(); }
+    }
+
+    private Node createArticlesPage(int pageIndex) {
+        ListView<String> listView = new ListView<>();
+        listView.setStyle("-fx-background-insets: 0; -fx-padding: 0;");
+        ObservableList<String> items = FXCollections.observableArrayList();
+        List<Integer> pageIds = new java.util.ArrayList<>();
+        
+        int startIdx = pageIndex * ARTICLES_PER_PAGE;
+        int endIdx = Math.min(startIdx + ARTICLES_PER_PAGE, currentAllArticles.size());
+        
+        for (int i = startIdx; i < endIdx; i++) {
+            Map<String, Object> art = currentAllArticles.get(i);
+            String author = (String) art.get("author");
+            String title = (String) art.get("title");
+            items.add("📝 " + title + "   •   By " + author);
+            pageIds.add((Integer) art.get("id"));
+        }
+        listView.setItems(items);
+        listView.setFixedCellSize(35);
+        listView.setPrefHeight(items.size() * 35 + 2);
+        listView.setOnMouseClicked(event -> {
+            int idx = listView.getSelectionModel().getSelectedIndex();
+            if (idx >= 0 && idx < pageIds.size()) {
+                navigateToArticleStats(pageIds.get(idx));
+            }
+        });
+        return listView;
     }
 
     @FXML
@@ -192,6 +223,23 @@ public class StatisticsController {
             topArticleIds.add((Integer) art.get("id"));
         }
         topArticlesList.setItems(topArticles);
+
+        // Load All Articles (Paginated)
+        currentAllArticles = statsService.getDetailedArticleStats(start, end, ownerEmail);
+        // Sort by publish date descending
+        currentAllArticles.sort((a, b) -> {
+            java.sql.Timestamp d1 = (java.sql.Timestamp) a.get("published_at");
+            java.sql.Timestamp d2 = (java.sql.Timestamp) b.get("published_at");
+            if (d1 == null && d2 == null) return 0;
+            if (d1 == null) return 1;
+            if (d2 == null) return -1;
+            return d2.compareTo(d1);
+        });
+        int pageCount = (int) Math.ceil((double) currentAllArticles.size() / ARTICLES_PER_PAGE);
+        if (pageCount == 0) pageCount = 1;
+        articlesPagination.setPageCount(pageCount);
+        articlesPagination.setMaxPageIndicatorCount(Math.min(pageCount, 10)); // Allow jumping to final easily
+        articlesPagination.setPageFactory(this::createArticlesPage);
 
         // Load Category Chart (Horizontal Bar Chart)
         XYChart.Series<Number, String> catSeries = new XYChart.Series<>();
