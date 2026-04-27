@@ -17,6 +17,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import javafx.stage.FileChooser;
 import tn.esprit.util.ImageUploadUtils;
+import tn.esprit.services.GeocodingService;
 
 public class EventFormController {
 
@@ -36,17 +37,37 @@ public class EventFormController {
     @FXML private Label aiSuccessLabel;
     @FXML private Label aiAnalysisLabel;
 
+    // Location Map Search
+    @FXML private Button searchLocationBtn;
+    @FXML private Label locationErrorLabel;
+    @FXML private ListView<GeocodingService.Place> locationResultsList;
+
     private tn.esprit.services.EventService eventService = new tn.esprit.services.EventService();
     private tn.esprit.services.SponsorService sponsorService = new tn.esprit.services.SponsorService();
     private OpenRouterEventService aiService = new OpenRouterEventService();
+    private GeocodingService geocodingService = new GeocodingService();
     private Event currentEvent;
     private boolean isEdit = false;
     private java.util.List<Sponsor> selectedSponsors = new java.util.ArrayList<>();
     private File selectedImageFile;
+    private double selectedLat = 0.0;
+    private double selectedLon = 0.0;
 
     @FXML
     public void initialize() {
         tn.esprit.util.NavigationHistory.track(saveBtn, "/event/EventForm.fxml");
+        
+        if (locationResultsList != null) {
+            locationResultsList.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
+                if (newVal != null) {
+                    locationField.setText(newVal.getDisplayName());
+                    selectedLat = newVal.getLat();
+                    selectedLon = newVal.getLon();
+                    locationResultsList.setVisible(false);
+                    locationResultsList.setManaged(false);
+                }
+            });
+        }
     }
 
     private void updateSponsorsFlow() {
@@ -111,6 +132,8 @@ public class EventFormController {
 
         nameField.setText(event.getName());
         locationField.setText(event.getLocation());
+        this.selectedLat = event.getLatitude();
+        this.selectedLon = event.getLongitude();
         capacityField.setText(String.valueOf(event.getCapacity()));
         if (event.getImage() != null) {
             imageNameLabel.setText(event.getImage());
@@ -122,6 +145,41 @@ public class EventFormController {
         // Load sponsors
         this.selectedSponsors = sponsorService.getSponsorsForEvent(event.getId());
         updateSponsorsFlow();
+    }
+
+    @FXML
+    void handleLocationSearch(ActionEvent event) {
+        String query = locationField.getText().trim();
+        if (query.length() < 3) {
+            locationErrorLabel.setText("Please enter at least 3 characters to search.");
+            locationErrorLabel.setVisible(true);
+            locationErrorLabel.setManaged(true);
+            return;
+        }
+
+        searchLocationBtn.setDisable(true);
+        searchLocationBtn.setText("...");
+
+        new Thread(() -> {
+            java.util.List<GeocodingService.Place> results = geocodingService.search(query);
+            javafx.application.Platform.runLater(() -> {
+                searchLocationBtn.setDisable(false);
+                searchLocationBtn.setText("Search");
+                if (results.isEmpty()) {
+                    locationErrorLabel.setText("No locations found for: " + query);
+                    locationErrorLabel.setVisible(true);
+                    locationErrorLabel.setManaged(true);
+                    locationResultsList.setVisible(false);
+                    locationResultsList.setManaged(false);
+                } else {
+                    locationResultsList.getItems().setAll(results);
+                    locationResultsList.setVisible(true);
+                    locationResultsList.setManaged(true);
+                    locationErrorLabel.setVisible(false);
+                    locationErrorLabel.setManaged(false);
+                }
+            });
+        }).start();
     }
 
     @FXML
@@ -175,6 +233,8 @@ public class EventFormController {
 
             currentEvent.setName(nameField.getText());
             currentEvent.setLocation(locationField.getText());
+            currentEvent.setLatitude(selectedLat);
+            currentEvent.setLongitude(selectedLon);
             currentEvent.setCapacity(Integer.parseInt(capacityField.getText()));
             
             if (selectedImageFile != null) {
@@ -246,6 +306,11 @@ public class EventFormController {
 
         if (!isEdit && selectedImageFile == null) {
             showAlert("Missing Photo", "Please select an image for the event.");
+            return false;
+        }
+
+        if (selectedLat == 0 && selectedLon == 0) {
+            showAlert("Invalid Location", "Please search and select a valid location from the list.");
             return false;
         }
 
