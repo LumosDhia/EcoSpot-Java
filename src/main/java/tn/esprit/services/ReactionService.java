@@ -6,7 +6,13 @@ import java.sql.*;
 
 public class ReactionService {
 
-    private final Connection cnx = MyConnection.getInstance().getCnx();
+    private Connection getCnx() {
+        Connection c = MyConnection.getInstance().getCnx();
+        if (c == null) {
+            throw new RuntimeException("CRITICAL ERROR: Database connection is null. Is MySQL/MariaDB running?");
+        }
+        return c;
+    }
 
     public ReactionService() {
         ensureTable();
@@ -20,7 +26,7 @@ public class ReactionService {
                 "type ENUM('like','dislike') NOT NULL," +
                 "UNIQUE KEY uniq_article_user (article_id, user_id)" +
                 ")";
-        try (Statement st = cnx.createStatement()) {
+        try (Statement st = getCnx().createStatement()) {
             st.execute(sql);
         } catch (SQLException e) {
             e.printStackTrace();
@@ -30,7 +36,7 @@ public class ReactionService {
     /** Returns current user's reaction type ("like", "dislike") or null if none. */
     public String getUserReaction(int articleId, int userId) {
         String sql = "SELECT type FROM article_reaction WHERE article_id = ? AND user_id = ?";
-        try (PreparedStatement ps = cnx.prepareStatement(sql)) {
+        try (PreparedStatement ps = getCnx().prepareStatement(sql)) {
             ps.setInt(1, articleId);
             ps.setInt(2, userId);
             ResultSet rs = ps.executeQuery();
@@ -52,7 +58,7 @@ public class ReactionService {
             if (existing == null) {
                 // Insert
                 String sql = "INSERT INTO article_reaction (article_id, user_id, type) VALUES (?, ?, ?)";
-                try (PreparedStatement ps = cnx.prepareStatement(sql)) {
+                try (PreparedStatement ps = getCnx().prepareStatement(sql)) {
                     ps.setInt(1, articleId);
                     ps.setInt(2, userId);
                     ps.setString(3, type);
@@ -63,7 +69,7 @@ public class ReactionService {
             } else if (existing.equals(type)) {
                 // Remove (toggle off)
                 String sql = "DELETE FROM article_reaction WHERE article_id = ? AND user_id = ?";
-                try (PreparedStatement ps = cnx.prepareStatement(sql)) {
+                try (PreparedStatement ps = getCnx().prepareStatement(sql)) {
                     ps.setInt(1, articleId);
                     ps.setInt(2, userId);
                     ps.executeUpdate();
@@ -72,7 +78,7 @@ public class ReactionService {
             } else {
                 // Switch
                 String sql = "UPDATE article_reaction SET type = ? WHERE article_id = ? AND user_id = ?";
-                try (PreparedStatement ps = cnx.prepareStatement(sql)) {
+                try (PreparedStatement ps = getCnx().prepareStatement(sql)) {
                     ps.setString(1, type);
                     ps.setInt(2, articleId);
                     ps.setInt(3, userId);
@@ -97,7 +103,7 @@ public class ReactionService {
 
     private int countReactions(int articleId, String type) {
         String sql = "SELECT COUNT(*) FROM article_reaction WHERE article_id = ? AND type = ?";
-        try (PreparedStatement ps = cnx.prepareStatement(sql)) {
+        try (PreparedStatement ps = getCnx().prepareStatement(sql)) {
             ps.setInt(1, articleId);
             ps.setString(2, type);
             ResultSet rs = ps.executeQuery();

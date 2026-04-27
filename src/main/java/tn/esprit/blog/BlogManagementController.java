@@ -76,7 +76,12 @@ public class BlogManagementController {
         sortChoice.setItems(FXCollections.observableArrayList("Newest", "Oldest", "Most Viewed"));
         sortChoice.setValue("Newest");
 
-        refreshData();
+        try {
+            refreshData();
+        } catch (Exception e) {
+            System.err.println("Failed to load blog data: " + e.getMessage());
+            e.printStackTrace();
+        }
 
         searchField.textProperty().addListener((obs, old, val) -> {
             currentPage = 0;
