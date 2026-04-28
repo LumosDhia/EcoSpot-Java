@@ -64,7 +64,12 @@ public class LoginController {
             stage.initModality(Modality.APPLICATION_MODAL);
             stage.setTitle("EcoSpot - Face ID Login");
             stage.setScene(new Scene(root));
-            stage.show();
+            stage.showAndWait();
+            
+            // Check if login was successful
+            if (tn.esprit.util.SessionManager.isLoggedIn()) {
+                navigate(event, "/home/Home.fxml");
+            }
         } catch (IOException e) {
             e.printStackTrace();
             showError("Could not load Face Login view.");

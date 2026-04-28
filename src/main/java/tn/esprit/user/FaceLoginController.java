@@ -12,6 +12,7 @@ import javafx.scene.control.ProgressIndicator;
 import javafx.scene.image.ImageView;
 import javafx.scene.image.WritableImage;
 import javafx.stage.Stage;
+import org.json.JSONObject;
 import tn.esprit.services.UserService;
 import tn.esprit.util.Config;
 
@@ -37,7 +38,14 @@ public class FaceLoginController {
     private Webcam webcam;
     private AtomicBoolean stopCamera = new AtomicBoolean(false);
     private UserService userService = new UserService();
-    private final String FACE_SERVICE_URL = Config.get("FACE_SERVICE_URL", "http://localhost:8001");
+    private final String FACE_SERVICE_URL = sanitizeUrl(Config.get("FACE_SERVICE_URL", "http://localhost:8001"));
+
+    private String sanitizeUrl(String url) {
+        if (url != null && url.endsWith("/")) {
+            return url.substring(0, url.length() - 1);
+        }
+        return url;
+    }
     
     private boolean enrollMode = false;
     private String enrollEmail = null;
@@ -45,6 +53,7 @@ public class FaceLoginController {
     @FXML
     public void initialize() {
         startWebcam();
+        checkServiceStatus();
         
         // Ensure camera stops if window is closed via X button
         Platform.runLater(() -> {
@@ -52,6 +61,33 @@ public class FaceLoginController {
                 webcamView.getScene().getWindow().setOnCloseRequest(e -> stopCamera.set(true));
             }
         });
+    }
+
+    private void checkServiceStatus() {
+        HttpClient client = HttpClient.newHttpClient();
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(FACE_SERVICE_URL + "/health"))
+                .GET()
+                .build();
+
+        client.sendAsync(request, HttpResponse.BodyHandlers.ofString())
+                .thenAccept(response -> {
+                    if (response.statusCode() == 200) {
+                        Platform.runLater(() -> {
+                            statusLabel.setText("Face Service: ONLINE");
+                            statusLabel.setStyle("-fx-text-fill: #2d6a4f;");
+                            scanBtn.setDisable(false);
+                        });
+                    }
+                })
+                .exceptionally(ex -> {
+                    Platform.runLater(() -> {
+                        statusLabel.setText("Face Service: OFFLINE (Run run_face_service.bat)");
+                        statusLabel.setStyle("-fx-text-fill: #e53e3e;");
+                        scanBtn.setDisable(true);
+                    });
+                    return null;
+                });
     }
 
     public void setEnrollmentMode(String email) {
@@ -71,7 +107,6 @@ public class FaceLoginController {
                 webcam.open();
                 
                 Platform.runLater(() -> {
-                    statusLabel.setText("Camera Ready");
                     scanBtn.setDisable(false);
                 });
 
@@ -105,7 +140,7 @@ public class FaceLoginController {
 
         loadingIndicator.setVisible(true);
         scanBtn.setDisable(true);
-        statusLabel.setText("Verifying face...");
+        statusLabel.setText("Processing...");
 
         BufferedImage image = webcam.getImage();
         String base64Image = encodeImageToBase64(image);
@@ -124,19 +159,20 @@ public class FaceLoginController {
 
     private void enrollFace(String base64Image, ActionEvent event) {
         HttpClient client = HttpClient.newHttpClient();
-        String jsonBody = "{\"image\": \"" + base64Image + "\", \"user_id\": \"" + enrollEmail + "\"}";
+        JSONObject json = new JSONObject();
+        json.put("image", base64Image);
+        json.put("user_id", enrollEmail);
 
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(FACE_SERVICE_URL + "/enroll"))
                 .header("Content-Type", "application/json")
-                .POST(HttpRequest.BodyPublishers.ofString(jsonBody))
+                .POST(HttpRequest.BodyPublishers.ofString(json.toString()))
                 .build();
 
         client.sendAsync(request, HttpResponse.BodyHandlers.ofString())
-                .thenApply(HttpResponse::body)
                 .thenAccept(response -> {
                     Platform.runLater(() -> {
-                        if (response.contains("\"status\":\"success\"") || response.contains("\"success\"")) {
+                        if (response.statusCode() == 200) {
                             statusLabel.setText("Face Enrolled Successfully!");
                             statusLabel.setStyle("-fx-text-fill: #2d6a4f;");
                             new Thread(() -> {
@@ -144,7 +180,12 @@ public class FaceLoginController {
                                 Platform.runLater(() -> closeWindow(event));
                             }).start();
                         } else {
-                            showError("Enrollment failed: " + response);
+                            try {
+                                JSONObject errorJson = new JSONObject(response.body());
+                                showError("Error: " + errorJson.optString("detail", "Enrollment failed"));
+                            } catch (Exception e) {
+                                showError("Enrollment failed: " + response.body());
+                            }
                         }
                     });
                 })
@@ -167,49 +208,57 @@ public class FaceLoginController {
 
     private void verifyFace(String base64Image, ActionEvent event) {
         HttpClient client = HttpClient.newHttpClient();
-        String jsonBody = "{\"image\": \"" + base64Image + "\"}";
+        JSONObject json = new JSONObject();
+        json.put("image", base64Image);
 
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(FACE_SERVICE_URL + "/recognize"))
                 .header("Content-Type", "application/json")
-                .POST(HttpRequest.BodyPublishers.ofString(jsonBody))
+                .POST(HttpRequest.BodyPublishers.ofString(json.toString()))
                 .build();
 
         client.sendAsync(request, HttpResponse.BodyHandlers.ofString())
-                .thenApply(HttpResponse::body)
                 .thenAccept(response -> {
                     Platform.runLater(() -> {
-                        processResponse(response, event);
+                        if (response.statusCode() == 200) {
+                            processResponse(response.body(), event);
+                        } else {
+                            try {
+                                JSONObject errorJson = new JSONObject(response.body());
+                                showError(errorJson.optString("detail", "Recognition failed"));
+                            } catch (Exception e) {
+                                showError("Recognition failed.");
+                            }
+                        }
                     });
                 })
                 .exceptionally(ex -> {
                     Platform.runLater(() -> {
-                        showError("Face service unavailable. Ensure port 8001 is running.");
+                        showError("Face service unavailable. Run face_service/main.py");
                     });
                     return null;
                 });
     }
 
-    private void processResponse(String response, ActionEvent event) {
-        // Simple JSON parsing (since we don't have a library like Jackson here yet, 
-        // or we can use a regex/substring for simplicity in this specific case)
-        if (response.contains("\"user_id\"") && !response.contains("\"user_id\":null")) {
-            String userId = response.split("\"user_id\":\"")[1].split("\"")[0];
+    private void processResponse(String responseBody, ActionEvent event) {
+        try {
+            JSONObject response = new JSONObject(responseBody);
+            String userId = response.getString("user_id");
             statusLabel.setText("Welcome " + userId + "!");
             statusLabel.setStyle("-fx-text-fill: #2d6a4f;");
             
-            // Perform login in our system
             User user = userService.getUserByEmail(userId);
             if (user != null) {
                 tn.esprit.util.SessionManager.login(user);
-                closeWindow(event);
-                // Trigger navigation in LoginController or handle it here
-                // For simplicity, we'll assume the main window will check session
+                new Thread(() -> {
+                    try { Thread.sleep(1000); } catch (InterruptedException ignored) {}
+                    Platform.runLater(() -> closeWindow(event));
+                }).start();
             } else {
                 showError("User found in Face ID but not in Database.");
             }
-        } else {
-            showError("Face not recognized.");
+        } catch (Exception e) {
+            showError("Invalid response from face service.");
         }
     }
 

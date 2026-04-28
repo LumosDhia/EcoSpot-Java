@@ -8,12 +8,23 @@ if /I "%~1"=="--dry-run" set "DRY_RUN=1"
 
 echo.
 echo ==========================================
-echo   EcoSpot Fast Relaunch
+echo   EcoSpot Unified Relaunch
 echo ==========================================
 echo.
 
-:: 1) Kill only EcoSpot Java processes (faster + safer)
-echo [1/2] Terminating existing instances...
+:: 1) Start Face Recognition Service if needed
+echo [1/3] Checking Face Recognition Service...
+netstat -ano | findstr :8001 >nul
+if %errorlevel% neq 0 (
+    echo [INFO] Face Service is not running. Starting it in a new window...
+    start "EcoSpot Face Service" /min cmd /c run_face_service.bat
+    timeout /t 2 >nul
+) else (
+    echo [INFO] Face Service is already running on port 8001.
+)
+
+:: 2) Kill only EcoSpot Java processes (faster + safer)
+echo [2/3] Terminating existing instances...
 set "KILLED=0"
 
 for /f %%p in ('powershell -NoProfile -Command "Get-CimInstance Win32_Process | Where-Object { ($_.Name -eq 'java.exe' -or $_.Name -eq 'javaw.exe') -and ($_.CommandLine -like '*Ecospot-Java*' -or $_.CommandLine -like '*tn.esprit.MainFX*' -or $_.CommandLine -like '*javafx:run*') } | Select-Object -ExpandProperty ProcessId"') do (
@@ -28,8 +39,8 @@ for /f %%p in ('powershell -NoProfile -Command "Get-CimInstance Win32_Process | 
 
 if "!KILLED!"=="0" echo No running EcoSpot instance detected.
 
-:: 2) Launch with fastest available Maven command
-echo [2/2] Launching new instance...
+:: 3) Launch with fastest available Maven command
+echo [3/3] Launching new instance...
 echo.
 
 set "MVN_CMD="
@@ -51,10 +62,10 @@ if not defined MVN_CMD (
 
 echo Using Maven: %MVN_CMD%
 if "!DRY_RUN!"=="1" (
-    echo [dry-run] Would run: "%MVN_CMD%" -q -DskipTests javafx:run
+    echo [dry-run] Would run: "%MVN_CMD%" -DskipTests javafx:run
     exit /b 0
 )
 
-"%MVN_CMD%" -q -DskipTests javafx:run
+"%MVN_CMD%" -DskipTests javafx:run
 
 endlocal
