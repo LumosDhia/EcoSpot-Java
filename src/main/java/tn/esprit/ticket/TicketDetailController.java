@@ -41,6 +41,7 @@ public class TicketDetailController {
     @FXML private VBox weatherBox;
     @FXML private HBox forecastContainer;
     @FXML private Button dashboardTopBtn;
+    @FXML private HBox ngoActionsBox;
 
     private Ticket currentTicket;
     private final TicketService ticketService = new TicketService();
@@ -199,6 +200,55 @@ public class TicketDetailController {
         } else {
             ticketImageView.setManaged(false);
             ticketImageView.setVisible(false);
+        }
+
+        setupNgoActions(t);
+    }
+
+    private void setupNgoActions(Ticket t) {
+        if (!tn.esprit.util.SessionManager.isLoggedIn()) return;
+        tn.esprit.user.User user = tn.esprit.util.SessionManager.getCurrentUser();
+        if (!"NGO".equalsIgnoreCase(user.getRole())) return;
+
+        ngoActionsBox.getChildren().clear();
+        ngoActionsBox.setVisible(true);
+        ngoActionsBox.setManaged(true);
+
+        if (t.getStatus() == TicketStatus.PUBLISHED && (t.getAssignedNgoId() == null || t.getAssignedNgoId() == 0)) {
+            Button btnClaim = new Button("🤝 Claim Ticket");
+            btnClaim.setStyle("-fx-background-color: #3b82f6; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 10 20; -fx-cursor: hand;");
+            btnClaim.setOnAction(e -> {
+                t.setAssignedNgoId(user.getId());
+                t.setStatus(TicketStatus.ASSIGNED);
+                ticketService.update(t);
+                setTicket(t); // Refresh UI
+            });
+            ngoActionsBox.getChildren().add(btnClaim);
+        } else if (t.getAssignedNgoId() != null && t.getAssignedNgoId() == user.getId()) {
+            if (t.getStatus() == TicketStatus.ASSIGNED) {
+                Button btnStart = new Button("▶ Start Working");
+                btnStart.setStyle("-fx-background-color: #f59e0b; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 10 20; -fx-cursor: hand;");
+                btnStart.setOnAction(e -> {
+                    t.setStatus(TicketStatus.IN_PROGRESS);
+                    ticketService.update(t);
+                    setTicket(t);
+                });
+                ngoActionsBox.getChildren().add(btnStart);
+            } else if (t.getStatus() == TicketStatus.IN_PROGRESS) {
+                Button btnComplete = new Button("✔ Mark Completed");
+                btnComplete.setStyle("-fx-background-color: #10b981; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 10 20; -fx-cursor: hand;");
+                btnComplete.setOnAction(e -> {
+                    try {
+                        FXMLLoader loader = new FXMLLoader(getClass().getResource("/ticket/CompleteTicket.fxml"));
+                        Parent root = loader.load();
+                        CompleteTicketController ctrl = loader.getController();
+                        ctrl.setTicket(t);
+                        Stage stage = (Stage) ngoActionsBox.getScene().getWindow();
+                        stage.getScene().setRoot(root);
+                    } catch (IOException ex) { ex.printStackTrace(); }
+                });
+                ngoActionsBox.getChildren().add(btnComplete);
+            }
         }
     }
 

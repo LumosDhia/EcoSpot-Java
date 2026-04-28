@@ -142,6 +142,10 @@ public class AdminAllTicketsController {
         viewBtn.setStyle("-fx-background-color: #3b82f6; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;");
         viewBtn.setOnAction(e -> openTicketDetail(t));
 
+        Button editBtn = new Button("Edit");
+        editBtn.setStyle("-fx-background-color: #6366f1; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;");
+        editBtn.setOnAction(e -> openTicketEdit(t));
+
         Button deleteBtn = new Button("Delete");
         deleteBtn.setStyle("-fx-background-color: #ef4444; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;");
         deleteBtn.setOnAction(e -> deleteTicket(t));
@@ -164,7 +168,7 @@ public class AdminAllTicketsController {
             }
         }
 
-        actions.getChildren().addAll(deleteBtn, viewBtn);
+        actions.getChildren().addAll(deleteBtn, editBtn, viewBtn);
 
         // Assignment Controls for Published tickets
         if (t.getStatus() == TicketStatus.PUBLISHED) {
@@ -217,6 +221,19 @@ public class AdminAllTicketsController {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/ticket/TicketDetail.fxml"));
             Parent root = loader.load();
             TicketDetailController controller = loader.getController();
+            controller.setTicket(t);
+            Stage stage = (Stage) ticketsListContainer.getScene().getWindow();
+            stage.getScene().setRoot(root);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void openTicketEdit(Ticket t) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/ticket/AdminTicketEdit.fxml"));
+            Parent root = loader.load();
+            AdminTicketEditController controller = loader.getController();
             controller.setTicket(t);
             Stage stage = (Stage) ticketsListContainer.getScene().getWindow();
             stage.getScene().setRoot(root);

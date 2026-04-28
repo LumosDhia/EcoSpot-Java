@@ -53,6 +53,7 @@
                                 <Button onAction="#goToBlogManagement" styleClass="sidebar-item" text="📰 My articles" />
                                 <Button onAction="#goToCommentsManagement" styleClass="sidebar-item" text="💬 Comments" />
                                 <Button onAction="#goToStatistics" styleClass="sidebar-item" text="📊 My statistics" />
+                                <Button onAction="#goToNgoTickets" styleClass="sidebar-item" text="📋 Ticket management" />
                                 <Button onAction="#goToEventManagement" styleClass="sidebar-item" text="📅 My events" />
                                 <Button onAction="#goToAchievements" styleClass="sidebar-item" text="🏆 My achievements" />
                             </children>
@@ -406,6 +407,23 @@
                                                         </StackPane>
                                                         <Label styleClass="card-title-lg" text="My Achievements" />
                                                         <Label styleClass="card-subtitle" text="Review your history of successfully resolved tickets." textAlignment="CENTER" wrapText="true" />
+                                                    </children>
+                                                </VBox>
+                                            </children>
+                                        </VBox>
+                                        
+                                        <!-- NGO Tickets Card -->
+                                        <VBox onMouseClicked="#goToNgoTicketsGrid" styleClass="stat-card">
+                                            <children>
+                                                <VBox alignment="CENTER" spacing="15.0">
+                                                    <children>
+                                                        <StackPane styleClass="dashboard-icon-container" style="-fx-background-color: #ecfdf5;">
+                                                            <children>
+                                                                <Label styleClass="dashboard-icon" style="-fx-text-fill: #10b981;" text="&#xEBE7;" />
+                                                            </children>
+                                                        </StackPane>
+                                                        <Label styleClass="card-title-lg" text="Manage Tickets" />
+                                                        <Label styleClass="card-subtitle" text="Claim community tickets and track your progress." textAlignment="CENTER" wrapText="true" />
                                                     </children>
                                                 </VBox>
                                             </children>

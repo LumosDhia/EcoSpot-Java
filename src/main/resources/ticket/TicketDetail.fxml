@@ -154,6 +154,9 @@
 
                         <Region prefHeight="20.0" />
 
+                        <!-- NGO Actions -->
+                        <HBox fx:id="ngoActionsBox" alignment="CENTER_LEFT" spacing="15.0" style="-fx-border-color: #e5e7eb transparent transparent transparent; -fx-padding: 30 0 0 0;" visible="false" managed="false" />
+
                         <!-- Action Row -->
                         <HBox fx:id="completionBox" spacing="20.0" alignment="CENTER_LEFT" style="-fx-border-color: #e5e7eb transparent transparent transparent; -fx-padding: 30 0 0 0;">
                             <children>

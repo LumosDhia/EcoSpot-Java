@@ -281,6 +281,36 @@ public class TicketService implements GlobalInterface<Ticket> {
         return tickets;
     }
 
+    public List<Ticket> getByNgoId(int ngoId) {
+        List<Ticket> tickets = new ArrayList<>();
+        String req = "SELECT * FROM `ticket` WHERE assigned_ngo_id = ? ORDER BY created_at DESC";
+        try (PreparedStatement ps = cnx.prepareStatement(req)) {
+            ps.setInt(1, ngoId);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    tickets.add(mapTicket(rs));
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return tickets;
+    }
+
+    public List<Ticket> getAvailableForNgo() {
+        List<Ticket> tickets = new ArrayList<>();
+        String req = "SELECT * FROM `ticket` WHERE status = 'PUBLISHED' AND (assigned_ngo_id IS NULL OR assigned_ngo_id = 0) ORDER BY created_at DESC";
+        try (PreparedStatement ps = cnx.prepareStatement(req);
+             ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                tickets.add(mapTicket(rs));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return tickets;
+    }
+
     public Ticket getById(int id) {
         String req = "SELECT * FROM `ticket` WHERE id = ? LIMIT 1";
         try (PreparedStatement ps = cnx.prepareStatement(req)) {

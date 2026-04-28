@@ -290,6 +290,11 @@ public class DashboardController {
     }
 
     @FXML
+    void goToNgoTickets(ActionEvent event) {
+        navigate(event, "/ticket/NgoTickets.fxml");
+    }
+
+    @FXML
     void goToAchievements(ActionEvent event) {
         navigate(event, "/ticket/Achievements.fxml");
     }
@@ -298,6 +303,18 @@ public class DashboardController {
     void goToAchievementsGrid(MouseEvent event) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/ticket/Achievements.fxml"));
+            Parent root = loader.load();
+            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+            stage.getScene().setRoot(root);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @FXML
+    void goToNgoTicketsGrid(MouseEvent event) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/ticket/NgoTickets.fxml"));
             Parent root = loader.load();
             Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
             stage.getScene().setRoot(root);
