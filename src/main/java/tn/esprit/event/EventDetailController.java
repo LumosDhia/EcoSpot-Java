@@ -14,6 +14,8 @@ import javafx.scene.layout.*;
 import tn.esprit.event.Sponsor;
 import tn.esprit.user.User;
 import tn.esprit.util.SessionManager;
+import javafx.scene.web.WebView;
+import javafx.scene.web.WebEngine;
 
 import java.io.IOException;
 import java.time.format.DateTimeFormatter;
@@ -29,10 +31,18 @@ public class EventDetailController {
     @FXML private Text descriptionText;
     @FXML private javafx.scene.layout.FlowPane sponsorContainer;
     @FXML private VBox participantContainer;
+    @FXML private VBox nearbyEventsContainer;
+    @FXML private WebView mapView;
+    
+    // AI Elements
+    @FXML private Label aiSuccessLabel;
+    @FXML private Label aiAnalysisLabel;
 
     private Event event;
     private tn.esprit.services.SponsorService sponsorService = new tn.esprit.services.SponsorService();
     private tn.esprit.services.EventService eventService = new tn.esprit.services.EventService();
+    private tn.esprit.services.GeocodingService geocodingService = new tn.esprit.services.GeocodingService();
+    private tn.esprit.services.OpenRouterEventService aiService = new tn.esprit.services.OpenRouterEventService();
 
     @FXML
     public void initialize() {
@@ -62,6 +72,123 @@ public class EventDetailController {
 
         loadSponsors();
         loadParticipants();
+        loadMap();
+        loadNearbyEvents();
+        loadAiInsights();
+    }
+
+    private void loadAiInsights() {
+        if (aiSuccessLabel == null || event == null) return;
+        
+        aiSuccessLabel.setText("ANALYZING...");
+        aiAnalysisLabel.setText("Our AI is currently analyzing this event's impact and success potential...");
+
+        new Thread(() -> {
+            try {
+                tn.esprit.services.OpenRouterEventService.PredictionResult result = aiService.predictAttendance(event);
+                javafx.application.Platform.runLater(() -> {
+                    aiSuccessLabel.setText(result.successLevel);
+                    aiAnalysisLabel.setText(result.analysis);
+                    
+                    // Style based on level
+                    if ("HIGH".equals(result.successLevel)) {
+                        aiSuccessLabel.setStyle("-fx-background-color: #2d6a4f; -fx-text-fill: white; -fx-padding: 3 10; -fx-background-radius: 10; -fx-font-weight: bold;");
+                    } else if ("LOW".equals(result.successLevel)) {
+                        aiSuccessLabel.setStyle("-fx-background-color: #e63946; -fx-text-fill: white; -fx-padding: 3 10; -fx-background-radius: 10; -fx-font-weight: bold;");
+                    } else {
+                        aiSuccessLabel.setStyle("-fx-background-color: #fca311; -fx-text-fill: white; -fx-padding: 3 10; -fx-background-radius: 10; -fx-font-weight: bold;");
+                    }
+                });
+            } catch (Exception e) {
+                javafx.application.Platform.runLater(() -> {
+                    aiSuccessLabel.setText("ERROR");
+                    aiAnalysisLabel.setText("AI Service is temporarily unavailable. Please check your internet or API key.");
+                });
+            }
+        }).start();
+    }
+
+    private void loadNearbyEvents() {
+        if (nearbyEventsContainer == null || event == null) return;
+        nearbyEventsContainer.getChildren().clear();
+        
+        java.util.List<Event> allEvents = eventService.getAll();
+        java.util.List<Event> nearby = new java.util.ArrayList<>();
+        
+        for (Event e : allEvents) {
+            if (e.getId() != event.getId() && e.getLatitude() != 0) {
+                double dist = geocodingService.calculateDistance(event.getLatitude(), event.getLongitude(), e.getLatitude(), e.getLongitude());
+                if (dist < 100) { // 100km radius
+                    nearby.add(e);
+                }
+            }
+        }
+        
+        nearby.sort((a, b) -> {
+            double distA = geocodingService.calculateDistance(event.getLatitude(), event.getLongitude(), a.getLatitude(), a.getLongitude());
+            double distB = geocodingService.calculateDistance(event.getLatitude(), event.getLongitude(), b.getLatitude(), b.getLongitude());
+            return Double.compare(distA, distB);
+        });
+
+        if (nearby.isEmpty()) {
+            Label none = new Label("No other events nearby.");
+            none.setStyle("-fx-text-fill: gray; -fx-font-style: italic;");
+            nearbyEventsContainer.getChildren().add(none);
+            return;
+        }
+
+        for (int i = 0; i < Math.min(3, nearby.size()); i++) {
+            Event e = nearby.get(i);
+            double dist = geocodingService.calculateDistance(event.getLatitude(), event.getLongitude(), e.getLatitude(), e.getLongitude());
+            
+            HBox box = new HBox(10);
+            box.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
+            box.setStyle("-fx-padding: 8; -fx-background-color: #f9f9f9; -fx-background-radius: 5; -fx-cursor: hand;");
+            box.setOnMouseClicked(event -> {
+                setEvent(e); // Reload with new event
+            });
+            
+            Label title = new Label(e.getName());
+            title.setStyle("-fx-font-weight: bold; -fx-text-fill: #2d6a4f;");
+            
+            Label distLabel = new Label(String.format("%.1f km", dist));
+            distLabel.setStyle("-fx-text-fill: #fca311; -fx-font-size: 11; -fx-font-weight: bold;");
+            
+            Region spacer = new Region();
+            HBox.setHgrow(spacer, Priority.ALWAYS);
+            
+            box.getChildren().addAll(title, spacer, distLabel);
+            nearbyEventsContainer.getChildren().add(box);
+        }
+    }
+
+    private void loadMap() {
+        if (mapView == null || event == null) return;
+        
+        double lat = event.getLatitude();
+        double lon = event.getLongitude();
+        
+        // Default to Tunis if coordinates are missing
+        if (lat == 0 && lon == 0) {
+            lat = 36.8065;
+            lon = 10.1815;
+        }
+
+        String content = "<!DOCTYPE html><html><head>" +
+                "<link rel='stylesheet' href='https://unpkg.com/leaflet@1.9.4/dist/leaflet.css'/>" +
+                "<script src='https://unpkg.com/leaflet@1.9.4/dist/leaflet.js'></script>" +
+                "<style>#map { height: 100vh; margin: 0; padding: 0; }</style>" +
+                "</head><body><div id='map'></div><script>" +
+                "var map = L.map('map').setView([" + lat + ", " + lon + "], 13);" +
+                "L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {" +
+                "    attribution: '&copy; OpenStreetMap contributors'" +
+                "}).addTo(map);" +
+                "L.marker([" + lat + ", " + lon + "]).addTo(map)" +
+                "    .bindPopup('<b>" + event.getName().replace("'", "\\'") + "</b><br>" + event.getLocation().replace("'", "\\'") + "')" +
+                "    .openPopup();" +
+                "</script></body></html>";
+
+        mapView.getEngine().loadContent(content);
     }
 
     private void updateCapacityState() {

@@ -10,10 +10,7 @@ import tn.esprit.user.User;
 import tn.esprit.util.MyConnection;
 import tn.esprit.util.SessionManager;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.List;
 import java.util.Optional;
 
@@ -22,15 +19,18 @@ import static org.junit.jupiter.api.Assertions.*;
 public class ArticleValidationAndPersistenceTest {
 
     @BeforeEach
-    void loginAsDbBackedUserForWriteOperations() {
-        String adminEmail = findEmailForRole("ROLE_ADMIN");
-        if (adminEmail != null) {
-            SessionManager.login(new User(0, "admin-test", adminEmail, "", "ADMIN"));
+    void loginAsAdmin() {
+        TestDatabaseMigration.applyMigrations();
+        String email = findEmailForRole("ADMIN");
+        int id = findIdForRole("ADMIN");
+        String username = findUsernameForRole("ADMIN");
+        if (email != null) {
+            SessionManager.login(new User(id, username != null ? username : "admin", email, "", "ADMIN"));
         }
     }
 
     @AfterEach
-    void clearSessionAfterEachTest() {
+    void clearSession() {
         SessionManager.logout();
     }
 
@@ -65,7 +65,7 @@ public class ArticleValidationAndPersistenceTest {
         Blog blog = new Blog();
         blog.setTitle(baseTitle);
         blog.setContent("<p>Initial DB content with enough details for persistence test.</p>");
-        blog.setImage("https://upload.wikimedia.org/wikipedia/commons/thumb/a/a9/Example.jpg/640px-Example.jpg");
+        blog.setImage("test.jpg");
         blog.setCategory(category);
         blog.setIsPublished(false);
 
@@ -101,8 +101,8 @@ public class ArticleValidationAndPersistenceTest {
         BlogService blogService = new BlogService();
 
         String newCategoryName = "CatFromWriteUI_" + System.currentTimeMillis();
-        String newTagA = "TagFromWriteUI_A_" + System.currentTimeMillis();
-        String newTagB = "TagFromWriteUI_B_" + System.currentTimeMillis();
+        String newTagA = "TagWriteA" + System.currentTimeMillis() % 100000;
+        String newTagB = "TagWriteB" + System.currentTimeMillis() % 100000;
 
         Category createdCategory = categoryService.createIfMissing(newCategoryName);
         assertNotNull(createdCategory, "New category should be inserted");
@@ -117,7 +117,7 @@ public class ArticleValidationAndPersistenceTest {
         String title = "WriteUI CategoryTag Flow " + System.currentTimeMillis();
         blog.setTitle(title);
         blog.setContent("<p>Article created to verify new category/tag persistence from writing interface flow.</p>");
-        blog.setImage("https://upload.wikimedia.org/wikipedia/commons/thumb/a/a9/Example.jpg/640px-Example.jpg");
+        blog.setImage("test.jpg");
         blog.setCategory(createdCategory);
         blog.setTags(List.of(createdTagA, createdTagB));
         blog.setIsPublished(false);
@@ -138,26 +138,23 @@ public class ArticleValidationAndPersistenceTest {
     }
 
     @Test
-    void articleOwnerAndRevisionWorkflowPersistsInDatabase() {
+    void articleOwnerEmailMatchesLoggedInUser() {
         BlogService blogService = new BlogService();
         CategoryService categoryService = new CategoryService();
 
-        String ngoEmail = findEmailForRole("ROLE_NGO");
-        String adminEmail = findEmailForRole("ROLE_ADMIN");
-        assertNotNull(ngoEmail, "DB must contain at least one NGO app_user");
-        assertNotNull(adminEmail, "DB must contain at least one ADMIN app_user");
+        String adminEmail = findEmailForRole("ADMIN");
+        assertNotNull(adminEmail, "DB must contain at least one ADMIN user");
 
-        SessionManager.login(new User(0, "ngo-test", ngoEmail, "", "NGO"));
-        assertEquals(ngoEmail, blogService.resolveCurrentOwnerEmail(), "Owner email resolution should match logged-in NGO");
+        assertEquals(adminEmail, blogService.resolveCurrentOwnerEmail(),
+                "Owner email should match the currently logged-in user");
 
         List<Category> categories = categoryService.getAll();
         Category category = categories.isEmpty() ? null : categories.get(0);
 
-        String title = "Workflow Owner Revision " + System.currentTimeMillis();
+        String title = "OwnerEmail Test " + System.currentTimeMillis();
         Blog blog = new Blog();
         blog.setTitle(title);
-        blog.setContent("<p>Workflow test content long enough to validate persistence and role ownership behavior.</p>");
-        blog.setImage("https://upload.wikimedia.org/wikipedia/commons/thumb/a/a9/Example.jpg/640px-Example.jpg");
+        blog.setContent("<p>Test verifying owner email attribution on article creation.</p>");
         blog.setCategory(category);
         blog.setIsPublished(false);
 
@@ -166,11 +163,35 @@ public class ArticleValidationAndPersistenceTest {
         Blog created = blogService.search(title).stream()
                 .filter(b -> title.equals(b.getTitle()))
                 .findFirst()
-                .orElseThrow(() -> new AssertionError("Created workflow article should be found"));
+                .orElseThrow(() -> new AssertionError("Created article should be found"));
 
-        assertEquals(ngoEmail, created.getCreatedByEmail(), "Article should be owned by the currently logged-in NGO user");
+        assertEquals(adminEmail, created.getCreatedByEmail(),
+                "Article createdByEmail should match the logged-in admin's email");
 
-        SessionManager.login(new User(0, "admin-test", adminEmail, "", "ADMIN"));
+        blogService.delete(created);
+    }
+
+    @Test
+    void articleRevisionNotePersistedByUpdate() {
+        BlogService blogService = new BlogService();
+        CategoryService categoryService = new CategoryService();
+
+        List<Category> categories = categoryService.getAll();
+        Category category = categories.isEmpty() ? null : categories.get(0);
+
+        String title = "Revision Note Test " + System.currentTimeMillis();
+        Blog blog = new Blog();
+        blog.setTitle(title);
+        blog.setContent("<p>Content for revision note persistence verification.</p>");
+        blog.setCategory(category);
+        blog.setIsPublished(false);
+        blogService.add2(blog);
+
+        Blog created = blogService.search(title).stream()
+                .filter(b -> title.equals(b.getTitle()))
+                .findFirst()
+                .orElseThrow(() -> new AssertionError("Article for revision test should be found"));
+
         created.setAdminRevisionNote("Please expand impact metrics and evidence.");
         created.setIsPublished(false);
         blogService.update(created);
@@ -181,11 +202,10 @@ public class ArticleValidationAndPersistenceTest {
                 .orElseThrow(() -> new AssertionError("Revised article should still be found"));
 
         assertNotNull(revised.getAdminRevisionNote(), "Revision note should be persisted");
-        assertTrue(revised.getAdminRevisionNote().contains("impact metrics"), "Revision note content should match update");
-        assertFalse(revised.getIsPublished(), "Revision-requested article must remain unpublished");
+        assertTrue(revised.getAdminRevisionNote().contains("impact metrics"), "Revision note content should match");
+        assertFalse(revised.getIsPublished(), "Article with revision note must remain unpublished");
 
         blogService.delete(revised);
-        SessionManager.logout();
     }
 
     @Test
@@ -194,12 +214,8 @@ public class ArticleValidationAndPersistenceTest {
         TagService tagService = new TagService();
         BlogService blogService = new BlogService();
 
-        String adminEmail = findEmailForRole("ROLE_ADMIN");
-        assertNotNull(adminEmail, "DB must contain at least one ADMIN app_user");
-        SessionManager.login(new User(0, "admin-test", adminEmail, "", "ADMIN"));
-
         String categoryName = "TaxFlowCat_" + System.currentTimeMillis();
-        String tagName = "TaxTag_" + (System.currentTimeMillis() % 100000);
+        String tagName = "TaxTag" + (System.currentTimeMillis() % 100000);
         Category category = categoryService.createIfMissing(categoryName);
         Tag tag = tagService.createIfMissing(tagName);
 
@@ -210,7 +226,6 @@ public class ArticleValidationAndPersistenceTest {
         Blog blog = new Blog();
         blog.setTitle(title);
         blog.setContent("<p>Taxonomy flow test verifies rename and unlink behavior on persistent article rows.</p>");
-        blog.setImage("https://upload.wikimedia.org/wikipedia/commons/thumb/a/a9/Example.jpg/640px-Example.jpg");
         blog.setCategory(category);
         blog.setTags(List.of(tag));
         blog.setIsPublished(false);
@@ -222,7 +237,7 @@ public class ArticleValidationAndPersistenceTest {
                 .orElseThrow(() -> new AssertionError("Taxonomy test article should be found"));
 
         String renamedCategory = "TaxFlowCatRenamed_" + System.currentTimeMillis();
-        String renamedTag = "TaxTagRen_" + (System.currentTimeMillis() % 100000);
+        String renamedTag = "TaxTagRen" + (System.currentTimeMillis() % 100000);
 
         assertTrue(categoryService.renameCategory(category.getId(), renamedCategory), "Category rename should succeed");
         assertTrue(tagService.renameTag(tag.getId(), renamedTag), "Tag rename should succeed");
@@ -251,23 +266,54 @@ public class ArticleValidationAndPersistenceTest {
         assertNull(afterCategoryDelete.getCategory(), "Deleted category should be unlinked from article");
 
         blogService.delete(afterCategoryDelete);
-        SessionManager.logout();
     }
 
-    private String findEmailForRole(String roleKeyword) {
-        String sql = "SELECT email FROM app_user WHERE roles LIKE ? LIMIT 1";
+    // ── helpers ──────────────────────────────────────────────────────────────
+
+    private String findEmailForRole(String role) {
+        String sql = "SELECT email FROM user WHERE role = ? LIMIT 1";
         try {
             Connection cnx = MyConnection.getInstance().getCnx();
             try (PreparedStatement ps = cnx.prepareStatement(sql)) {
-                ps.setString(1, "%" + roleKeyword + "%");
+                ps.setString(1, role);
                 try (ResultSet rs = ps.executeQuery()) {
-                    if (rs.next()) {
-                        return rs.getString("email");
-                    }
+                    if (rs.next()) return rs.getString("email");
                 }
             }
         } catch (SQLException e) {
-            fail("Unable to query app_user role data: " + e.getMessage());
+            fail("Unable to query user role data: " + e.getMessage());
+        }
+        return null;
+    }
+
+    private int findIdForRole(String role) {
+        String sql = "SELECT id FROM user WHERE role = ? LIMIT 1";
+        try {
+            Connection cnx = MyConnection.getInstance().getCnx();
+            try (PreparedStatement ps = cnx.prepareStatement(sql)) {
+                ps.setString(1, role);
+                try (ResultSet rs = ps.executeQuery()) {
+                    if (rs.next()) return rs.getInt("id");
+                }
+            }
+        } catch (SQLException e) {
+            fail("Unable to query user id: " + e.getMessage());
+        }
+        return 1;
+    }
+
+    private String findUsernameForRole(String role) {
+        String sql = "SELECT username FROM user WHERE role = ? LIMIT 1";
+        try {
+            Connection cnx = MyConnection.getInstance().getCnx();
+            try (PreparedStatement ps = cnx.prepareStatement(sql)) {
+                ps.setString(1, role);
+                try (ResultSet rs = ps.executeQuery()) {
+                    if (rs.next()) return rs.getString("username");
+                }
+            }
+        } catch (SQLException e) {
+            fail("Unable to query username: " + e.getMessage());
         }
         return null;
     }

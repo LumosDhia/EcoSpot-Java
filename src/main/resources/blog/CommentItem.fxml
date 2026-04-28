@@ -2,17 +2,37 @@
 
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.shape.Circle?>
 
-<VBox spacing="5.0" style="-fx-background-color: white; -fx-padding: 15; -fx-background-radius: 8; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.05), 10, 0, 0, 2);" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="tn.esprit.blog.CommentItemController">
+<HBox spacing="0.0" styleClass="comment-card" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="tn.esprit.blog.CommentItemController">
    <children>
-      <HBox alignment="CENTER_LEFT" spacing="10.0">
+      <!-- Accent bar -->
+      <Region styleClass="comment-accent-bar" />
+      <HBox alignment="TOP_LEFT" spacing="14.0" HBox.hgrow="ALWAYS">
+         <padding><Insets bottom="16.0" left="16.0" right="16.0" top="16.0" /></padding>
          <children>
-            <Label fx:id="authorLabel" style="-fx-font-weight: bold; -fx-text-fill: #2d6a4f; -fx-font-size: 13;" text="Author Name" />
-            <Label fx:id="dateLabel" style="-fx-text-fill: #999; -fx-font-size: 11;" text="Date" />
+            <ImageView fx:id="avatarImageView" fitHeight="40.0" fitWidth="40.0" pickOnBounds="true" preserveRatio="true">
+               <clip>
+                  <Circle centerX="20.0" centerY="20.0" radius="20.0" />
+               </clip>
+            </ImageView>
+            <VBox alignment="CENTER_LEFT" spacing="6.0" HBox.hgrow="ALWAYS">
+               <children>
+                  <HBox alignment="CENTER_LEFT" spacing="10.0">
+                     <children>
+                        <Label fx:id="authorLabel" styleClass="comment-author" text="Author Name" />
+                        <Region HBox.hgrow="ALWAYS" />
+                        <Label fx:id="dateLabel" styleClass="comment-date" text="Date" />
+                     </children>
+                  </HBox>
+                  <Label fx:id="contentLabel" styleClass="comment-content" text="Comment content goes here. This can be multiple lines long." wrapText="true" />
+               </children>
+            </VBox>
          </children>
       </HBox>
-      <Label fx:id="contentLabel" style="-fx-text-fill: #444; -fx-font-size: 13;" text="Comment content goes here. This can be multiple lines long." wrapText="true" />
    </children>
-</VBox>
+</HBox>

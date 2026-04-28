@@ -16,8 +16,10 @@
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.web.WebView?>
+<?import javafx.scene.shape.SVGPath?>
+<?import javafx.scene.shape.Circle?>
 
-<BorderPane style="-fx-background-color: white;" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="tn.esprit.blog.BlogDetailController">
+<BorderPane style="-fx-background-color: #f8faf9;" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="tn.esprit.blog.BlogDetailController">
     <stylesheets>
         <URL value="@../style.css" />
     </stylesheets>
@@ -25,157 +27,226 @@
     <top>
         <VBox>
             <!-- ===== TOP NAV ===== -->
-            <HBox alignment="CENTER_LEFT" spacing="20.0" styleClass="top-bar">
-                <padding><Insets bottom="8.0" left="20.0" right="20.0" top="8.0" /></padding>
+            <HBox alignment="CENTER" styleClass="top-bar">
                 <children>
-                    <Label onMouseClicked="#goToHome" style="-fx-cursor: hand;" styleClass="top-bar-brand" text="🌿 EcoSpot" />
-                    <Region HBox.hgrow="ALWAYS" />
+                    <HBox alignment="CENTER_LEFT" maxWidth="1200.0" spacing="20.0" HBox.hgrow="ALWAYS">
+                        <padding><Insets bottom="8.0" left="20.0" right="20.0" top="8.0" /></padding>
+                        <children>
+                            <Label onMouseClicked="#goToHome" style="-fx-cursor: hand;" styleClass="top-bar-brand" text="🌿 EcoSpot" />
+                            <Region HBox.hgrow="ALWAYS" />
+                        </children>
+                    </HBox>
                 </children>
             </HBox>
-            <HBox alignment="CENTER_LEFT" spacing="10.0" styleClass="main-nav">
-                <padding><Insets bottom="12.0" left="20.0" right="20.0" top="12.0" /></padding>
+            
+            <HBox alignment="CENTER" styleClass="main-nav">
                 <children>
-                    <Label onMouseClicked="#goToHome" style="-fx-cursor: hand;" styleClass="brand-name" text="EcoSpot" />
-                    <Region HBox.hgrow="ALWAYS" />
-                    <Button onAction="#goToHome" styleClass="nav-link-btn" text="Home" />
-                    <Button onAction="#goToEvents" styleClass="nav-link-btn" text="Events" />
-                    <Button onAction="#goToTickets" styleClass="nav-link-btn" text="🎟 Tickets" />
-                    <Button onAction="#goToAchievements" styleClass="nav-link-btn" text="Achievements" />
-                    <Button onAction="#goToBlog" styleClass="nav-btn-blog" text="Blog" />
-
+                    <HBox alignment="CENTER_LEFT" maxWidth="1200.0" spacing="10.0" HBox.hgrow="ALWAYS">
+                        <padding><Insets bottom="12.0" left="20.0" right="20.0" top="12.0" /></padding>
+                        <children>
+                            <Label onMouseClicked="#goToHome" style="-fx-cursor: hand;" styleClass="brand-name" text="EcoSpot" />
+                            <Region HBox.hgrow="ALWAYS" />
+                            <Button onAction="#goToHome" styleClass="nav-link-btn" text="Home" />
+                            <Button onAction="#goToEvents" styleClass="nav-link-btn" text="Events" />
+                            <Button onAction="#goToTickets" styleClass="nav-link-btn" text="🎟 Tickets" />
+                            <Button onAction="#goToAchievements" styleClass="nav-link-btn" text="Achievements" />
+                            <Button onAction="#goToBlogReset" styleClass="nav-btn-blog" text="Blog" />
+                        </children>
+                    </HBox>
                 </children>
             </HBox>
         </VBox>
     </top>
 
     <center>
-        <ScrollPane fitToWidth="true" style="-fx-background-color: white; -fx-background: white; -fx-border-color: transparent;">
+        <ScrollPane fitToWidth="true" style="-fx-background-color: #f8faf9; -fx-background: #f8faf9; -fx-border-color: transparent;">
             <content>
                 <VBox spacing="0.0">
                     <children>
                         <!-- ===== HERO SECTION ===== -->
-                        <VBox alignment="CENTER" spacing="0.0" styleClass="detail-hero-banner">
+                        <VBox alignment="CENTER" maxWidth="Infinity" spacing="0.0" styleClass="detail-hero-banner">
                            <children>
-                              <VBox alignment="CENTER" spacing="15.0" styleClass="detail-hero-overlay">
+                              <VBox alignment="CENTER" maxWidth="Infinity" spacing="0.0" styleClass="detail-hero-overlay">
                                  <children>
-                                    <Label fx:id="heroTitle" alignment="CENTER" styleClass="detail-hero-title" text="Article Title" textAlignment="CENTER" wrapText="true" />
-                                    <Label fx:id="heroDate" styleClass="detail-hero-date" text="Published date" />
-                                    <HBox alignment="CENTER" spacing="10.0">
+                                    <VBox alignment="CENTER" maxWidth="1200.0" spacing="15.0">
                                        <children>
-                                          <Label onMouseClicked="#goToHome" style="-fx-text-fill: white; -fx-cursor: hand;" text="Home" />
-                                          <Label style="-fx-text-fill: white;" text="/" />
-                                          <Label onMouseClicked="#goToBlog" style="-fx-text-fill: white; -fx-cursor: hand;" text="Blog" />
-                                          <Label style="-fx-text-fill: white;" text="/" />
-                                          <Label fx:id="breadcrumbTitle" style="-fx-text-fill: #2d6a4f;" text="Current Article" />
+                                          <Label fx:id="heroTitle" alignment="CENTER" styleClass="detail-hero-title" text="Article Title" textAlignment="CENTER" wrapText="true" />
+                                          <Label fx:id="heroDate" styleClass="detail-hero-date" text="Published date" />
+                                          <HBox alignment="CENTER" spacing="10.0" styleClass="breadcrumb-row">
+                                             <children>
+                                                <Label onMouseClicked="#goToHome" styleClass="breadcrumb-link" text="Home" />
+                                                <Label styleClass="breadcrumb-sep" text="›" />
+                                                <Label onMouseClicked="#goToBlogReset" styleClass="breadcrumb-link" text="Blog" />
+                                                <Label styleClass="breadcrumb-sep" text="›" />
+                                                <Label fx:id="breadcrumbTitle" styleClass="breadcrumb-current" text="Current Article" />
+                                             </children>
+                                          </HBox>
                                        </children>
-                                    </HBox>
+                                       <padding><Insets bottom="50.0" left="20.0" right="20.0" top="50.0" /></padding>
+                                    </VBox>
                                  </children>
-                                 <padding><Insets bottom="40.0" left="60.0" right="60.0" top="40.0" /></padding>
                               </VBox>
                            </children>
                         </VBox>
 
                         <!-- ===== MAIN CONTENT AREA ===== -->
-                        <VBox alignment="CENTER" spacing="30.0">
-                           <padding><Insets bottom="40.0" left="100.0" right="100.0" top="40.0" /></padding>
+                        <VBox alignment="CENTER" spacing="0.0">
                            <children>
-                               <HBox alignment="CENTER_LEFT">
+                              <VBox maxWidth="1200.0" spacing="0.0">
+                                 <padding><Insets bottom="40.0" left="20.0" right="20.0" top="30.0" /></padding>
+                                 <children>
+                                     <!-- Back button -->
+                                     <HBox alignment="CENTER_LEFT">
+                                         <padding><Insets bottom="20.0" /></padding>
+                                         <children>
+                                             <Button onAction="#goToBlogReset" styleClass="btn-back" text="← Back to Articles" />
+                                         </children>
+                                     </HBox>
+                                     
+                                     <!-- Article Card Container -->
+                                     <VBox spacing="0.0" styleClass="article-detail-card">
                                    <children>
-                                       <Button onAction="#goToBlog" styleClass="btn-back" text="Back to Articles">
-                                           <graphic>
-                                               <SVGPath content="M20,11V13H8L13.5,18.5L12.08,19.92L4.16,12L12.08,4.08L13.5,5.5L8,11H20Z" scaleX="0.8" scaleY="0.8" styleClass="article-author" />
-                                           </graphic>
-                                       </Button>
-                                   </children>
-                               </HBox>
-                               <ImageView fx:id="articleImg" fitHeight="400.0" fitWidth="700.0" pickOnBounds="true" preserveRatio="false" styleClass="detail-main-img" />
-                               
-                               <VBox spacing="15.0">
-                                  <children>
-                                     <HBox alignment="CENTER_LEFT" spacing="10.0">
-                                        <children>
-                                           <Label fx:id="categoryLabel" styleClass="category-tag" text="Category" />
-                                           <FlowPane fx:id="tagsFlowPane" hgap="5.0" vgap="5.0" />
-                                        </children>
-                                     </HBox>
-                                     <Label fx:id="titleLabel" styleClass="detail-article-title" text="Article Title" wrapText="true" />
-                                     <HBox alignment="CENTER_LEFT" spacing="20.0" styleClass="detail-meta-row">
-                                       <children>
-                                          <Label fx:id="dateLabel" text="🕒 Date" />
-                                          <Label fx:id="viewsLabel" text="👁 0 views" />
-                                           <Label fx:id="readTimeLabel" text="📖 1 min read" />
-                                          <Label fx:id="authorLabel" text="👤 Writer: Admin" />
-                                          <Region HBox.hgrow="ALWAYS" />
-                                          <HBox alignment="CENTER" spacing="10.0" styleClass="reaction-bar">
-                                             <children>
-                                                <Button fx:id="likeBtn" onAction="#handleLike" styleClass="reaction-btn like-btn" text="👍 0" />
-                                                <Button fx:id="dislikeBtn" onAction="#handleDislike" styleClass="reaction-btn dislike-btn" text="👎 0" />
-                                             </children>
-                                          </HBox>
-                                       </children>
-                                    </HBox>
-                                     <!-- ===== AI VOICE READER PANEL ===== -->
-                                     <HBox fx:id="aiReaderPanel" alignment="CENTER_LEFT" spacing="15.0" styleClass="ai-reader-panel">
-                                        <children>
-                                           <Label style="-fx-font-size: 26px;" text="🤖" />
-                                           <VBox spacing="2.0">
-                                              <children>
-                                                 <Label styleClass="ai-title-label" text="EcoSpot AI Assistant" />
-                                                 <Label fx:id="aiStatusLabel" styleClass="ai-status-label" text="Ready to read aloud" />
-                                              </children>
-                                           </VBox>
-                                           <Region HBox.hgrow="ALWAYS" />
-                                           <Button fx:id="aiPlayBtn" onAction="#handleTtsPlay" styleClass="btn btn-primary" text="▶ Play" />
-                                           <Button fx:id="aiPauseBtn" disable="true" onAction="#handleTtsPause" styleClass="btn-outline" text="⏸ Pause" />
-                                           <Button fx:id="aiStopBtn" onAction="#handleTtsStop" styleClass="btn btn-danger" text="⏹ Stop" />
-                                        </children>
-                                     </HBox>
+                                       <!-- Image -->
+                                       <ImageView fx:id="articleImg" fitHeight="420.0" pickOnBounds="true" preserveRatio="true" styleClass="detail-main-img" />
+                                       
+                                       <!-- Article body -->
+                                       <VBox spacing="18.0" styleClass="article-detail-body">
+                                          <children>
+                                             <!-- Category + Tags -->
+                                             <HBox alignment="CENTER_LEFT" spacing="10.0">
+                                                <children>
+                                                   <Label fx:id="categoryLabel" styleClass="category-tag" text="Category" />
+                                                   <FlowPane fx:id="tagsFlowPane" hgap="6.0" vgap="6.0" />
+                                                </children>
+                                             </HBox>
+                                             
+                                             <!-- Title -->
+                                             <Label fx:id="titleLabel" styleClass="detail-article-title" text="Article Title" wrapText="true" />
+                                             
+                                             <!-- Meta info row -->
+                                             <HBox alignment="CENTER_LEFT" spacing="0.0" styleClass="detail-meta-strip">
+                                               <children>
+                                                  <HBox alignment="CENTER_LEFT" spacing="6.0" styleClass="meta-chip">
+                                                     <children><Label fx:id="dateLabel" text="🕒 Date" /></children>
+                                                  </HBox>
+                                                  <HBox alignment="CENTER_LEFT" spacing="6.0" styleClass="meta-chip">
+                                                     <children><Label fx:id="viewsLabel" text="👁 0 views" /></children>
+                                                  </HBox>
+                                                  <HBox alignment="CENTER_LEFT" spacing="6.0" styleClass="meta-chip">
+                                                     <children><Label fx:id="readTimeLabel" text="📖 1 min read" /></children>
+                                                  </HBox>
+                                                  <HBox alignment="CENTER_LEFT" spacing="6.0" styleClass="meta-chip">
+                                                     <children><Label fx:id="authorLabel" text="👤 Writer: Admin" /></children>
+                                                  </HBox>
+                                                  <Region HBox.hgrow="ALWAYS" />
+                                                  <HBox alignment="CENTER" spacing="8.0" styleClass="reaction-bar">
+                                                     <children>
+                                                        <Button fx:id="likeBtn" onAction="#handleLike" styleClass="reaction-btn, like-btn" text="👍 0" />
+                                                        <Button fx:id="dislikeBtn" onAction="#handleDislike" styleClass="reaction-btn, dislike-btn" text="👎 0" />
+                                                     </children>
+                                                  </HBox>
+                                               </children>
+                                             </HBox>
+                                             
+                                             <!-- ===== AI VOICE READER PANEL ===== -->
+                                             <HBox fx:id="aiReaderPanel" alignment="CENTER_LEFT" spacing="15.0" styleClass="ai-reader-panel">
+                                                <children>
+                                                   <VBox alignment="CENTER" spacing="0.0" styleClass="ai-icon-circle">
+                                                      <children>
+                                                         <Label style="-fx-font-size: 22px;" text="🤖" />
+                                                      </children>
+                                                   </VBox>
+                                                   <VBox spacing="2.0" HBox.hgrow="ALWAYS">
+                                                      <children>
+                                                         <Label styleClass="ai-title-label" text="EcoSpot AI Assistant" />
+                                                         <Label fx:id="aiStatusLabel" styleClass="ai-status-label" text="Ready to read aloud" />
+                                                      </children>
+                                                   </VBox>
+                                                   <HBox alignment="CENTER" spacing="8.0">
+                                                      <children>
+                                                         <Button fx:id="aiPlayBtn" onAction="#handleTtsPlay" styleClass="ai-control-btn, ai-play-btn" text="▶ Play" />
+                                                         <Button fx:id="aiPauseBtn" disable="true" onAction="#handleTtsPause" styleClass="ai-control-btn, ai-pause-btn" text="⏸ Pause" />
+                                                         <Button fx:id="aiStopBtn" onAction="#handleTtsStop" styleClass="ai-control-btn, ai-stop-btn" text="⏹ Stop" />
+                                                      </children>
+                                                   </HBox>
+                                                </children>
+                                             </HBox>
 
-                                     <WebView fx:id="contentWebView" prefHeight="450.0" minHeight="300.0" />
-                                     <Separator />
-                                  </children>
+                                             <!-- Article Content -->
+                                             <WebView fx:id="contentWebView" minHeight="100.0" prefHeight="200.0" />
+                                          </children>
+                                       </VBox>
+                                   </children>
                                </VBox>
 
                                <!-- ===== COMMENTS SECTION ===== -->
-                               <VBox spacing="25.0" style="-fx-background-color: #f8fbf9; -fx-padding: 30; -fx-background-radius: 10; -fx-border-color: #e0e0e0; -fx-border-radius: 10;">
+                               <VBox spacing="20.0" styleClass="comments-section">
                                   <children>
-                                     <Label fx:id="commentsCountLabel" styleClass="section-title" text="Comments (0)" />
-                                     <VBox fx:id="commentsContainer" spacing="15.0" />
-                                     <Separator />
-                                     <!-- Only for Logged In Users -->
-                                     <VBox fx:id="commentInputSection" spacing="15.0">
+                                     <!-- Section Header -->
+                                     <HBox alignment="CENTER_LEFT" spacing="10.0">
                                         <children>
-                                           <Label styleClass="section-title" text="Leave a comment" />
-                                           <TextField fx:id="commentAuthorField" prefHeight="40.0" promptText="Your name..." styleClass="modern-input" />
-                                           <TextArea fx:id="commentArea" prefHeight="100.0" promptText="Write your comment here..." styleClass="modern-input" wrapText="true" />
-                                           <Label fx:id="commentErrorLabel" style="-fx-text-fill: #e63946; -fx-font-size: 12px;" visible="false" />
-                                           <Label fx:id="commentSuccessLabel" style="-fx-text-fill: #2d6a4f; -fx-font-size: 12px;" visible="false" />
+                                           <Label style="-fx-font-size: 22px;" text="💬" />
+                                           <Label fx:id="commentsCountLabel" styleClass="comments-section-title" text="Comments (0)" />
+                                        </children>
+                                     </HBox>
+                                     
+                                     <VBox fx:id="commentsContainer" spacing="12.0" />
+                                     
+                                     <Separator styleClass="comment-divider" />
+                                     
+                                     <!-- Only for Logged In Users -->
+                                     <VBox fx:id="commentInputSection" spacing="15.0" styleClass="comment-form-card">
+                                        <children>
+                                            <Label styleClass="comment-form-title" text="💭 Leave a Comment" />
+                                            <HBox alignment="CENTER_LEFT" spacing="15.0">
+                                               <children>
+                                                  <ImageView fx:id="currentUserAvatar" fitHeight="44.0" fitWidth="44.0" pickOnBounds="true" preserveRatio="true">
+                                                     <clip>
+                                                        <Circle centerX="22.0" centerY="22.0" radius="22.0" />
+                                                     </clip>
+                                                  </ImageView>
+                                                  <VBox alignment="CENTER_LEFT" spacing="5.0" HBox.hgrow="ALWAYS">
+                                                     <children>
+                                                        <TextField fx:id="commentAuthorField" prefHeight="38.0" promptText="Your name..." styleClass="comment-input" />
+                                                     </children>
+                                                  </VBox>
+                                               </children>
+                                            </HBox>
+                                           <TextArea fx:id="commentArea" prefHeight="100.0" promptText="Share your thoughts..." styleClass="comment-textarea" wrapText="true" />
+                                           <Label fx:id="commentErrorLabel" styleClass="comment-error" visible="false" />
+                                           <Label fx:id="commentSuccessLabel" styleClass="comment-success" visible="false" />
                                            <HBox alignment="CENTER_RIGHT">
                                               <children>
-                                                 <Button onAction="#handlePostComment" prefHeight="40.0" prefWidth="150.0" styleClass="btn-primary" text="Post Comment" />
+                                                 <Button onAction="#handlePostComment" styleClass="btn-post-comment" text="Post Comment →" />
                                               </children>
                                            </HBox>
                                         </children>
                                      </VBox>
 
                                      <!-- For Guests -->
-                                     <VBox fx:id="guestPromptSection" alignment="CENTER" managed="false" spacing="15.0" visible="false">
+                                     <VBox fx:id="guestPromptSection" alignment="CENTER" managed="false" spacing="12.0" visible="false" styleClass="guest-prompt-card">
                                          <children>
-                                             <Label style="-fx-font-size: 16px; -fx-text-fill: #666;" text="Want to join the discussion?" />
-                                             <Button onAction="#goToLogin" styleClass="btn-primary" text="🔑 Log in to comment" />
+                                             <Label style="-fx-font-size: 28px;" text="🔒" />
+                                             <Label styleClass="guest-prompt-title" text="Join the Discussion" />
+                                             <Label styleClass="guest-prompt-text" text="Log in to share your thoughts and engage with other readers." />
+                                             <Button onAction="#goToLogin" styleClass="btn-guest-login" text="Log In to Comment" />
                                          </children>
-                                         <padding><Insets bottom="20.0" top="20.0" /></padding>
+                                         <padding><Insets bottom="30.0" top="30.0" /></padding>
                                      </VBox>
                                   </children>
                                </VBox>
 
+                               <!-- Back to blog -->
                                <HBox>
+                                  <padding><Insets top="20.0" /></padding>
                                   <children>
-                                     <Button onAction="#goToBlog" styleClass="btn-back-blog" text="← Back to blog" />
+                                     <Button onAction="#goToBlogReset" styleClass="btn-back-blog" text="← Back to blog" />
                                   </children>
                                </HBox>
-                           </children>
-                        </VBox>
+                            </children>
+                         </VBox>
+                      </children>
+                   </VBox>
                         
                         <!-- ===== MINIMALIST FOOTER ===== -->
                         <HBox alignment="CENTER_LEFT" spacing="10.0" styleClass="eco-footer">
@@ -191,4 +262,3 @@
         </ScrollPane>
     </center>
 </BorderPane>
-

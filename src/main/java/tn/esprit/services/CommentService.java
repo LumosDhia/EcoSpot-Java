@@ -9,10 +9,28 @@ import java.sql.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.StringJoiner;
 
 public class CommentService {
     private String lastErrorMessage;
+
+    private static final String[] GUEST_ADJECTIVES = {
+        "Green", "Eco", "Solar", "Windy", "Pure", "Wild", "Earth", "Nature", "Ocean", "Forest",
+        "Happy", "Caring", "Wise", "Brave", "Swift", "Quiet", "Bright", "Steady", "Loyal", "Kind"
+    };
+
+    private static final String[] GUEST_NOUNS = {
+        "Traveler", "Guardian", "Explorer", "Lover", "Protector", "Friend", "Warrior", "Spirit", "Breeze", "Seed",
+        "Panda", "Turtle", "Oak", "Leaf", "River", "Sprout", "Bloom", "Shadow", "Light", "Mountain"
+    };
+
+    private String getGuestName(int id) {
+        if (id <= 0) return "Guest " + ((int) (Math.random() * 9000) + 1000);
+        int adjIndex = (id * 31) % GUEST_ADJECTIVES.length;
+        int nounIndex = (id * 17) % GUEST_NOUNS.length;
+        if (adjIndex < 0) adjIndex += GUEST_ADJECTIVES.length;
+        if (nounIndex < 0) nounIndex += GUEST_NOUNS.length;
+        return GUEST_ADJECTIVES[adjIndex] + " " + GUEST_NOUNS[nounIndex];
+    }
 
     private Connection getCnx() {
         return MyConnection.getInstance().getCnx();
@@ -30,8 +48,10 @@ public class CommentService {
                      "id INT AUTO_INCREMENT PRIMARY KEY, " +
                      "article_id INT, " +
                      "content TEXT, " +
-                     "created_at DATETIME, " +
-                     "author_name VARCHAR(255)" +
+                     "created_at DATETIME DEFAULT CURRENT_TIMESTAMP, " +
+                     "author_name VARCHAR(255), " +
+                     "flagged TINYINT(1) NOT NULL DEFAULT 0, " +
+                     "hidden_from_public TINYINT(1) NOT NULL DEFAULT 0" +
                      ")";
         try (Statement st = c.createStatement()) {
             st.execute(req);
@@ -60,67 +80,19 @@ public class CommentService {
         Connection conn = getCnx();
         if (conn == null) {
             lastErrorMessage = "Database connection is not available.";
-            System.err.println("Cannot add comment: Database connection is null!");
             return false;
         }
 
-        boolean hasAuthorId = hasColumn(conn, "comment", "author_id");
-        boolean hasAuthorUserId = hasColumn(conn, "comment", "author_user_id");
-        boolean hasAuthor = hasColumn(conn, "comment", "author");
-        boolean hasAuthorName = hasColumn(conn, "comment", "author_name");
-        boolean hasCreatedAt = hasColumn(conn, "comment", "created_at");
         User currentUser = SessionManager.getCurrentUser();
+        String authorName = (currentUser != null && currentUser.getUsername() != null)
+                ? currentUser.getUsername()
+                : (c.getAuthorName() != null && !c.getAuthorName().equalsIgnoreCase("Anonymous User") ? c.getAuthorName() : getGuestName(0));
 
-        StringJoiner columns = new StringJoiner(", ");
-        StringJoiner values = new StringJoiner(", ");
-        columns.add("article_id");
-        values.add("?");
-        columns.add("content");
-        values.add("?");
-
-        if (hasCreatedAt) {
-            columns.add("created_at");
-            values.add("NOW()");
-        }
-        if (hasAuthorName) {
-            columns.add("author_name");
-            values.add("?");
-        }
-        if (hasAuthor) {
-            columns.add("author");
-            values.add("?");
-        }
-        if (hasAuthorUserId) {
-            columns.add("author_user_id");
-            values.add("?");
-        }
-        if (hasAuthorId) {
-            columns.add("author_id");
-            values.add("?");
-        }
-
-        String req = "INSERT INTO `comment` (" + columns + ") VALUES (" + values + ")";
+        String req = "INSERT INTO `comment` (article_id, content, created_at, author_name) VALUES (?, ?, NOW(), ?)";
         try (PreparedStatement ps = conn.prepareStatement(req)) {
-            int idx = 1;
-            ps.setInt(idx++, c.getArticleId());
-            ps.setString(idx++, c.getContent());
-            if (hasAuthorName) {
-                ps.setString(idx++, c.getAuthorName() != null ? c.getAuthorName() : "Anonymous User");
-            }
-            if (hasAuthor) {
-                ps.setString(idx++, c.getAuthorName() != null ? c.getAuthorName() : "Anonymous User");
-            }
-            if (hasAuthorUserId) {
-                byte[] appUserId = resolveAppUserIdForComment(conn, currentUser);
-                if (appUserId == null) {
-                    lastErrorMessage = "No valid app_user UUID found for comment author.";
-                    return false;
-                }
-                ps.setBytes(idx++, appUserId);
-            }
-            if (hasAuthorId) {
-                ps.setNull(idx++, Types.VARCHAR);
-            }
+            ps.setInt(1, c.getArticleId());
+            ps.setString(2, c.getContent());
+            ps.setString(3, authorName);
             int affected = ps.executeUpdate();
             System.out.println("DEBUG: Comment INSERT successful. ArticleID: " + c.getArticleId() + ", Affected: " + affected);
             return affected > 0;
@@ -140,21 +112,22 @@ public class CommentService {
         List<Comment> comments = new ArrayList<>();
         Connection conn = getCnx();
         if (conn == null) return comments;
-        boolean hasAuthorName = hasColumn(conn, "comment", "author_name");
-        boolean hasAuthor = hasColumn(conn, "comment", "author");
 
         boolean hasHiddenFromPublic = hasColumn(conn, "comment", "hidden_from_public");
         boolean hasFlagged = hasColumn(conn, "comment", "flagged");
         String visibilityFilter;
         if (hasHiddenFromPublic) {
-            visibilityFilter = " AND COALESCE(hidden_from_public, 0) = 0";
+            visibilityFilter = " AND COALESCE(c.hidden_from_public, 0) = 0";
         } else if (hasFlagged) {
-            visibilityFilter = " AND COALESCE(flagged, 0) = 0";
+            visibilityFilter = " AND COALESCE(c.flagged, 0) = 0";
         } else {
             visibilityFilter = "";
         }
 
-        String req = "SELECT * FROM `comment` WHERE article_id = ?" + visibilityFilter + " ORDER BY created_at DESC";
+        String req = "SELECT c.*, u.avatar_style FROM `comment` c " +
+                     "LEFT JOIN `user` u ON c.author_name = u.username " +
+                     "WHERE c.article_id = ?" + visibilityFilter + " ORDER BY c.created_at DESC";
+
         try (PreparedStatement ps = conn.prepareStatement(req)) {
             ps.setInt(1, articleId);
             ResultSet rs = ps.executeQuery();
@@ -163,27 +136,23 @@ public class CommentService {
                 Timestamp ts = rs.getTimestamp("created_at");
                 if (ts != null) dt = ts.toLocalDateTime();
 
-                String authorValue = "Anonymous User";
-                if (hasAuthorName) {
-                    String fromAuthorName = rs.getString("author_name");
-                    if (fromAuthorName != null && !fromAuthorName.isBlank()) {
-                        authorValue = fromAuthorName;
-                    }
+                String authorValue = rs.getString("author_name");
+                int commentId = rs.getInt("id");
+                if (authorValue == null || authorValue.isBlank() || authorValue.equalsIgnoreCase("Anonymous User")) {
+                    authorValue = getGuestName(commentId);
                 }
-                if ((authorValue == null || authorValue.isBlank() || "Anonymous User".equals(authorValue)) && hasAuthor) {
-                    String fromAuthor = rs.getString("author");
-                    if (fromAuthor != null && !fromAuthor.isBlank()) {
-                        authorValue = fromAuthor;
-                    }
-                }
-                
-                comments.add(new Comment(
+
+                Comment comment = new Comment(
                     rs.getInt("id"),
                     rs.getInt("article_id"),
                     authorValue,
                     rs.getString("content"),
                     dt
-                ));
+                );
+
+                try { comment.setAvatarStyle(rs.getString("avatar_style")); } catch (Exception ignored) {}
+
+                comments.add(comment);
             }
             System.out.println("DEBUG: Found " + comments.size() + " comments for article " + articleId);
         } catch (SQLException e) {
@@ -198,28 +167,14 @@ public class CommentService {
         Connection conn = getCnx();
         if (conn == null) return comments;
 
-        boolean hasAuthorName = hasColumn(conn, "comment", "author_name");
-        boolean hasAuthor = hasColumn(conn, "comment", "author");
         boolean hasFlagged = hasColumn(conn, "comment", "flagged");
-
-        String authorExpr;
-        if (hasAuthorName && hasAuthor) {
-            authorExpr = "COALESCE(NULLIF(c.author_name, ''), NULLIF(c.author, ''), 'Anonymous User') AS author_display";
-        } else if (hasAuthorName) {
-            authorExpr = "COALESCE(NULLIF(c.author_name, ''), 'Anonymous User') AS author_display";
-        } else if (hasAuthor) {
-            authorExpr = "COALESCE(NULLIF(c.author, ''), 'Anonymous User') AS author_display";
-        } else {
-            authorExpr = "'Anonymous User' AS author_display";
-        }
-
         String flaggedExpr = hasFlagged ? "c.flagged AS flagged_value" : "0 AS flagged_value";
-        String moderationFilter = hasFlagged ? "WHERE COALESCE(c.flagged, 0) = 1 " : "";
-        String req = "SELECT c.id, c.article_id, c.content, c.created_at, " + authorExpr + ", " + flaggedExpr +
-                     ", a.title AS article_title " +
+
+        String req = "SELECT c.id, c.article_id, c.content, c.created_at, " +
+                     "c.author_name AS author_raw, " +
+                     flaggedExpr + ", a.title AS article_title " +
                      "FROM `comment` c " +
                      "LEFT JOIN article a ON a.id = c.article_id " +
-                     moderationFilter +
                      "ORDER BY flagged_value DESC, c.created_at DESC";
 
         try (PreparedStatement ps = conn.prepareStatement(req);
@@ -229,10 +184,16 @@ public class CommentService {
                 Timestamp ts = rs.getTimestamp("created_at");
                 if (ts != null) dt = ts.toLocalDateTime();
 
+                String authorDisplay = rs.getString("author_raw");
+                int commentId = rs.getInt("id");
+                if (authorDisplay == null || authorDisplay.isBlank() || authorDisplay.equalsIgnoreCase("Anonymous User")) {
+                    authorDisplay = getGuestName(commentId);
+                }
+
                 Comment comment = new Comment(
-                    rs.getInt("id"),
+                    commentId,
                     rs.getInt("article_id"),
-                    rs.getString("author_display"),
+                    authorDisplay,
                     rs.getString("content"),
                     dt
                 );
@@ -310,49 +271,19 @@ public class CommentService {
         User currentUser = SessionManager.getCurrentUser();
         if (currentUser == null) return comments;
 
-        boolean hasAuthorName = hasColumn(conn, "comment", "author_name");
-        boolean hasAuthor = hasColumn(conn, "comment", "author");
-        boolean hasAuthorUserId = hasColumn(conn, "comment", "author_user_id");
         boolean hasFlagged = hasColumn(conn, "comment", "flagged");
-        String appUserIdHex = resolveCurrentAppUserIdHex(conn);
-        String authorExpr = buildAuthorDisplayExpr(hasAuthorName, hasAuthor);
         String flaggedExpr = hasFlagged ? "COALESCE(c.flagged, 0) AS flagged_value" : "0 AS flagged_value";
-        StringBuilder req = new StringBuilder();
-        req.append("SELECT c.id, c.article_id, c.content, c.created_at, ")
-           .append(authorExpr).append(", ")
-           .append("a.title AS article_title, ").append(flaggedExpr).append(" ")
-           .append("FROM `comment` c ")
-           .append("LEFT JOIN article a ON a.id = c.article_id WHERE ");
 
-        List<String> predicates = new ArrayList<>();
-        if (hasAuthorUserId && appUserIdHex != null) {
-            predicates.add("HEX(c.author_user_id) = ?");
-        }
-        if (hasAuthorName) {
-            predicates.add("LOWER(c.author_name) = LOWER(?)");
-        }
-        if (hasAuthor) {
-            predicates.add("LOWER(c.author) = LOWER(?)");
-        }
-        if (predicates.isEmpty()) return comments;
+        String req = "SELECT c.id, c.article_id, c.content, c.created_at, " +
+                     "c.author_name AS author_raw, " +
+                     "a.title AS article_title, " + flaggedExpr + " " +
+                     "FROM `comment` c LEFT JOIN article a ON a.id = c.article_id " +
+                     "WHERE LOWER(c.author_name) = LOWER(?) ORDER BY c.created_at DESC";
 
-        req.append("(").append(String.join(" OR ", predicates)).append(") ORDER BY c.created_at DESC");
-
-        try (PreparedStatement ps = conn.prepareStatement(req.toString())) {
-            int idx = 1;
-            if (hasAuthorUserId && appUserIdHex != null) {
-                ps.setString(idx++, appUserIdHex);
-            }
-            if (hasAuthorName) {
-                ps.setString(idx++, currentUser.getUsername());
-            }
-            if (hasAuthor) {
-                ps.setString(idx++, currentUser.getUsername());
-            }
+        try (PreparedStatement ps = conn.prepareStatement(req)) {
+            ps.setString(1, currentUser.getUsername());
             try (ResultSet rs = ps.executeQuery()) {
-                while (rs.next()) {
-                    comments.add(mapCommentRow(rs));
-                }
+                while (rs.next()) comments.add(mapCommentRow(rs));
             }
         } catch (SQLException e) {
             lastErrorMessage = e.getMessage();
@@ -369,27 +300,22 @@ public class CommentService {
         String ownerEmail = new BlogService().resolveCurrentOwnerEmail();
         if (ownerEmail == null || ownerEmail.isBlank()) return comments;
 
-        boolean hasAuthorName = hasColumn(conn, "comment", "author_name");
-        boolean hasAuthor = hasColumn(conn, "comment", "author");
         boolean hasFlagged = hasColumn(conn, "comment", "flagged");
-        String authorExpr = buildAuthorDisplayExpr(hasAuthorName, hasAuthor);
         String flaggedExpr = hasFlagged ? "COALESCE(c.flagged, 0) AS flagged_value" : "0 AS flagged_value";
 
         String req = "SELECT c.id, c.article_id, c.content, c.created_at, " +
-                     authorExpr + ", " +
+                     "c.author_name AS author_raw, " +
                      "a.title AS article_title, " + flaggedExpr + " " +
                      "FROM `comment` c " +
                      "JOIN article a ON a.id = c.article_id " +
-                     "JOIN app_user au ON au.id = a.created_by_id " +
+                     "JOIN user au ON au.id = a.created_by_id " +
                      "WHERE LOWER(au.email) = LOWER(?) " +
                      "ORDER BY c.created_at DESC";
 
         try (PreparedStatement ps = conn.prepareStatement(req)) {
             ps.setString(1, ownerEmail);
             try (ResultSet rs = ps.executeQuery()) {
-                while (rs.next()) {
-                    comments.add(mapCommentRow(rs));
-                }
+                while (rs.next()) comments.add(mapCommentRow(rs));
             }
         } catch (SQLException e) {
             lastErrorMessage = e.getMessage();
@@ -403,78 +329,22 @@ public class CommentService {
         Timestamp ts = rs.getTimestamp("created_at");
         if (ts != null) dt = ts.toLocalDateTime();
 
+        String authorDisplay = rs.getString("author_raw");
+        int commentId = rs.getInt("id");
+        if (authorDisplay == null || authorDisplay.isBlank() || authorDisplay.equalsIgnoreCase("Anonymous User")) {
+            authorDisplay = getGuestName(commentId);
+        }
+
         Comment comment = new Comment(
-            rs.getInt("id"),
+            commentId,
             rs.getInt("article_id"),
-            rs.getString("author_display"),
+            authorDisplay,
             rs.getString("content"),
             dt
         );
         comment.setArticleTitle(rs.getString("article_title"));
         comment.setFlagged(rs.getInt("flagged_value") == 1);
         return comment;
-    }
-
-    private String buildAuthorDisplayExpr(boolean hasAuthorName, boolean hasAuthor) {
-        if (hasAuthorName && hasAuthor) {
-            return "COALESCE(NULLIF(c.author_name, ''), NULLIF(c.author, ''), 'Anonymous User') AS author_display";
-        } else if (hasAuthorName) {
-            return "COALESCE(NULLIF(c.author_name, ''), 'Anonymous User') AS author_display";
-        } else if (hasAuthor) {
-            return "COALESCE(NULLIF(c.author, ''), 'Anonymous User') AS author_display";
-        }
-        return "'Anonymous User' AS author_display";
-    }
-
-    private String resolveCurrentAppUserIdHex(Connection conn) {
-        User currentUser = SessionManager.getCurrentUser();
-        if (currentUser == null || currentUser.getEmail() == null || currentUser.getEmail().isBlank()) {
-            return null;
-        }
-
-        String byEmail = findAppUserIdHexByEmail(conn, currentUser.getEmail());
-        if (byEmail != null) {
-            return byEmail;
-        }
-
-        String mappedEmail = mapDemoEmailToAppUserEmail(conn, currentUser.getEmail());
-        if (mappedEmail != null) {
-            return findAppUserIdHexByEmail(conn, mappedEmail);
-        }
-        return null;
-    }
-
-    private String findAppUserIdHexByEmail(Connection conn, String email) {
-        String req = "SELECT HEX(id) AS id_hex FROM app_user WHERE email = ? LIMIT 1";
-        try (PreparedStatement ps = conn.prepareStatement(req)) {
-            ps.setString(1, email);
-            try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) {
-                    return rs.getString("id_hex");
-                }
-            }
-        } catch (SQLException ignored) {
-        }
-        return null;
-    }
-
-    private String mapDemoEmailToAppUserEmail(Connection conn, String email) {
-        if (email == null || !email.endsWith("@mail.com")) {
-            return null;
-        }
-        String localPart = email.substring(0, email.indexOf('@'));
-        String candidate = localPart + "@ecospot.local";
-        String req = "SELECT email FROM app_user WHERE email = ? LIMIT 1";
-        try (PreparedStatement ps = conn.prepareStatement(req)) {
-            ps.setString(1, candidate);
-            try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) {
-                    return rs.getString("email");
-                }
-            }
-        } catch (SQLException ignored) {
-        }
-        return null;
     }
 
     private boolean hasColumn(Connection conn, String tableName, String columnName) {
@@ -489,34 +359,4 @@ public class CommentService {
             return false;
         }
     }
-
-    private byte[] resolveAppUserIdForComment(Connection conn, User currentUser) {
-        if (currentUser != null && currentUser.getEmail() != null && !currentUser.getEmail().isBlank()) {
-            byte[] byEmail = findAppUserIdByEmail(conn, currentUser.getEmail());
-            if (byEmail != null) {
-                return byEmail;
-            }
-
-            String mappedEmail = mapDemoEmailToAppUserEmail(conn, currentUser.getEmail());
-            if (mappedEmail != null) {
-                return findAppUserIdByEmail(conn, mappedEmail);
-            }
-        }
-        return null;
-    }
-
-    private byte[] findAppUserIdByEmail(Connection conn, String email) {
-        String req = "SELECT id FROM app_user WHERE email = ? LIMIT 1";
-        try (PreparedStatement ps = conn.prepareStatement(req)) {
-            ps.setString(1, email);
-            try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) {
-                    return rs.getBytes("id");
-                }
-            }
-        } catch (SQLException ignored) {
-        }
-        return null;
-    }
-
 }

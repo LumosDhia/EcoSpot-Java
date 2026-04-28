@@ -173,43 +173,53 @@ public class TicketService implements GlobalInterface<Ticket> {
     @Override
     public void update(Ticket ticket) {
         String req = "UPDATE `ticket` SET title=?, description=?, location=?, image=?, status=?, priority=?, domain=?, latitude=?, longitude=?, assigned_ngo_id=?, admin_notes=?, completed_by_id=?, completion_message=?, completion_image=?, is_spam=?, ai_category=?, ai_suggested_ngo=?, spam_reason=?, achieved_at=? WHERE id=?";
-        try (PreparedStatement ps = cnx.prepareStatement(req)) {
-            ps.setString(1, ticket.getTitle());
-            ps.setString(2, ticket.getDescription());
-            ps.setString(3, ticket.getLocation());
-            ps.setString(4, ticket.getImage());
-            ps.setString(5, ticket.getStatus().name());
-            ps.setString(6, ticket.getPriority().name());
-            ps.setString(7, ticket.getDomain() != null ? ticket.getDomain().name() : null);
-            ps.setDouble(8, ticket.getLatitude());
-            ps.setDouble(9, ticket.getLongitude());
-            
-            if (ticket.getAssignedNgoId() != null && ticket.getAssignedNgoId() > 0) ps.setInt(10, ticket.getAssignedNgoId());
-            else ps.setNull(10, Types.INTEGER);
-            
-            ps.setString(11, ticket.getAdminNotes());
-            
-            if (ticket.getCompletedById() != null) ps.setInt(12, ticket.getCompletedById());
-            else ps.setNull(12, Types.INTEGER);
-            
-            ps.setString(13, ticket.getCompletionMessage());
-            ps.setString(14, ticket.getCompletionImage());
-            ps.setBoolean(15, ticket.isSpam());
-            ps.setString(16, ticket.getAiCategory());
-            ps.setString(17, ticket.getAiSuggestedNgo());
-            ps.setString(18, ticket.getSpamReason());
-            
-            if (ticket.getAchievedAt() != null) ps.setTimestamp(19, Timestamp.valueOf(ticket.getAchievedAt()));
-            else ps.setNull(19, Types.TIMESTAMP);
-            
-            ps.setInt(20, ticket.getId());
-            ps.executeUpdate();
+        try {
+            cnx.setAutoCommit(false);
+            try (PreparedStatement ps = cnx.prepareStatement(req)) {
+                ps.setString(1, ticket.getTitle());
+                ps.setString(2, ticket.getDescription());
+                ps.setString(3, ticket.getLocation());
+                ps.setString(4, ticket.getImage());
+                ps.setString(5, ticket.getStatus().name());
+                ps.setString(6, ticket.getPriority().name());
+                ps.setString(7, ticket.getDomain() != null ? ticket.getDomain().name() : null);
+                ps.setDouble(8, ticket.getLatitude());
+                ps.setDouble(9, ticket.getLongitude());
+                
+                if (ticket.getAssignedNgoId() != null && ticket.getAssignedNgoId() > 0) ps.setInt(10, ticket.getAssignedNgoId());
+                else ps.setNull(10, Types.INTEGER);
+                
+                ps.setString(11, ticket.getAdminNotes());
+                
+                if (ticket.getCompletedById() != null) ps.setInt(12, ticket.getCompletedById());
+                else ps.setNull(12, Types.INTEGER);
+                
+                ps.setString(13, ticket.getCompletionMessage());
+                ps.setString(14, ticket.getCompletionImage());
+                ps.setBoolean(15, ticket.isSpam());
+                ps.setString(16, ticket.getAiCategory());
+                ps.setString(17, ticket.getAiSuggestedNgo());
+                ps.setString(18, ticket.getSpamReason());
+                
+                if (ticket.getAchievedAt() != null) ps.setTimestamp(19, Timestamp.valueOf(ticket.getAchievedAt()));
+                else ps.setNull(19, Types.TIMESTAMP);
+                
+                ps.setInt(20, ticket.getId());
+                ps.executeUpdate();
 
-            // Update Consignes: Delete and Re-add
-            consigneService.deleteByTicketId(ticket.getId());
-            for (Consigne c : ticket.getConsignes()) {
-                c.setTicketId(ticket.getId());
-                consigneService.add(c);
+                // Update Consignes: Delete and Re-add within same transaction
+                consigneService.deleteByTicketId(ticket.getId());
+                for (Consigne c : ticket.getConsignes()) {
+                    c.setTicketId(ticket.getId());
+                    consigneService.add(c);
+                }
+                
+                cnx.commit();
+            } catch (SQLException e) {
+                cnx.rollback();
+                throw e;
+            } finally {
+                cnx.setAutoCommit(true);
             }
         } catch (SQLException e) {
             e.printStackTrace();

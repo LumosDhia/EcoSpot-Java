@@ -153,42 +153,48 @@ public class TicketDetailController {
         if (t.getImage() != null && !t.getImage().isEmpty()) {
             try {
                 String imgPath = t.getImage();
+<<<<<<< HEAD
                 if (imgPath.startsWith("/uploads/")) {
                     imgPath = "http://127.0.0.1:8000" + imgPath;
                 }
+=======
+>>>>>>> 855544ec1f0da8fa388b7da2471b2ad72ba813cc
                 
-                System.out.println("Loading ticket image: " + imgPath);
-                
-                // Load in background (true)
-                Image img = new Image(imgPath, true); 
+                // 1. Try local Java-uploaded image first
+                String localUrl = tn.esprit.util.ImageUploadUtils.getImageUrl("tickets", imgPath);
+                Image img = new Image(localUrl, true);
                 ticketImageView.setImage(img);
                 ticketImageView.setManaged(true);
                 ticketImageView.setVisible(true);
-                
-                // Fallback mechanism if 8000 isn't available
+
+                // 2. Fallback sequence if local fails (could be from Symfony web app)
                 img.errorProperty().addListener((obs, oldVal, newVal) -> {
                     if (newVal) {
-                        System.out.println("Warning: HTTP 8000 failed. Trying Apache localhost...");
-                        try {
-                            String fallback = "http://localhost/ecospot-web/public" + t.getImage();
-                            if (t.getImage().startsWith("http")) fallback = t.getImage(); // Just in case it's absolute
-                            Image fallbackImg = new Image(fallback, true);
-                            ticketImageView.setImage(fallbackImg);
-                            
-                            fallbackImg.errorProperty().addListener((o, oldV, newV) -> {
-                                if (newV) {
-                                    System.out.println("All image loading attempts failed. Hiding image view.");
-                                    ticketImageView.setManaged(false);
-                                    ticketImageView.setVisible(false);
-                                }
-                            });
-                        } catch (Exception ex) {
-                            ticketImageView.setManaged(false);
-                            ticketImageView.setVisible(false);
-                        }
+                        System.out.println("Local image failed, trying Symfony fallback: " + t.getImage());
+                        String symfonyUrl = t.getImage().startsWith("/uploads/") 
+                                ? "http://127.0.0.1:8000" + t.getImage() 
+                                : t.getImage();
+                        
+                        Image symfonyImg = new Image(symfonyUrl, true);
+                        ticketImageView.setImage(symfonyImg);
+                        
+                        symfonyImg.errorProperty().addListener((o, ov, nv) -> {
+                            if (nv) {
+                                // Final fallback: Apache localhost
+                                String apacheUrl = "http://localhost/ecospot-web/public" + t.getImage();
+                                Image apacheImg = new Image(apacheUrl, true);
+                                ticketImageView.setImage(apacheImg);
+                                
+                                apacheImg.errorProperty().addListener((o3, ov3, nv3) -> {
+                                    if (nv3) {
+                                        ticketImageView.setManaged(false);
+                                        ticketImageView.setVisible(false);
+                                    }
+                                });
+                            }
+                        });
                     }
                 });
-                
             } catch (Exception e) {
                 ticketImageView.setManaged(false);
                 ticketImageView.setVisible(false);

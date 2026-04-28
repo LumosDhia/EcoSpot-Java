@@ -12,7 +12,20 @@ import java.io.IOException;
 public class MainFX extends Application {
 
     public static void main(String[] args) {
+        killOtherInstances();
         launch(args);
+    }
+
+    private static void killOtherInstances() {
+        try {
+            // For Windows: Kill other windows with the same title
+            // Use taskkill to find and terminate processes with our app title
+            new ProcessBuilder("taskkill", "/F", "/FI", "WINDOWTITLE eq EcoSpot Desktop App", "/T").start();
+            // Small delay to let the OS release the process
+            Thread.sleep(500);
+        } catch (Exception e) {
+            // Silently fail if taskkill is not available or fails
+        }
     }
 
     @Override

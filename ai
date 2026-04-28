@@ -1,0 +1,30 @@
+# 🧠 AI-Powered Smart Challenge Recommendation Engine Walkthrough
+
+I have successfully built and integrated the AI Recommendation Engine for CodeArena entirely from scratch. The system does not rely on any third-party APIs—it analyzes actual platform data (submissions, pass rates, execution times, test cases, and tags) to build skill profiles and calculate true difficulty scores.
+
+## Key Accomplishments
+
+### Backend Architecture
+*   **Database Setup**: Created `challenge_difficulty_profile` and `user_skill_profile` tables via a Spring `@PostConstruct` setup script (`AiDatabaseSetup`).
+*   **Difficulty Predictor (Naive Bayes Math)**: Created the `DifficultyPredictorService` which computes a true 1-100 difficulty score based on empirical evidence:
+    *   Pass rates (`ACCEPTED` vs `COMPILATION_ERROR` vs `TIME_LIMIT_EXCEEDED`)
+    *   Average attempts per user
+    *   Average execution time factor
+*   **User Proficiency Analyzer**: Implemented `SkillProfileService` to construct a high-dimensional vector space mapping for each user based on tags (e.g., Arrays=0.9, Trees=0.2).
+*   **Collaborative Filtering Recommender**: Built `RecommendationService` to locate optimal challenges in a user's "Zone of Proximal Development". It favors challenges that sit just above their current core latency limit and specifically targets their weak areas.
+*   **AI Training Scheduler**: Enacted `AiTrainingScheduler` to automatically retrain the neural profiles every 6 hours via Spring Cron expression (`0 0 */6 * * *`).
+
+### Cyberpunk-Themed Frontend Integration
+*   **Neural Skill Radar**: 
+    Embedded a dynamic Canvas-based Skill Radar charting onto the user's `MyProfile` component dashboard. It visually breaks down user competency into hexagon matrices (DP, MATH, ARRAYS, STRINGS, etc.) and highlights maximum competencies.
+*   **Challenge List - AI Picks**: 
+    On `/challenge` listings, added a new `🧠 AI PICKS` tab filter. This queries the AI engine to retrieve personalized recommended cards displaying "Match Percentage," "True Difficulty Score," and the deductive *reasoning* (e.g., "Strengthens your weak area: MATH").
+*   **Challenge Detail - AI Analyzer**:
+    Embedded an "AI Analysis" accordion card within the challenge brief UI. It features a cyber-gauge plotting the true predicted 1-100 difficulty alongside global heuristic statistics.
+
+## Verification
+You can manually test it by:
+1. Reloading the Java Backend context (the AI tables will generate explicitly to MySQL).
+2. Navigating to the Frontend user profile route (`/front-office/reward-profile/my-profile`). Wait a few milliseconds, and the `NEURAL SKILL RADAR` will execute its animation render.
+3. Accessing the Coding Challenges List view to try out the `🧠 AI PICKS` logic. Ensure to click it to see personalized cards.
+4. Calling `POST /api/ai/retrain` as an Admin via Postman initiates an explicit retrain trigger out-of-cycle if needed.

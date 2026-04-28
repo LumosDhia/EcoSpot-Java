@@ -19,7 +19,10 @@ public class EventService implements GlobalInterface<Event> {
 
     @Override
     public void add(Event event) {
-        String req = "INSERT INTO event (name, slug, description, capacity, location, started_at, ended_at, image) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+        if (event.getSlug() == null || event.getSlug().isEmpty()) {
+            event.setSlug(generateSlug(event.getName()));
+        }
+        String req = "INSERT INTO event (name, slug, description, capacity, location, started_at, ended_at, image, latitude, longitude) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         try (PreparedStatement ps = cnx.prepareStatement(req, Statement.RETURN_GENERATED_KEYS)) {
             ps.setString(1, event.getName());
             ps.setString(2, event.getSlug());
@@ -29,6 +32,8 @@ public class EventService implements GlobalInterface<Event> {
             ps.setTimestamp(6, Timestamp.valueOf(event.getStartedAt()));
             ps.setTimestamp(7, Timestamp.valueOf(event.getEndedAt()));
             ps.setString(8, event.getImage());
+            ps.setDouble(9, event.getLatitude());
+            ps.setDouble(10, event.getLongitude());
             ps.executeUpdate();
             
             try (ResultSet rs = ps.getGeneratedKeys()) {
@@ -80,7 +85,7 @@ public class EventService implements GlobalInterface<Event> {
 
     @Override
     public void update(Event event) {
-        String req = "UPDATE event SET name=?, description=?, capacity=?, location=?, started_at=?, ended_at=?, image=? WHERE id=?";
+        String req = "UPDATE event SET name=?, description=?, capacity=?, location=?, started_at=?, ended_at=?, image=?, latitude=?, longitude=? WHERE id=?";
         try (PreparedStatement ps = cnx.prepareStatement(req)) {
             ps.setString(1, event.getName());
             ps.setString(2, event.getDescription());
@@ -89,7 +94,9 @@ public class EventService implements GlobalInterface<Event> {
             ps.setTimestamp(5, Timestamp.valueOf(event.getStartedAt()));
             ps.setTimestamp(6, Timestamp.valueOf(event.getEndedAt()));
             ps.setString(7, event.getImage());
-            ps.setInt(8, event.getId());
+            ps.setDouble(8, event.getLatitude());
+            ps.setDouble(9, event.getLongitude());
+            ps.setInt(10, event.getId());
             ps.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -117,6 +124,8 @@ public class EventService implements GlobalInterface<Event> {
                 if (end != null) e.setEndedAt(end.toLocalDateTime());
                 
                 e.setImage(rs.getString("image"));
+                e.setLatitude(rs.getDouble("latitude"));
+                e.setLongitude(rs.getDouble("longitude"));
                 
                 events.add(e);
             }
@@ -131,6 +140,35 @@ public class EventService implements GlobalInterface<Event> {
             });
         }
         return events;
+    }
+
+    public Event getById(int id) {
+        String req = "SELECT * FROM event WHERE id = ?";
+        try (PreparedStatement ps = cnx.prepareStatement(req)) {
+            ps.setInt(1, id);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    Event e = new Event();
+                    e.setId(rs.getInt("id"));
+                    e.setName(rs.getString("name"));
+                    e.setSlug(rs.getString("slug"));
+                    e.setDescription(rs.getString("description"));
+                    e.setCapacity(rs.getInt("capacity"));
+                    e.setLocation(rs.getString("location"));
+                    Timestamp start = rs.getTimestamp("started_at");
+                    if (start != null) e.setStartedAt(start.toLocalDateTime());
+                    Timestamp end = rs.getTimestamp("ended_at");
+                    if (end != null) e.setEndedAt(end.toLocalDateTime());
+                    e.setImage(rs.getString("image"));
+                    e.setLatitude(rs.getDouble("latitude"));
+                    e.setLongitude(rs.getDouble("longitude"));
+                    return e;
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
     public boolean joinEvent(int eventId, int userId) {
@@ -160,6 +198,31 @@ public class EventService implements GlobalInterface<Event> {
                 }
 
                 cnx.commit();
+
+                // Send confirmation email asynchronously to avoid blocking UI
+                new Thread(() -> {
+                    try {
+                        tn.esprit.user.User user = new tn.esprit.services.UserService().getAllUsers().stream()
+                                .filter(u -> u.getId() == userId)
+                                .findFirst().orElse(null);
+
+                        Event event = getById(eventId);
+
+                        if (user != null && event != null) {
+                            String body = "<h1>EcoSpot Participation Confirmation</h1>" +
+                                          "<p>Hello " + user.getUsername() + ",</p>" +
+                                          "<p>You are now registered for: <b>" + event.getName() + "</b></p>" +
+                                          "<p><b>Location:</b> " + event.getLocation() + "</p>" +
+                                          "<p><b>Date:</b> " + event.getStartedAt().toString() + "</p>" +
+                                          "<br><p>Thank you for contributing to a greener planet!</p>";
+
+                            tn.esprit.util.EmailService.sendEmail(user.getEmail(), "Confirmation: Attending " + event.getName(), body);
+                        }
+                    } catch (Exception e) {
+                        System.err.println("Failed to send confirmation email: " + e.getMessage());
+                    }
+                }).start();
+
                 return true;
             } catch (SQLException inner) {
                 cnx.rollback();
@@ -263,5 +326,12 @@ public class EventService implements GlobalInterface<Event> {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+    }
+
+    private String generateSlug(String name) {
+        if (name == null) return "";
+        return name.toLowerCase()
+                .replaceAll("[^a-z0-9\\s]", "")
+                .replaceAll("\\s+", "-");
     }
 }
