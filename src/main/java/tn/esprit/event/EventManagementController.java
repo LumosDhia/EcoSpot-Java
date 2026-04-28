@@ -16,6 +16,8 @@ import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
 import tn.esprit.services.EventService;
+import tn.esprit.services.GeocodingService;
+import tn.esprit.util.SessionManager;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -42,6 +44,7 @@ public class EventManagementController {
     private static final int PAGE_SIZE = 8;
 
     private final EventService eventService = new EventService();
+    private final GeocodingService geocodingService = new GeocodingService();
     private List<Event> allEvents = new ArrayList<>();
     private List<Event> filteredEvents = new ArrayList<>();
     private int currentPage = 0;
@@ -71,7 +74,7 @@ public class EventManagementController {
         if (manageSponsorsBtn != null) { manageSponsorsBtn.setVisible(isAdmin); manageSponsorsBtn.setManaged(isAdmin); }
 
         if (sortChoice != null) {
-            sortChoice.setItems(FXCollections.observableArrayList("Next Events", "Capacity High", "Name A-Z"));
+            sortChoice.setItems(FXCollections.observableArrayList("Next Events", "Nearby", "Capacity High", "Name A-Z"));
             sortChoice.setValue("Next Events");
             sortChoice.getSelectionModel().selectedItemProperty().addListener((obs, o, n) -> { currentPage = 0; filterAndDisplay(); });
         }
@@ -101,6 +104,24 @@ public class EventManagementController {
         if ("Next Events".equals(sort)) filteredEvents.sort((a, b) -> a.getStartedAt().compareTo(b.getStartedAt()));
         else if ("Capacity High".equals(sort)) filteredEvents.sort((a, b) -> Integer.compare(b.getCapacity(), a.getCapacity()));
         else if ("Name A-Z".equals(sort)) filteredEvents.sort((a, b) -> a.getName().compareToIgnoreCase(b.getName()));
+        else if ("Nearby".equals(sort)) {
+            if (SessionManager.isLoggedIn()) {
+                tn.esprit.user.User user = SessionManager.getCurrentUser();
+                if (user.getAddress() != null && !user.getAddress().isEmpty()) {
+                    String addr = user.getAddress() + ", " + user.getCity();
+                    List<GeocodingService.Place> places = geocodingService.search(addr);
+                    if (!places.isEmpty()) {
+                        double userLat = places.get(0).getLat();
+                        double userLon = places.get(0).getLon();
+                        filteredEvents.sort((a, b) -> {
+                            double distA = geocodingService.calculateDistance(userLat, userLon, a.getLatitude(), a.getLongitude());
+                            double distB = geocodingService.calculateDistance(userLat, userLon, b.getLatitude(), b.getLongitude());
+                            return Double.compare(distA, distB);
+                        });
+                    }
+                }
+            }
+        }
 
         displayCurrentPage();
     }

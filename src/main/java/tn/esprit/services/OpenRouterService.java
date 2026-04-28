@@ -25,8 +25,12 @@ public class OpenRouterService {
     public static class DetectionResult {
         public boolean isSpam;
         public String reason;
+        public String category;
+        public String suggestedNgo;
     }
 
+    // Existing generateTasks method here...
+    
     public AiResponse generateTasks(String title, String description) {
         AiResponse result = new AiResponse();
         if (API_KEY == null || API_KEY.isEmpty()) {
@@ -96,6 +100,8 @@ public class OpenRouterService {
         DetectionResult result = new DetectionResult();
         result.isSpam = false;
         result.reason = "";
+        result.category = "General";
+        result.suggestedNgo = "Community Action";
 
         if (API_KEY == null || API_KEY.isEmpty()) {
             return result;
@@ -114,11 +120,15 @@ public class OpenRouterService {
             payload.put("model", "openrouter/auto");
             
             JSONArray messages = new JSONArray();
-            messages.put(new JSONObject().put("role", "system").put("content", "You are a precise spam filter. Output ONLY valid JSON."));
+            messages.put(new JSONObject().put("role", "system").put("content", "You are an advanced AI ticket analyzer. Output ONLY valid JSON."));
             messages.put(new JSONObject().put("role", "user").put("content", 
-                "Analyze if this ticket is spam (gibberish or unrelated to environment/nature).\n" +
+                "Analyze this environmental ticket:\n" +
                 "Title: " + title + "\nDescription: " + description + "\n\n" +
-                "Reply ONLY with a JSON object: {\"is_spam\": boolean, \"reason\": \"string\"}"));
+                "1. Is it spam? (Gibberish, tests, or completely unrelated to environment/nature)\n" +
+                "2. If it is spam, provide a detailed 'reason' (e.g., 'Contains commercial advertisement' or 'Nonsensical text').\n" +
+                "3. If not spam, categorize it (e.g., #Pollution, #WaterWaste, #Deforestation).\n" +
+                "4. Suggest a fictitious NGO specialty to handle it (e.g., 'Green Earth Alliance', 'Ocean Defenders').\n\n" +
+                "Reply ONLY with a JSON object: {\"is_spam\": boolean, \"reason\": \"string\", \"category\": \"string\", \"suggested_ngo\": \"string\"}"));
             
             payload.put("messages", messages);
             payload.put("response_format", new JSONObject().put("type", "json_object"));
@@ -140,17 +150,20 @@ public class OpenRouterService {
                 JSONObject decoded = new JSONObject(content);
                 result.isSpam = decoded.getBoolean("is_spam");
                 result.reason = decoded.optString("reason", "");
+                result.category = decoded.optString("category", "General");
+                result.suggestedNgo = decoded.optString("suggested_ngo", "Community Action");
             } else {
                 BufferedReader in = new BufferedReader(new InputStreamReader(conn.getErrorStream()));
                 StringBuilder err = new StringBuilder();
                 String line;
                 while ((line = in.readLine()) != null) err.append(line);
                 in.close();
-                System.err.println("Spam check failed (" + conn.getResponseCode() + "): " + err.toString());
+                System.err.println("AI analysis failed (" + conn.getResponseCode() + "): " + err.toString());
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
         return result;
     }
+
 }

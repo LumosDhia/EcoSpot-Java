@@ -9,6 +9,7 @@ import javafx.scene.layout.*;
 import javafx.stage.Stage;
 import tn.esprit.services.EventService;
 import tn.esprit.event.Sponsor;
+import tn.esprit.services.OpenRouterEventService;
 
 import java.io.File;
 import java.io.IOException;
@@ -29,10 +30,19 @@ public class EventFormController {
     @FXML private TextArea descriptionArea;
     @FXML private Button saveBtn;
     @FXML private javafx.scene.layout.FlowPane selectedSponsorsFlow;
+    
+    // AI Elements
+    @FXML private VBox aiResultBox;
+    @FXML private Label aiSuccessLabel;
+    @FXML private Label aiAnalysisLabel;
 
     private tn.esprit.services.EventService eventService = new tn.esprit.services.EventService();
     private tn.esprit.services.SponsorService sponsorService = new tn.esprit.services.SponsorService();
+    private OpenRouterEventService aiService = new OpenRouterEventService();
+    private tn.esprit.services.GeocodingService geocodingService = new tn.esprit.services.GeocodingService();
     private Event currentEvent;
+    private double currentLat = 0;
+    private double currentLon = 0;
     private boolean isEdit = false;
     private java.util.List<Sponsor> selectedSponsors = new java.util.ArrayList<>();
     private File selectedImageFile;
@@ -114,7 +124,81 @@ public class EventFormController {
         
         // Load sponsors
         this.selectedSponsors = sponsorService.getSponsorsForEvent(event.getId());
+        this.currentLat = event.getLatitude();
+        this.currentLon = event.getLongitude();
         updateSponsorsFlow();
+    }
+
+    @FXML
+    private void handleGeocode() {
+        String query = locationField.getText().trim();
+        if (query.isEmpty()) {
+            showAlert("Input Required", "Please enter a location name first.");
+            return;
+        }
+
+        saveBtn.setDisable(true);
+        new Thread(() -> {
+            java.util.List<tn.esprit.services.GeocodingService.Place> results = geocodingService.search(query);
+            javafx.application.Platform.runLater(() -> {
+                saveBtn.setDisable(false);
+                if (results.isEmpty()) {
+                    showAlert("Location Not Found", "Could not find coordinates for: " + query);
+                } else {
+                    tn.esprit.services.GeocodingService.Place top = results.get(0);
+                    this.currentLat = top.getLat();
+                    this.currentLon = top.getLon();
+                    
+                    // Show confirmation
+                    Alert ok = new Alert(Alert.AlertType.INFORMATION);
+                    ok.setTitle("Location Verified");
+                    ok.setHeaderText(top.getDisplayName());
+                    ok.setContentText(String.format("Coordinates captured: %.5f, %.5f", currentLat, currentLon));
+                    ok.show();
+                }
+            });
+        }).start();
+    }
+
+    @FXML
+    private void handleAiPredict() {
+        if (nameField.getText().isEmpty() || descriptionArea.getText().isEmpty()) {
+            showAlert("Missing Data", "Please enter at least a Name and Description for AI analysis.");
+            return;
+        }
+
+        // Create a temp event for AI to analyze
+        Event temp = new Event();
+        temp.setName(nameField.getText());
+        temp.setDescription(descriptionArea.getText());
+        temp.setLocation(locationField.getText());
+        try {
+            temp.setCapacity(Integer.parseInt(capacityField.getText()));
+        } catch (Exception e) {
+            temp.setCapacity(100);
+        }
+        temp.setStartedAt(startDatePicker.getValue() != null ? 
+            LocalDateTime.of(startDatePicker.getValue(), LocalTime.of(9, 0)) : LocalDateTime.now());
+
+        saveBtn.setDisable(true); // Disable save during AI call
+        aiAnalysisLabel.setText("Analyzing event potential... please wait...");
+        aiResultBox.setVisible(true);
+        aiResultBox.setManaged(true);
+
+        new Thread(() -> {
+            OpenRouterEventService.PredictionResult result = aiService.predictAttendance(temp);
+            javafx.application.Platform.runLater(() -> {
+                aiSuccessLabel.setText(result.successLevel);
+                aiAnalysisLabel.setText(result.analysis);
+                
+                // Color code based on level
+                if ("HIGH".equals(result.successLevel)) aiSuccessLabel.setStyle("-fx-text-fill: #2d6a4f; -fx-font-weight: bold;");
+                else if ("LOW".equals(result.successLevel)) aiSuccessLabel.setStyle("-fx-text-fill: #e63946; -fx-font-weight: bold;");
+                else aiSuccessLabel.setStyle("-fx-text-fill: #fca311; -fx-font-weight: bold;");
+                
+                saveBtn.setDisable(false);
+            });
+        }).start();
     }
 
     @FXML
@@ -143,6 +227,8 @@ public class EventFormController {
             currentEvent.setStartedAt(LocalDateTime.of(startDatePicker.getValue(), LocalTime.of(9, 0)));
             currentEvent.setEndedAt(LocalDateTime.of(endDatePicker.getValue(), LocalTime.of(17, 0)));
             currentEvent.setDescription(descriptionArea.getText());
+            currentEvent.setLatitude(currentLat);
+            currentEvent.setLongitude(currentLon);
 
             if (isEdit) {
                 eventService.update(currentEvent);
@@ -151,18 +237,21 @@ public class EventFormController {
             }
 
             // Save Many-to-Many Sponsor links
-            // 1. Remove old links if editing
-            if (isEdit) {
-                // We need a method in SponsorService to clear all sponsors for an event
-                // or just unassign all.
-                for (Sponsor s : sponsorService.getSponsorsForEvent(currentEvent.getId())) {
+            // 1. Get current assigned sponsors to compare
+            java.util.List<Sponsor> currentlyAssigned = sponsorService.getSponsorsForEvent(currentEvent.getId());
+            
+            // 2. Remove those that are no longer selected
+            for (Sponsor s : currentlyAssigned) {
+                if (selectedSponsors.stream().noneMatch(sel -> sel.getId() == s.getId())) {
                     sponsorService.unassignSponsorFromEvent(currentEvent.getId(), s.getId());
                 }
             }
             
-            // 2. Add new links
-            for (Sponsor s : selectedSponsors) {
-                sponsorService.assignSponsorToEvent(currentEvent.getId(), s.getId());
+            // 3. Add new ones
+            for (Sponsor sel : selectedSponsors) {
+                if (currentlyAssigned.stream().noneMatch(cur -> cur.getId() == sel.getId())) {
+                    sponsorService.assignSponsorToEvent(currentEvent.getId(), sel.getId());
+                }
             }
 
             goBack(null);

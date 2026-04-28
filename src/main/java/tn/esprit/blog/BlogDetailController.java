@@ -6,9 +6,11 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
@@ -37,6 +39,7 @@ public class BlogDetailController {
     @FXML private Label viewsLabel;
     @FXML private WebView contentWebView;
     @FXML private FlowPane tagsFlowPane;
+    @FXML private ImageView currentUserAvatar;
 
     // Comments
     @FXML private VBox commentsContainer;
@@ -64,6 +67,7 @@ public class BlogDetailController {
     private final tn.esprit.services.CommentService commentService = new tn.esprit.services.CommentService();
     private final tn.esprit.services.ReactionService reactionService = new tn.esprit.services.ReactionService();
     private final tn.esprit.services.BlogService blogService = new tn.esprit.services.BlogService();
+    private final tn.esprit.services.UserService userService = new tn.esprit.services.UserService();
 
     // TTS state
     private Process ttsProcess;
@@ -82,6 +86,7 @@ public class BlogDetailController {
             if (user != null) {
                 commentAuthorField.setText(user.getUsername());
                 commentAuthorField.setEditable(false);
+                loadCurrentUserAvatar();
             }
         } else {
             commentInputSection.setVisible(false);
@@ -89,9 +94,42 @@ public class BlogDetailController {
             guestPromptSection.setVisible(true);
             guestPromptSection.setManaged(true);
         }
+
+        // Fix trackpad/two-finger scrolling: WebView eats scroll events,
+        // so we intercept them and forward to the parent ScrollPane.
+        contentWebView.addEventFilter(ScrollEvent.SCROLL, event -> {
+            ScrollPane parentScroll = findParentScrollPane(contentWebView);
+            if (parentScroll != null) {
+                double deltaY = event.getDeltaY();
+                double vvalue = parentScroll.getVvalue();
+                double contentHeight = parentScroll.getContent().getBoundsInLocal().getHeight();
+                double viewportHeight = parentScroll.getViewportBounds().getHeight();
+                double scrollableHeight = contentHeight - viewportHeight;
+                if (scrollableHeight > 0) {
+                    parentScroll.setVvalue(vvalue - (deltaY / scrollableHeight));
+                }
+                event.consume();
+            }
+        });
     }
 
-    // ─── Reactions ──────────────────────────────────────────────────────────────
+    private ScrollPane findParentScrollPane(javafx.scene.Node node) {
+        javafx.scene.Node current = node.getParent();
+        while (current != null) {
+            if (current instanceof ScrollPane) return (ScrollPane) current;
+            current = current.getParent();
+        }
+        return null;
+    }
+
+    private void loadCurrentUserAvatar() {
+        tn.esprit.user.User user = tn.esprit.util.SessionManager.getCurrentUser();
+        if (user != null && currentUserAvatar != null) {
+            String style = user.getAvatarStyle() != null ? user.getAvatarStyle() : "avataaars";
+            String url = tn.esprit.services.AvatarService.getAvatarUrl(user.getUsername(), style);
+            currentUserAvatar.setImage(new Image(url, true));
+        }
+    }
 
     @FXML
     private void handleLike() {
@@ -113,6 +151,9 @@ public class BlogDetailController {
         int likes = reactionService.getLikes(currentArticle.getId());
         int dislikes = reactionService.getDislikes(currentArticle.getId());
         String userReaction = reactionService.getUserReaction(currentArticle.getId(), userId);
+        
+        System.out.println("DEBUG: Refreshing reactions for article " + currentArticle.getId() + ". Likes: " + likes + ", Dislikes: " + dislikes);
+        
         likeBtn.setText("👍 " + likes);
         dislikeBtn.setText("👎 " + dislikes);
         likeBtn.getStyleClass().removeAll("reaction-active");
@@ -121,8 +162,30 @@ public class BlogDetailController {
         else if ("dislike".equals(userReaction)) dislikeBtn.getStyleClass().add("reaction-active");
     }
 
+    private static Image fallbackImage() {
+        return new Image("https://images.unsplash.com/photo-1527330772182-997f9850cab9?q=80&w=1469&auto=format&fit=crop", true);
+    }
+
+    private void loadThumbnail(String url) {
+        articleImg.setImage(fallbackImage());
+        if (url == null || url.isEmpty()) return;
+        try {
+            Image img = new Image(url, true);
+            img.errorProperty().addListener((obs, old, err) -> {
+                if (err) articleImg.setImage(fallbackImage());
+            });
+            img.progressProperty().addListener((obs, old, prog) -> {
+                if (prog.doubleValue() >= 1.0 && !img.isError()) articleImg.setImage(img);
+            });
+        } catch (Exception e) {
+            // fallback already set
+        }
+    }
+
     public void setArticle(Blog blog) {
-        this.currentArticle = blog;
+        try {
+            System.out.println("DEBUG: setArticle called for ID: " + (blog != null ? blog.getId() : "NULL"));
+            this.currentArticle = blog;
         heroTitle.setText(blog.getTitle());
         breadcrumbTitle.setText(blog.getTitle());
         titleLabel.setText(blog.getTitle());
@@ -133,9 +196,7 @@ public class BlogDetailController {
             dateLabel.setText("🕒 " + TimeUtils.formatRelativeTime(blog.getPublishedAt()));
         }
 
-        if (blog.getImage() != null && !blog.getImage().isEmpty()) {
-            try { articleImg.setImage(new Image(blog.getImage(), true)); } catch (Exception ignored) {}
-        }
+        loadThumbnail(blog.getImage());
 
         categoryLabel.setText(blog.getCategory() != null ? blog.getCategory().getName() : "General");
         categoryLabel.setStyle("-fx-cursor: hand;");
@@ -180,11 +241,35 @@ public class BlogDetailController {
         }
 
         contentWebView.getEngine().loadContent(blog.getContent());
+
+        // Auto-resize WebView to fit content (eliminates internal scrollbar)
+        contentWebView.getEngine().getLoadWorker().stateProperty().addListener((obs, oldState, newState) -> {
+            if (newState == javafx.concurrent.Worker.State.SUCCEEDED) {
+                Platform.runLater(() -> {
+                    try {
+                        Object heightObj = contentWebView.getEngine().executeScript(
+                            "Math.max(document.body.scrollHeight, document.documentElement.scrollHeight)"
+                        );
+                        if (heightObj instanceof Number) {
+                            double h = ((Number) heightObj).doubleValue() + 30;
+                            contentWebView.setPrefHeight(h);
+                            contentWebView.setMinHeight(h);
+                            contentWebView.setMaxHeight(h);
+                        }
+                    } catch (Exception ignored) {}
+                });
+            }
+        });
+
         loadComments();
 
-        int userId = tn.esprit.util.SessionManager.isLoggedIn()
-                ? tn.esprit.util.SessionManager.getCurrentUser().getId() : -1;
-        refreshReactions(userId);
+            int userId = tn.esprit.util.SessionManager.isLoggedIn()
+                    ? tn.esprit.util.SessionManager.getCurrentUser().getId() : -1;
+            refreshReactions(userId);
+        } catch (Exception e) {
+            System.err.println("CRITICAL ERROR in setArticle: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 
     // ─── AI Voice Reader ────────────────────────────────────────────────────────
@@ -315,22 +400,27 @@ public class BlogDetailController {
     // ─── Comments ───────────────────────────────────────────────────────────────
 
     private void loadComments() {
-        if (currentArticle == null) return;
-        commentsContainer.getChildren().clear();
-        List<Comment> comments = commentService.getByArticleId(currentArticle.getId());
-        System.out.println("Loading comments for article ID: " + currentArticle.getId() + ". Found: " + comments.size());
-        commentsCountLabel.setText("Comments (" + comments.size() + ")");
+        try {
+            if (currentArticle == null) return;
+            commentsContainer.getChildren().clear();
+            List<Comment> comments = commentService.getByArticleId(currentArticle.getId());
+            System.out.println("Loading comments for article ID: " + currentArticle.getId() + ". Found: " + comments.size());
+            commentsCountLabel.setText("Comments (" + comments.size() + ")");
 
-        for (Comment comment : comments) {
-            try {
-                FXMLLoader loader = new FXMLLoader(getClass().getResource("/blog/CommentItem.fxml"));
-                Parent card = loader.load();
-                CommentItemController controller = loader.getController();
-                controller.setData(comment);
-                commentsContainer.getChildren().add(card);
-            } catch (IOException e) {
-                e.printStackTrace();
+            for (Comment comment : comments) {
+                try {
+                    FXMLLoader loader = new FXMLLoader(getClass().getResource("/blog/CommentItem.fxml"));
+                    Parent card = loader.load();
+                    CommentItemController controller = loader.getController();
+                    controller.setData(comment);
+                    commentsContainer.getChildren().add(card);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
+        } catch (Exception e) {
+            System.err.println("ERROR in loadComments: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
@@ -356,7 +446,8 @@ public class BlogDetailController {
 
         Comment comment = new Comment(commentAuthorField.getText(), trimmed, currentArticle.getId());
         if (!commentService.add(comment)) {
-            showError("Failed to post comment. Please try again.");
+            String reason = commentService.getLastErrorMessage();
+            showError(reason != null ? reason : "Failed to post comment. Please try again.");
             return;
         }
         commentArea.clear();
@@ -369,7 +460,18 @@ public class BlogDetailController {
 
     // ─── Navigation ─────────────────────────────────────────────────────────────
 
-    @FXML private void goToBlog() { stopTtsAndNavigate("/blog/BlogManagement.fxml", null); }
+    @FXML
+    private void goToBlog() {
+        stopTtsAndNavigate("/blog/BlogManagement.fxml", null);
+    }
+
+    @FXML
+    private void goToBlogReset() {
+        tn.esprit.blog.BlogManagementController.selectedCategory = null;
+        tn.esprit.blog.BlogManagementController.selectedTag = null;
+        tn.esprit.blog.BlogManagementController.selectedAuthor = null;
+        goToBlog();
+    }
     @FXML private void goToHome() { stopTtsAndNavigate("/home/Home.fxml", null); }
     @FXML private void goToArticles() { stopTtsAndNavigate("/blog/ArticlesManagement.fxml", null); }
     @FXML private void goToEvents(javafx.event.ActionEvent e) { handleTtsStop(); navigate(e, "/event/EventManagement.fxml"); }

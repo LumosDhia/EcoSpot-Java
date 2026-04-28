@@ -24,7 +24,6 @@
         <HBox alignment="CENTER_LEFT" spacing="10.0">
             <children>
                 <Button onAction="#goBack" styleClass="btn-outline" text="← Back" />
-                <Button onAction="#goToDashboard" styleClass="btn-outline" text="Dashboard" />
                 <Label styleClass="page-title" text="Categories Management" />
                 <Region HBox.hgrow="ALWAYS" />
             </children>

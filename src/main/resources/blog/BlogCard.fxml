@@ -4,58 +4,62 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
 
-<VBox fx:id="cardContainer" prefWidth="280.0" spacing="0" styleClass="article-card" stylesheets="@../style.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="tn.esprit.blog.BlogCardController">
+<VBox fx:id="cardContainer" prefWidth="300.0" spacing="0" styleClass="article-card" stylesheets="@../style.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="tn.esprit.blog.BlogCardController">
    <children>
-      <StackPane prefHeight="180.0">
+      <!-- Image with overlay -->
+      <StackPane prefHeight="190.0" styleClass="card-image-wrapper">
          <children>
-            <ImageView fx:id="articleImage" fitHeight="180.0" fitWidth="280.0" pickOnBounds="true" preserveRatio="false">
-               <image>
-                  <Image url="https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=800" />
-               </image>
-            </ImageView>
-         </children>
-      </StackPane>
-      <VBox spacing="12" style="-fx-padding: 15;">
-         <children>
-            <HBox alignment="CENTER_LEFT" spacing="10">
+            <ImageView fx:id="articleImage" fitHeight="190.0" fitWidth="300.0" pickOnBounds="true" preserveRatio="false" />
+            <!-- Category overlay on image -->
+            <HBox alignment="TOP_LEFT" StackPane.alignment="TOP_LEFT" style="-fx-padding: 12;">
                <children>
-                  <Label fx:id="categoryLabel" styleClass="category-tag" text="Energy" />
-                  <Region HBox.hgrow="ALWAYS" />
-                  <Label fx:id="dateLabel" styleClass="article-date" text="15 minutes ago">
-                     <graphic>
-                        <Label style="-fx-text-fill: #64748b;" text="📅" />
-                     </graphic>
-                  </Label>
+                  <Label fx:id="categoryLabel" styleClass="category-tag-overlay" text="Energy" />
                </children>
             </HBox>
+         </children>
+      </StackPane>
+      
+      <!-- Card body -->
+      <VBox spacing="10" styleClass="card-body">
+         <children>
+            <!-- Date -->
+            <Label fx:id="dateLabel" styleClass="card-date-label" text="15 minutes ago" />
             
-            <Label fx:id="titleLabel" styleClass="article-title" text="hufhuhu ijoij" wrapText="true" />
+            <!-- Title -->
+            <Label fx:id="titleLabel" styleClass="card-title-label" text="Article Title" wrapText="true" />
             
-            <HBox fx:id="statsBar" alignment="CENTER_LEFT" spacing="15.0" styleClass="article-stats-bar">
+            <!-- Excerpt -->
+            <TextFlow prefHeight="48.0" styleClass="card-excerpt-flow">
+               <children>
+                  <Text fx:id="excerptText" styleClass="article-excerpt" text="Article excerpt goes here..." />
+               </children>
+            </TextFlow>
+
+            <!-- Tags -->
+            <FlowPane fx:id="tagsFlowPane" hgap="5.0" vgap="5.0" />
+
+            <!-- Divider -->
+            <Region styleClass="card-divider" />
+
+            <!-- Stats row -->
+            <HBox alignment="CENTER_LEFT" spacing="12.0" styleClass="card-stats-row">
                <children>
                   <Label fx:id="viewsLabel" styleClass="stat-item" text="👁 3" />
                   <Label fx:id="likesLabel" styleClass="stat-item" text="👍 0" />
                   <Label fx:id="dislikesLabel" styleClass="stat-item" text="👎 0" />
-                  <Label fx:id="readTimeLabel" styleClass="stat-item" text="👤 1m" />
+                  <Label fx:id="readTimeLabel" styleClass="stat-item" text="📖 1m" />
                   <Label fx:id="commentsLabel" styleClass="stat-item" text="💬 0" />
                </children>
             </HBox>
 
-            <Label fx:id="authorLabel" styleClass="article-author" text="👤 Admin User">
-                <graphic>
-                    <Label style="-fx-text-fill: #64748b;" text="🖋" />
-                </graphic>
-            </Label>
-
-            <TextFlow prefHeight="60.0">
+            <!-- Author + Read More -->
+            <HBox alignment="CENTER_LEFT" spacing="10.0">
                <children>
-                  <Text fx:id="excerptText" styleClass="article-excerpt" text="jij ijoiijiojijioiji ioj ijijo joijoijij ioj ij joijiojijio j jjoijiojijjo jijioiWrite your article..." />
+                  <Label fx:id="authorLabel" styleClass="card-author-label" text="Admin User" />
+                  <Region HBox.hgrow="ALWAYS" />
+                  <Button fx:id="readMoreBtn" styleClass="card-read-more-btn" text="Read →" />
                </children>
-            </TextFlow>
-
-            <FlowPane fx:id="tagsFlowPane" hgap="5.0" vgap="5.0" />
-
-            <Button fx:id="readMoreBtn" maxWidth="1.7976931348623157E308" styleClass="read-more-btn" text="Read more" />
+            </HBox>
          </children>
       </VBox>
    </children>

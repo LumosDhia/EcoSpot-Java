@@ -34,14 +34,48 @@ public class BlogCardController {
     @FXML private Button readMoreBtn;
     @FXML private FlowPane tagsFlowPane;
 
-    public void setData(Blog blog) {
-        if (blog.getImage() != null && !blog.getImage().isEmpty()) {
-            try {
-                articleImage.setImage(new Image(blog.getImage(), true));
-            } catch (Exception e) {
-                // Keep default if loading fails
+    private static Image fallbackImage() {
+        return new Image("https://images.unsplash.com/photo-1527330772182-997f9850cab9?q=80&w=1469&auto=format&fit=crop", true);
+    }
+
+    private void loadThumbnail(String url) {
+        articleImage.setImage(fallbackImage());
+        if (url == null || url.trim().isEmpty()) return;
+        
+        try {
+            // If the URL doesn't have a protocol, it might be a local file path
+            String finalUrl = url;
+            if (!url.startsWith("http") && !url.startsWith("file:")) {
+                finalUrl = "file:" + url;
             }
+
+            Image img = new Image(finalUrl, true);
+            
+            // Check if already loaded (from cache)
+            if (img.getProgress() >= 1.0 && !img.isError()) {
+                articleImage.setImage(img);
+                return;
+            }
+
+            img.errorProperty().addListener((obs, old, err) -> {
+                if (err) {
+                    System.err.println("Failed to load image: " + url);
+                    articleImage.setImage(fallbackImage());
+                }
+            });
+            
+            img.progressProperty().addListener((obs, old, prog) -> {
+                if (prog.doubleValue() >= 1.0 && !img.isError()) {
+                    articleImage.setImage(img);
+                }
+            });
+        } catch (Exception e) {
+            System.err.println("Error creating image: " + e.getMessage());
         }
+    }
+
+    public void setData(Blog blog) {
+        loadThumbnail(blog.getImage());
         
         categoryLabel.setText(blog.getCategory() != null ? blog.getCategory().getName() : "General");
         categoryLabel.setStyle("-fx-cursor: hand;");

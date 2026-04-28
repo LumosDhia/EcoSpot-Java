@@ -142,11 +142,33 @@ public class AdminAllTicketsController {
         viewBtn.setStyle("-fx-background-color: #3b82f6; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;");
         viewBtn.setOnAction(e -> openTicketDetail(t));
 
+        Button editBtn = new Button("Edit");
+        editBtn.setStyle("-fx-background-color: #6366f1; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;");
+        editBtn.setOnAction(e -> openTicketEdit(t));
+
         Button deleteBtn = new Button("Delete");
         deleteBtn.setStyle("-fx-background-color: #ef4444; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;");
         deleteBtn.setOnAction(e -> deleteTicket(t));
 
-        actions.getChildren().addAll(deleteBtn, viewBtn);
+        if (t.isSpam() && t.getUserId() > 0) {
+            tn.esprit.user.User owner = userService.getAllUsers().stream()
+                    .filter(u -> u.getId() == t.getUserId())
+                    .findFirst().orElse(null);
+            
+            boolean canBeTimedOut = owner != null && !"ADMIN".equalsIgnoreCase(owner.getRole()) && !"NGO".equalsIgnoreCase(owner.getRole());
+
+            if (canBeTimedOut) {
+                Button timeoutBtn = new Button("Timeout User");
+                timeoutBtn.setStyle("-fx-background-color: #f97316; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;");
+                timeoutBtn.setOnAction(e -> {
+                    userService.updateTimeout(t.getUserId(), java.time.LocalDateTime.now().plusHours(24));
+                    new Alert(Alert.AlertType.INFORMATION, "User has been put in a 24-hour timeout.").show();
+                });
+                actions.getChildren().add(timeoutBtn);
+            }
+        }
+
+        actions.getChildren().addAll(deleteBtn, editBtn, viewBtn);
 
         // Assignment Controls for Published tickets
         if (t.getStatus() == TicketStatus.PUBLISHED) {
@@ -199,6 +221,19 @@ public class AdminAllTicketsController {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/ticket/TicketDetail.fxml"));
             Parent root = loader.load();
             TicketDetailController controller = loader.getController();
+            controller.setTicket(t);
+            Stage stage = (Stage) ticketsListContainer.getScene().getWindow();
+            stage.getScene().setRoot(root);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void openTicketEdit(Ticket t) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/ticket/AdminTicketEdit.fxml"));
+            Parent root = loader.load();
+            AdminTicketEditController controller = loader.getController();
             controller.setTicket(t);
             Stage stage = (Stage) ticketsListContainer.getScene().getWindow();
             stage.getScene().setRoot(root);

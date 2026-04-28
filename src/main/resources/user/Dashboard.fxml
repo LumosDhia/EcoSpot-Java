@@ -3,6 +3,7 @@
 <?import java.net.URL?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.layout.FlowPane?>
@@ -10,6 +11,8 @@
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.shape.Circle?>
 
 <HBox prefHeight="720.0" prefWidth="1280.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="tn.esprit.user.DashboardController">
     <stylesheets>
@@ -40,6 +43,7 @@
                                 <Button onAction="#goToCompletions" styleClass="sidebar-item" text="✅ Completions" />
                                 <Button onAction="#goToUserManagement" styleClass="sidebar-item" text="👥 Users" />
                                 <Button onAction="#goToSponsorManagement" styleClass="sidebar-item" text="🤝 Sponsors" />
+
                             </children>
                         </VBox>
 
@@ -48,6 +52,8 @@
                             <children>
                                 <Button onAction="#goToBlogManagement" styleClass="sidebar-item" text="📰 My articles" />
                                 <Button onAction="#goToCommentsManagement" styleClass="sidebar-item" text="💬 Comments" />
+                                <Button onAction="#goToStatistics" styleClass="sidebar-item" text="📊 My statistics" />
+                                <Button onAction="#goToNgoTickets" styleClass="sidebar-item" text="📋 Ticket management" />
                                 <Button onAction="#goToEventManagement" styleClass="sidebar-item" text="📅 My events" />
                                 <Button onAction="#goToAchievements" styleClass="sidebar-item" text="🏆 My achievements" />
                             </children>
@@ -57,7 +63,7 @@
                         <VBox fx:id="userSidebarLinks" spacing="5.0" visible="false" managed="false">
                             <children>
                                 <Button onAction="#goToMyTickets" styleClass="sidebar-item" text="📋 My tickets" />
-                                <Button onAction="#goToCreateTicket" styleClass="sidebar-item" text="➕ New ticket" />
+                                <Button fx:id="sidebarCreateTicketBtn" onAction="#goToCreateTicket" styleClass="sidebar-item" text="➕ New ticket" />
                                 <Button onAction="#goToPendingTickets" styleClass="sidebar-item" text="🌐 Community tickets" />
                             </children>
                         </VBox>
@@ -72,6 +78,20 @@
         <!-- MAIN CONTENT -->
         <VBox styleClass="admin-content-bg" HBox.hgrow="ALWAYS">
             <children>
+                <!-- TIMEOUT BANNER -->
+                <HBox fx:id="timeoutBanner" alignment="CENTER_LEFT" spacing="15.0" style="-fx-background-color: linear-gradient(to right, #fef2f2, #fee2e2); -fx-border-color: #fca5a5; -fx-border-width: 0 0 1 0; -fx-padding: 12 30; -fx-min-height: 50;" visible="false" managed="false">
+                    <children>
+                        <Label style="-fx-font-size: 20px; -fx-text-fill: #b91c1c;" text="⚠️" />
+                        <VBox HBox.hgrow="ALWAYS">
+                            <children>
+                                <Label style="-fx-font-weight: bold; -fx-text-fill: #991b1b; -fx-font-size: 14px;" text="Account Restricted" />
+                                <Label fx:id="timeoutLabel" style="-fx-text-fill: #b91c1c; -fx-font-size: 13px;" text="Your account is temporarily in timeout due to multiple spam flags. Restored at: ..." />
+                            </children>
+                        </VBox>
+                        <Button onAction="#goToMyTickets" style="-fx-background-color: #ef4444; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 6 15; -fx-background-radius: 4; -fx-cursor: hand;" text="View My Tickets" />
+                    </children>
+                </HBox>
+
                 <!-- TOP HEADER -->
                 <HBox alignment="CENTER_LEFT" styleClass="admin-top-bar">
                     <children>
@@ -84,7 +104,21 @@
                                         <Label fx:id="userNameLabel" styleClass="admin-profile-name" text="User" />
                                     </children>
                                 </VBox>
-                                <Label text="👤" style="-fx-font-size: 32px; -fx-background-color: #fca311; -fx-text-fill: white; -fx-padding: 5; -fx-background-radius: 50;" />
+                                <VBox alignment="CENTER" spacing="10.0">
+                                   <children>
+                                      <StackPane style="-fx-background-color: #f0f7f4; -fx-background-radius: 40; -fx-padding: 2;">
+                                         <children>
+                                            <ImageView fx:id="userAvatarImageView" fitHeight="64.0" fitWidth="64.0" onMouseClicked="#toggleAvatarGallery" pickOnBounds="true" preserveRatio="true" style="-fx-cursor: hand;" />
+                                         </children>
+                                      </StackPane>
+                                      <Label style="-fx-font-size: 10px; -fx-text-fill: #666;" text="Click to change" />
+                                      <ScrollPane fx:id="avatarGalleryScroll" fitToHeight="true" managed="false" minHeight="80.0" prefHeight="80.0" prefWidth="300.0" style="-fx-background-color: transparent; -fx-background: transparent; -fx-border-color: #ddd; -fx-border-radius: 5;" visible="false">
+                                         <content>
+                                            <HBox fx:id="avatarGallery" alignment="CENTER_LEFT" spacing="10.0" style="-fx-padding: 5;" />
+                                         </content>
+                                      </ScrollPane>
+                                   </children>
+                                </VBox>
                             </children>
                         </HBox>
                     </children>
@@ -159,6 +193,21 @@
                                                         </StackPane>
                                                         <Label styleClass="card-title-lg" text="Comments" />
                                                         <Label styleClass="card-subtitle" text="View and manage blog comments" textAlignment="CENTER" wrapText="true" />
+                                                    </children>
+                                                </VBox>
+                                            </children>
+                                        </VBox>
+                                        <VBox onMouseClicked="#goToStatisticsGrid" styleClass="stat-card">
+                                            <children>
+                                                <VBox alignment="CENTER" spacing="15.0">
+                                                    <children>
+                                                        <StackPane styleClass="dashboard-icon-container">
+                                                            <children>
+                                                                <Label styleClass="dashboard-icon" text="&#xE9D9;" />
+                                                            </children>
+                                                        </StackPane>
+                                                        <Label styleClass="card-title-lg" text="Statistics" />
+                                                        <Label styleClass="card-subtitle" text="View blog and analytics metrics" textAlignment="CENTER" wrapText="true" />
                                                     </children>
                                                 </VBox>
                                             </children>
@@ -246,6 +295,7 @@
                                                 </VBox>
                                             </children>
                                         </VBox>
+
                                     </children>
                                 </FlowPane>
 
@@ -328,6 +378,23 @@
                                             </children>
                                         </VBox>
 
+                                        <!-- My Statistics -->
+                                        <VBox onMouseClicked="#goToStatisticsGrid" styleClass="stat-card">
+                                            <children>
+                                                <VBox alignment="CENTER" spacing="15.0">
+                                                    <children>
+                                                        <StackPane styleClass="dashboard-icon-container">
+                                                            <children>
+                                                                <Label styleClass="dashboard-icon" text="&#xE9D9;" />
+                                                            </children>
+                                                        </StackPane>
+                                                        <Label styleClass="card-title-lg" text="My Statistics" />
+                                                        <Label styleClass="card-subtitle" text="Views, likes and comments on your articles" textAlignment="CENTER" wrapText="true" />
+                                                    </children>
+                                                </VBox>
+                                            </children>
+                                        </VBox>
+
                                         <!-- My Achievements -->
                                         <VBox onMouseClicked="#goToAchievementsGrid" styleClass="stat-card">
                                             <children>
@@ -340,6 +407,23 @@
                                                         </StackPane>
                                                         <Label styleClass="card-title-lg" text="My Achievements" />
                                                         <Label styleClass="card-subtitle" text="Review your history of successfully resolved tickets." textAlignment="CENTER" wrapText="true" />
+                                                    </children>
+                                                </VBox>
+                                            </children>
+                                        </VBox>
+                                        
+                                        <!-- NGO Tickets Card -->
+                                        <VBox onMouseClicked="#goToNgoTicketsGrid" styleClass="stat-card">
+                                            <children>
+                                                <VBox alignment="CENTER" spacing="15.0">
+                                                    <children>
+                                                        <StackPane styleClass="dashboard-icon-container" style="-fx-background-color: #ecfdf5;">
+                                                            <children>
+                                                                <Label styleClass="dashboard-icon" style="-fx-text-fill: #10b981;" text="&#xEBE7;" />
+                                                            </children>
+                                                        </StackPane>
+                                                        <Label styleClass="card-title-lg" text="Manage Tickets" />
+                                                        <Label styleClass="card-subtitle" text="Claim community tickets and track your progress." textAlignment="CENTER" wrapText="true" />
                                                     </children>
                                                 </VBox>
                                             </children>
@@ -369,19 +453,30 @@
                                                 </StackPane>
                                             </children>
                                         </VBox>
-                                        <VBox onMouseClicked="#goToCreateTicketGrid" styleClass="stat-card">
+                                        <VBox fx:id="createTicketCard" onMouseClicked="#goToCreateTicketGrid" styleClass="stat-card">
                                             <children>
-                                                <VBox alignment="CENTER" spacing="15.0">
+                                                <StackPane>
                                                     <children>
-                                                        <StackPane styleClass="dashboard-icon-container">
+                                                        <VBox alignment="CENTER" spacing="15.0">
                                                             <children>
-                                                                <Label styleClass="dashboard-icon" text="&#xE710;" />
+                                                                <StackPane styleClass="dashboard-icon-container">
+                                                                    <children>
+                                                                        <Label styleClass="dashboard-icon" text="&#xE710;" />
+                                                                    </children>
+                                                                </StackPane>
+                                                                <Label styleClass="card-title-lg" text="Create a ticket" />
+                                                                <Label styleClass="card-subtitle" text="Report an environmental issue or suggestion quickly" textAlignment="CENTER" wrapText="true" />
                                                             </children>
-                                                        </StackPane>
-                                                        <Label styleClass="card-title-lg" text="Create a ticket" />
-                                                        <Label styleClass="card-subtitle" text="Report an environmental issue or suggestion quickly" textAlignment="CENTER" wrapText="true" />
+                                                        </VBox>
+                                                        <VBox fx:id="createTicketLockOverlay" alignment="CENTER" style="-fx-background-color: rgba(255,255,255,0.75); -fx-background-radius: 15;" visible="false" managed="false">
+                                                            <children>
+                                                                <Label style="-fx-font-size: 44px;" text="🔒" />
+                                                                <Label style="-fx-text-fill: #7f1d1d; -fx-font-weight: bold; -fx-font-size: 16px; -fx-padding: 5 0 0 0;" text="RESTRICTED" />
+                                                                <Label style="-fx-text-fill: #991b1b; -fx-font-size: 11px;" text="Feature Locked" />
+                                                            </children>
+                                                        </VBox>
                                                     </children>
-                                                </VBox>
+                                                </StackPane>
                                             </children>
                                         </VBox>
                                         <VBox onMouseClicked="#goToPendingTicketsGrid" styleClass="stat-card">

@@ -76,7 +76,12 @@ public class BlogManagementController {
         sortChoice.setItems(FXCollections.observableArrayList("Newest", "Oldest", "Most Viewed"));
         sortChoice.setValue("Newest");
 
-        refreshData();
+        try {
+            refreshData();
+        } catch (Exception e) {
+            System.err.println("Failed to load blog data: " + e.getMessage());
+            e.printStackTrace();
+        }
 
         searchField.textProperty().addListener((obs, old, val) -> {
             currentPage = 0;
@@ -127,6 +132,10 @@ public class BlogManagementController {
 
         displayCurrentPage();
         updateActiveFiltersUI();
+        
+        if (query != null && !query.trim().isEmpty() && query.trim().length() > 2) {
+            tn.esprit.util.StatisticsCollector.getInstance().recordSearchTerm(query.trim(), filteredBlogs.size());
+        }
     }
 
     private void updateActiveFiltersUI() {

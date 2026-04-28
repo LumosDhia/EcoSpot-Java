@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.net.URL?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.layout.FlowPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox prefHeight="720.0" prefWidth="1280.0" style="-fx-background-color: #f8fafc;" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="tn.esprit.ticket.NgoTicketsController">
+    <stylesheets>
+        <URL value="@../style.css" />
+        <URL value="@../ticket-style.css" />
+    </stylesheets>
+
+    <children>
+        <!-- TOP NAV -->
+        <HBox alignment="CENTER_LEFT" styleClass="admin-top-bar" spacing="15.0">
+            <padding>
+                <Insets left="20.0" right="20.0" top="10.0" bottom="10.0" />
+            </padding>
+            <children>
+                <Label styleClass="breadcrumb-text" text="NGO  ›  Ticket Management" />
+                <Region HBox.hgrow="ALWAYS" />
+                <HBox alignment="CENTER" spacing="15.0">
+                    <children>
+                        <VBox alignment="CENTER_RIGHT">
+                            <children>
+                                <Label fx:id="userNameLabel" styleClass="admin-profile-name" text="NGO User" />
+                            </children>
+                        </VBox>
+                        <Label text="🏢" style="-fx-font-size: 32px; -fx-background-color: #10b981; -fx-text-fill: white; -fx-padding: 5; -fx-background-radius: 50;" />
+                    </children>
+                </HBox>
+            </children>
+        </HBox>
+
+        <ScrollPane fitToWidth="true" style="-fx-background-color: transparent;" VBox.vgrow="ALWAYS">
+            <content>
+                <VBox spacing="30.0" style="-fx-padding: 40;">
+                    <children>
+                        
+                        <HBox alignment="CENTER_LEFT" spacing="10.0">
+                            <children>
+                                <Button onAction="#goBack" style="-fx-background-color: transparent; -fx-text-fill: #10b981; -fx-font-weight: bold; -fx-cursor: hand;" text="← Back to Dashboard" />
+                            </children>
+                        </HBox>
+
+                        <!-- SECTION: MY TASKS -->
+                        <VBox spacing="15.0">
+                            <children>
+                                <HBox alignment="CENTER_LEFT" spacing="10.0">
+                                    <children>
+                                        <Label style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #1e293b;" text="My Active Tasks" />
+                                        <Label fx:id="myTasksCount" style="-fx-background-color: #10b981; -fx-text-fill: white; -fx-padding: 2 10; -fx-background-radius: 12; -fx-font-weight: bold;" text="0" />
+                                    </children>
+                                </HBox>
+                                <FlowPane fx:id="myTasksFlowPane" hgap="25.0" vgap="25.0" />
+                            </children>
+                        </VBox>
+
+                        <Region prefHeight="20.0" style="-fx-border-color: #e2e8f0; -fx-border-width: 0 0 1 0;" />
+
+                        <!-- SECTION: AVAILABLE TICKETS -->
+                        <VBox spacing="15.0">
+                            <children>
+                                <HBox alignment="CENTER_LEFT" spacing="10.0">
+                                    <children>
+                                        <Label style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #1e293b;" text="Available Community Tickets" />
+                                        <Label fx:id="availableCount" style="-fx-background-color: #3b82f6; -fx-text-fill: white; -fx-padding: 2 10; -fx-background-radius: 12; -fx-font-weight: bold;" text="0" />
+                                    </children>
+                                </HBox>
+                                <Label style="-fx-text-fill: #64748b;" text="Claim these tickets to start working on them. They were published by admins." />
+                                <FlowPane fx:id="availableFlowPane" hgap="25.0" vgap="25.0" />
+                            </children>
+                        </VBox>
+
+                    </children>
+                </VBox>
+            </content>
+        </ScrollPane>
+    </children>
+</VBox>

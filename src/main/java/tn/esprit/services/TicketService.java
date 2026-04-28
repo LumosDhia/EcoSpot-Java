@@ -9,10 +9,12 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.StringJoiner;
+import java.time.LocalDateTime;
 
 public class TicketService implements GlobalInterface<Ticket> {
     private Connection cnx;
     private final ConsigneService consigneService = new ConsigneService();
+    private final UserService userService = new UserService();
 
     public TicketService() {
         cnx = MyConnection.getInstance().getCnx();
@@ -38,11 +40,25 @@ public class TicketService implements GlobalInterface<Ticket> {
                 "`completion_message` TEXT," +
                 "`completion_image` VARCHAR(255)," +
                 "`is_spam` TINYINT(1) DEFAULT 0," +
+                "`ai_category` VARCHAR(100)," +
+                "`ai_suggested_ngo` VARCHAR(255)," +
+                "`spam_reason` TEXT," +
                 "`created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP," +
                 "`achieved_at` TIMESTAMP NULL" +
                 ")";
         try (Statement st = cnx.createStatement()) {
             st.execute(req);
+            
+            // Add new columns if they don't exist
+            if (!hasColumn("ticket", "ai_category")) {
+                st.execute("ALTER TABLE `ticket` ADD COLUMN `ai_category` VARCHAR(100)");
+            }
+            if (!hasColumn("ticket", "ai_suggested_ngo")) {
+                st.execute("ALTER TABLE `ticket` ADD COLUMN `ai_suggested_ngo` VARCHAR(255)");
+            }
+            if (!hasColumn("ticket", "spam_reason")) {
+                st.execute("ALTER TABLE `ticket` ADD COLUMN `spam_reason` TEXT");
+            }
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -73,6 +89,9 @@ public class TicketService implements GlobalInterface<Ticket> {
         columns.add("completion_message"); values.add("?");
         columns.add("completion_image"); values.add("?");
         columns.add("is_spam"); values.add("?");
+        columns.add("ai_category"); values.add("?");
+        columns.add("ai_suggested_ngo"); values.add("?");
+        columns.add("spam_reason"); values.add("?");
         columns.add("created_at"); values.add("?");
         columns.add("achieved_at"); values.add("?");
 
@@ -106,6 +125,9 @@ public class TicketService implements GlobalInterface<Ticket> {
             ps.setString(idx++, ticket.getCompletionMessage());
             ps.setString(idx++, ticket.getCompletionImage());
             ps.setBoolean(idx++, ticket.isSpam());
+            ps.setString(idx++, ticket.getAiCategory());
+            ps.setString(idx++, ticket.getAiSuggestedNgo());
+            ps.setString(idx++, ticket.getSpamReason());
             ps.setTimestamp(idx++, java.sql.Timestamp.valueOf(java.time.LocalDateTime.now()));
             if (ticket.getAchievedAt() != null) ps.setTimestamp(idx++, Timestamp.valueOf(ticket.getAchievedAt()));
             else ps.setNull(idx++, Types.TIMESTAMP);
@@ -150,41 +172,54 @@ public class TicketService implements GlobalInterface<Ticket> {
 
     @Override
     public void update(Ticket ticket) {
-        String req = "UPDATE `ticket` SET title=?, description=?, location=?, image=?, status=?, priority=?, domain=?, latitude=?, longitude=?, assigned_ngo_id=?, admin_notes=?, completed_by_id=?, completion_message=?, completion_image=?, is_spam=?, achieved_at=? WHERE id=?";
-        try (PreparedStatement ps = cnx.prepareStatement(req)) {
-            ps.setString(1, ticket.getTitle());
-            ps.setString(2, ticket.getDescription());
-            ps.setString(3, ticket.getLocation());
-            ps.setString(4, ticket.getImage());
-            ps.setString(5, ticket.getStatus().name());
-            ps.setString(6, ticket.getPriority().name());
-            ps.setString(7, ticket.getDomain() != null ? ticket.getDomain().name() : null);
-            ps.setDouble(8, ticket.getLatitude());
-            ps.setDouble(9, ticket.getLongitude());
-            
-            if (ticket.getAssignedNgoId() != null) ps.setInt(10, ticket.getAssignedNgoId());
-            else ps.setNull(10, Types.INTEGER);
-            
-            ps.setString(11, ticket.getAdminNotes());
-            
-            if (ticket.getCompletedById() != null) ps.setInt(12, ticket.getCompletedById());
-            else ps.setNull(12, Types.INTEGER);
-            
-            ps.setString(13, ticket.getCompletionMessage());
-            ps.setString(14, ticket.getCompletionImage());
-            ps.setBoolean(15, ticket.isSpam());
-            
-            if (ticket.getAchievedAt() != null) ps.setTimestamp(16, Timestamp.valueOf(ticket.getAchievedAt()));
-            else ps.setNull(16, Types.TIMESTAMP);
-            
-            ps.setInt(17, ticket.getId());
-            ps.executeUpdate();
+        String req = "UPDATE `ticket` SET title=?, description=?, location=?, image=?, status=?, priority=?, domain=?, latitude=?, longitude=?, assigned_ngo_id=?, admin_notes=?, completed_by_id=?, completion_message=?, completion_image=?, is_spam=?, ai_category=?, ai_suggested_ngo=?, spam_reason=?, achieved_at=? WHERE id=?";
+        try {
+            cnx.setAutoCommit(false);
+            try (PreparedStatement ps = cnx.prepareStatement(req)) {
+                ps.setString(1, ticket.getTitle());
+                ps.setString(2, ticket.getDescription());
+                ps.setString(3, ticket.getLocation());
+                ps.setString(4, ticket.getImage());
+                ps.setString(5, ticket.getStatus().name());
+                ps.setString(6, ticket.getPriority().name());
+                ps.setString(7, ticket.getDomain() != null ? ticket.getDomain().name() : null);
+                ps.setDouble(8, ticket.getLatitude());
+                ps.setDouble(9, ticket.getLongitude());
+                
+                if (ticket.getAssignedNgoId() != null && ticket.getAssignedNgoId() > 0) ps.setInt(10, ticket.getAssignedNgoId());
+                else ps.setNull(10, Types.INTEGER);
+                
+                ps.setString(11, ticket.getAdminNotes());
+                
+                if (ticket.getCompletedById() != null) ps.setInt(12, ticket.getCompletedById());
+                else ps.setNull(12, Types.INTEGER);
+                
+                ps.setString(13, ticket.getCompletionMessage());
+                ps.setString(14, ticket.getCompletionImage());
+                ps.setBoolean(15, ticket.isSpam());
+                ps.setString(16, ticket.getAiCategory());
+                ps.setString(17, ticket.getAiSuggestedNgo());
+                ps.setString(18, ticket.getSpamReason());
+                
+                if (ticket.getAchievedAt() != null) ps.setTimestamp(19, Timestamp.valueOf(ticket.getAchievedAt()));
+                else ps.setNull(19, Types.TIMESTAMP);
+                
+                ps.setInt(20, ticket.getId());
+                ps.executeUpdate();
 
-            // Update Consignes: Delete and Re-add
-            consigneService.deleteByTicketId(ticket.getId());
-            for (Consigne c : ticket.getConsignes()) {
-                c.setTicketId(ticket.getId());
-                consigneService.add(c);
+                // Update Consignes: Delete and Re-add within same transaction
+                consigneService.deleteByTicketId(ticket.getId());
+                for (Consigne c : ticket.getConsignes()) {
+                    c.setTicketId(ticket.getId());
+                    consigneService.add(c);
+                }
+                
+                cnx.commit();
+            } catch (SQLException e) {
+                cnx.rollback();
+                throw e;
+            } finally {
+                cnx.setAutoCommit(true);
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -246,6 +281,36 @@ public class TicketService implements GlobalInterface<Ticket> {
         return tickets;
     }
 
+    public List<Ticket> getByNgoId(int ngoId) {
+        List<Ticket> tickets = new ArrayList<>();
+        String req = "SELECT * FROM `ticket` WHERE assigned_ngo_id = ? ORDER BY created_at DESC";
+        try (PreparedStatement ps = cnx.prepareStatement(req)) {
+            ps.setInt(1, ngoId);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    tickets.add(mapTicket(rs));
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return tickets;
+    }
+
+    public List<Ticket> getAvailableForNgo() {
+        List<Ticket> tickets = new ArrayList<>();
+        String req = "SELECT * FROM `ticket` WHERE status = 'PUBLISHED' AND (assigned_ngo_id IS NULL OR assigned_ngo_id = 0) ORDER BY created_at DESC";
+        try (PreparedStatement ps = cnx.prepareStatement(req);
+             ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                tickets.add(mapTicket(rs));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return tickets;
+    }
+
     public Ticket getById(int id) {
         String req = "SELECT * FROM `ticket` WHERE id = ? LIMIT 1";
         try (PreparedStatement ps = cnx.prepareStatement(req)) {
@@ -293,6 +358,9 @@ public class TicketService implements GlobalInterface<Ticket> {
         t.setCompletionImage(rs.getString("completion_image"));
         t.setConsignes(consigneService.getByTicketId(t.getId()));
         t.setSpam(rs.getBoolean("is_spam"));
+        if (hasColumn("ticket", "ai_category")) t.setAiCategory(rs.getString("ai_category"));
+        if (hasColumn("ticket", "ai_suggested_ngo")) t.setAiSuggestedNgo(rs.getString("ai_suggested_ngo"));
+        if (hasColumn("ticket", "spam_reason")) t.setSpamReason(rs.getString("spam_reason"));
         t.setCreatedAt(rs.getTimestamp("created_at").toLocalDateTime());
         Timestamp ach = rs.getTimestamp("achieved_at");
         if (ach != null) t.setAchievedAt(ach.toLocalDateTime());
@@ -390,4 +458,102 @@ public class TicketService implements GlobalInterface<Ticket> {
         }
         return null;
     }
+
+    public int countRecentSpamByUser(int userId, java.time.LocalDateTime since) {
+        String req = "SELECT COUNT(*) FROM `ticket` WHERE user_id = ? AND is_spam = 1 AND created_at > ?";
+        try (PreparedStatement ps = cnx.prepareStatement(req)) {
+            ps.setInt(1, userId);
+            ps.setTimestamp(2, java.sql.Timestamp.valueOf(since));
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) return rs.getInt(1);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
+    public void checkAndApplyTimeout(int userId) {
+        // Exemption check: Admins and NGOs cannot be timed out
+        String roleReq = "SELECT role FROM `user` WHERE id = ?";
+        try (PreparedStatement psRole = cnx.prepareStatement(roleReq)) {
+            psRole.setInt(1, userId);
+            try (ResultSet rsRole = psRole.executeQuery()) {
+                if (rsRole.next()) {
+                    String role = rsRole.getString(1);
+                    if ("ADMIN".equalsIgnoreCase(role) || "NGO".equalsIgnoreCase(role)) {
+                        return;
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        java.time.LocalDateTime since = java.time.LocalDateTime.now().minusHours(24);
+        int spamCount = countRecentSpamByUser(userId, since);
+        if (spamCount > 3) {
+            userService.updateTimeout(userId, java.time.LocalDateTime.now().plusHours(24));
+        }
+    }
+
+    // --- ANALYTICS DASHBOARD METHODS ---
+
+    public java.util.Map<java.time.LocalDate, Integer> getSpamTrends(int days) {
+        java.util.Map<java.time.LocalDate, Integer> trends = new java.util.LinkedHashMap<>();
+        java.time.LocalDate startDate = java.time.LocalDate.now().minusDays(days - 1);
+        
+        // Initialize map with 0s for all dates to ensure continuous line chart
+        for (int i = 0; i < days; i++) {
+            trends.put(startDate.plusDays(i), 0);
+        }
+
+        String req = "SELECT DATE(created_at) as d, COUNT(*) as c FROM ticket WHERE is_spam = 1 AND created_at >= ? GROUP BY DATE(created_at)";
+        try (PreparedStatement ps = cnx.prepareStatement(req)) {
+            ps.setTimestamp(1, java.sql.Timestamp.valueOf(startDate.atStartOfDay()));
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    java.sql.Date sqlDate = rs.getDate("d");
+                    if (sqlDate != null) {
+                        trends.put(sqlDate.toLocalDate(), rs.getInt("c"));
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return trends;
+    }
+
+    public java.util.Map<String, Integer> getTicketsPerLocation() {
+        java.util.Map<String, Integer> map = new java.util.HashMap<>();
+        String req = "SELECT location, COUNT(*) as c FROM ticket WHERE location IS NOT NULL AND location != '' GROUP BY location ORDER BY c DESC LIMIT 10";
+        try (Statement st = cnx.createStatement(); ResultSet rs = st.executeQuery(req)) {
+            while (rs.next()) {
+                map.put(rs.getString("location"), rs.getInt("c"));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return map;
+    }
+
+    public java.util.Map<String, Integer> getResolvedTicketsPerNgo() {
+        java.util.Map<String, Integer> map = new java.util.HashMap<>();
+        String req = "SELECT u.username, COUNT(t.id) as c " +
+                     "FROM ticket t " +
+                     "JOIN user u ON t.assigned_ngo_id = u.id " +
+                     "WHERE t.status = 'COMPLETED' " +
+                     "GROUP BY t.assigned_ngo_id, u.username " +
+                     "ORDER BY c DESC";
+        try (Statement st = cnx.createStatement(); ResultSet rs = st.executeQuery(req)) {
+            while (rs.next()) {
+                map.put(rs.getString("username"), rs.getInt("c"));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return map;
+    }
 }
+

@@ -37,6 +37,8 @@ public class CreateTicketController {
     @FXML private ListView<GeocodingService.Place> locationResultsList;
     @FXML private Label fileNameLabel;
     @FXML private Label errorLabel;
+    @FXML private Label timeoutLabel;
+    @FXML private Button submitBtn;
 
     private File selectedFile;
     private final TicketService ticketService = new TicketService();
@@ -51,6 +53,10 @@ public class CreateTicketController {
         if (SessionManager.isLoggedIn()) {
             User u = SessionManager.getCurrentUser();
             userNameLabel.setText(u.getUsername());
+            
+            if (u.isTimedOut()) {
+                showTimeoutWarning(u);
+            }
         } else {
             userNameLabel.setText("Guest");
         }
@@ -63,6 +69,20 @@ public class CreateTicketController {
         }
 
         setupLocationSearch();
+    }
+
+    private void showTimeoutWarning(User u) {
+        if (timeoutLabel != null) {
+            timeoutLabel.setText("⚠️ Your account is temporarily in timeout until " + 
+                u.getTimeoutUntil().format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")) + 
+                ". You cannot submit new tickets.");
+            timeoutLabel.setVisible(true);
+            timeoutLabel.setManaged(true);
+        }
+        if (submitBtn != null) {
+            submitBtn.setDisable(true);
+            submitBtn.setOpacity(0.5);
+        }
     }
 
     private void setupLocationSearch() {
@@ -269,6 +289,11 @@ public class CreateTicketController {
                 t.setSpam(result.isSpam);
                 if (result.isSpam) {
                     System.out.println("AI Flagged as SPAM: " + result.reason);
+                    t.setSpamReason(result.reason);
+                } else {
+                    t.setAiCategory(result.category);
+                    t.setAiSuggestedNgo(result.suggestedNgo);
+                    System.out.println("AI Categorized as: " + result.category + " | Suggested NGO: " + result.suggestedNgo);
                 }
 
                 // Collect Consignes
@@ -307,7 +332,16 @@ public class CreateTicketController {
                 }
 
                 if (selectedFile != null) {
-                    t.setImage(selectedFile.toURI().toString());
+                    try {
+                        String fileName = tn.esprit.util.ImageUploadUtils.saveImage(selectedFile, "tickets");
+                        t.setImage(fileName);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                        showError("Failed to upload image: " + e.getMessage());
+                        submitBtn.setDisable(false);
+                        submitBtn.setText(originalText);
+                        return;
+                    }
                 }
 
                 try {
@@ -316,6 +350,11 @@ public class CreateTicketController {
                     } else {
                         ticketService.add(t);
                     }
+                    
+                    if (t.isSpam()) {
+                        ticketService.checkAndApplyTimeout(t.getUserId());
+                    }
+                    
                     goToMyTickets(event);
                 } catch (RuntimeException ex) {
                     showError(ex.getMessage());

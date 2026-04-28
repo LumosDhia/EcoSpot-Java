@@ -33,10 +33,15 @@ public class TicketDetailController {
     @FXML private HBox userLinks;
     @FXML private HBox completionBox;
     @FXML private VBox consigneBox;
+    @FXML private VBox aiInsightsBox;
+    @FXML private Label aiCategoryLabel;
+    @FXML private Label aiNgoLabel;
+    @FXML private Label aiSpamLabel;
     @FXML private VBox consignesDisplayContainer;
     @FXML private VBox weatherBox;
     @FXML private HBox forecastContainer;
     @FXML private Button dashboardTopBtn;
+    @FXML private HBox ngoActionsBox;
 
     private Ticket currentTicket;
     private final TicketService ticketService = new TicketService();
@@ -83,6 +88,45 @@ public class TicketDetailController {
         statusBadge.setText(t.getStatus().name());
         priorityBadge.setText(t.getPriority().name());
 
+        // Handle AI Insights display
+        boolean hasAiData = false;
+        
+        if (t.isSpam() && t.getSpamReason() != null && !t.getSpamReason().isEmpty()) {
+            aiSpamLabel.setText("Reason: " + t.getSpamReason());
+            aiSpamLabel.setVisible(true);
+            aiSpamLabel.setManaged(true);
+            
+            aiCategoryLabel.setVisible(false);
+            aiCategoryLabel.setManaged(false);
+            aiNgoLabel.setVisible(false);
+            aiNgoLabel.setManaged(false);
+            hasAiData = true;
+        } else {
+            aiSpamLabel.setVisible(false);
+            aiSpamLabel.setManaged(false);
+            
+            if (t.getAiCategory() != null && !t.getAiCategory().isEmpty()) {
+                aiCategoryLabel.setText("Suggested Category: " + t.getAiCategory());
+                aiCategoryLabel.setVisible(true);
+                aiCategoryLabel.setManaged(true);
+                hasAiData = true;
+            }
+            if (t.getAiSuggestedNgo() != null && !t.getAiSuggestedNgo().isEmpty()) {
+                aiNgoLabel.setText("Recommended Routing: " + t.getAiSuggestedNgo());
+                aiNgoLabel.setVisible(true);
+                aiNgoLabel.setManaged(true);
+                hasAiData = true;
+            }
+        }
+        
+        if (hasAiData) {
+            aiInsightsBox.setVisible(true);
+            aiInsightsBox.setManaged(true);
+        } else {
+            aiInsightsBox.setVisible(false);
+            aiInsightsBox.setManaged(false);
+        }
+
         consignesDisplayContainer.getChildren().clear();
         if (t.getConsignes() != null && !t.getConsignes().isEmpty()) {
             consigneBox.setVisible(true);
@@ -111,42 +155,44 @@ public class TicketDetailController {
             try {
                 String imgPath = t.getImage();
                 if (imgPath.startsWith("/uploads/")) {
-                    // Prepend standard local Symfony dev server port
                     imgPath = "http://127.0.0.1:8000" + imgPath;
                 }
                 
-                System.out.println("Loading ticket image: " + imgPath);
-                
-                // Load in background (true)
-                Image img = new Image(imgPath, true); 
+                // 1. Try local Java-uploaded image first
+                String localUrl = tn.esprit.util.ImageUploadUtils.getImageUrl("tickets", imgPath);
+                Image img = new Image(localUrl, true);
                 ticketImageView.setImage(img);
                 ticketImageView.setManaged(true);
                 ticketImageView.setVisible(true);
-                
-                // Fallback mechanism if 8000 isn't available
+
+                // 2. Fallback sequence if local fails (could be from Symfony web app)
                 img.errorProperty().addListener((obs, oldVal, newVal) -> {
                     if (newVal) {
-                        System.out.println("Warning: HTTP 8000 failed. Trying Apache localhost...");
-                        try {
-                            String fallback = "http://localhost/ecospot-web/public" + t.getImage();
-                            if (t.getImage().startsWith("http")) fallback = t.getImage(); // Just in case it's absolute
-                            Image fallbackImg = new Image(fallback, true);
-                            ticketImageView.setImage(fallbackImg);
-                            
-                            fallbackImg.errorProperty().addListener((o, oldV, newV) -> {
-                                if (newV) {
-                                    System.out.println("All image loading attempts failed. Hiding image view.");
-                                    ticketImageView.setManaged(false);
-                                    ticketImageView.setVisible(false);
-                                }
-                            });
-                        } catch (Exception ex) {
-                            ticketImageView.setManaged(false);
-                            ticketImageView.setVisible(false);
-                        }
+                        System.out.println("Local image failed, trying Symfony fallback: " + t.getImage());
+                        String symfonyUrl = t.getImage().startsWith("/uploads/") 
+                                ? "http://127.0.0.1:8000" + t.getImage() 
+                                : t.getImage();
+                        
+                        Image symfonyImg = new Image(symfonyUrl, true);
+                        ticketImageView.setImage(symfonyImg);
+                        
+                        symfonyImg.errorProperty().addListener((o, ov, nv) -> {
+                            if (nv) {
+                                // Final fallback: Apache localhost
+                                String apacheUrl = "http://localhost/ecospot-web/public" + t.getImage();
+                                Image apacheImg = new Image(apacheUrl, true);
+                                ticketImageView.setImage(apacheImg);
+                                
+                                apacheImg.errorProperty().addListener((o3, ov3, nv3) -> {
+                                    if (nv3) {
+                                        ticketImageView.setManaged(false);
+                                        ticketImageView.setVisible(false);
+                                    }
+                                });
+                            }
+                        });
                     }
                 });
-                
             } catch (Exception e) {
                 ticketImageView.setManaged(false);
                 ticketImageView.setVisible(false);
@@ -154,6 +200,55 @@ public class TicketDetailController {
         } else {
             ticketImageView.setManaged(false);
             ticketImageView.setVisible(false);
+        }
+
+        setupNgoActions(t);
+    }
+
+    private void setupNgoActions(Ticket t) {
+        if (!tn.esprit.util.SessionManager.isLoggedIn()) return;
+        tn.esprit.user.User user = tn.esprit.util.SessionManager.getCurrentUser();
+        if (!"NGO".equalsIgnoreCase(user.getRole())) return;
+
+        ngoActionsBox.getChildren().clear();
+        ngoActionsBox.setVisible(true);
+        ngoActionsBox.setManaged(true);
+
+        if (t.getStatus() == TicketStatus.PUBLISHED && (t.getAssignedNgoId() == null || t.getAssignedNgoId() == 0)) {
+            Button btnClaim = new Button("🤝 Claim Ticket");
+            btnClaim.setStyle("-fx-background-color: #3b82f6; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 10 20; -fx-cursor: hand;");
+            btnClaim.setOnAction(e -> {
+                t.setAssignedNgoId(user.getId());
+                t.setStatus(TicketStatus.ASSIGNED);
+                ticketService.update(t);
+                setTicket(t); // Refresh UI
+            });
+            ngoActionsBox.getChildren().add(btnClaim);
+        } else if (t.getAssignedNgoId() != null && t.getAssignedNgoId() == user.getId()) {
+            if (t.getStatus() == TicketStatus.ASSIGNED) {
+                Button btnStart = new Button("▶ Start Working");
+                btnStart.setStyle("-fx-background-color: #f59e0b; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 10 20; -fx-cursor: hand;");
+                btnStart.setOnAction(e -> {
+                    t.setStatus(TicketStatus.IN_PROGRESS);
+                    ticketService.update(t);
+                    setTicket(t);
+                });
+                ngoActionsBox.getChildren().add(btnStart);
+            } else if (t.getStatus() == TicketStatus.IN_PROGRESS) {
+                Button btnComplete = new Button("✔ Mark Completed");
+                btnComplete.setStyle("-fx-background-color: #10b981; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 10 20; -fx-cursor: hand;");
+                btnComplete.setOnAction(e -> {
+                    try {
+                        FXMLLoader loader = new FXMLLoader(getClass().getResource("/ticket/CompleteTicket.fxml"));
+                        Parent root = loader.load();
+                        CompleteTicketController ctrl = loader.getController();
+                        ctrl.setTicket(t);
+                        Stage stage = (Stage) ngoActionsBox.getScene().getWindow();
+                        stage.getScene().setRoot(root);
+                    } catch (IOException ex) { ex.printStackTrace(); }
+                });
+                ngoActionsBox.getChildren().add(btnComplete);
+            }
         }
     }
 

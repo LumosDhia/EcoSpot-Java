@@ -8,9 +8,9 @@ public class MyConnection {
     // Singleton: one shared database connection manager instance in the app.
 
     // DB properties
-    final String URL = "jdbc:mysql://localhost:3306/projetdev";
-    final String USR = "root";
-    final String PWD = "Wiem123456";
+    final String URL = Config.get("DB_URL", "jdbc:mysql://localhost:3306/projetdev");
+    final String USR = Config.get("DB_USER", "root");
+    final String PWD = Config.get("DB_PASS", "root");
 
     // Attributes
     // 2. static instance
@@ -26,6 +26,13 @@ public class MyConnection {
     }
 
     public Connection getCnx() {
+        try {
+            if (cnx == null || cnx.isClosed()) {
+                cnx = DriverManager.getConnection(URL, USR, PWD);
+            }
+        } catch (SQLException e) {
+            // Silently fail here, we'll handle the null return in services
+        }
         return cnx;
     }
 

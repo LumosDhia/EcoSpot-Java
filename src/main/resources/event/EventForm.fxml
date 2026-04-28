@@ -17,6 +17,11 @@
                 <children>
                     <Label onMouseClicked="#goToHome" style="-fx-cursor: hand;" styleClass="top-bar-brand" text="🌿 EcoSpot | Event Editor" />
                     <Region HBox.hgrow="ALWAYS" />
+                    <HBox alignment="CENTER_RIGHT" spacing="0">
+                        <Button onAction="#handleMinimize" styleClass="win-btn" text="—" />
+                        <Button onAction="#handleMaximize" styleClass="win-btn" text="❐" />
+                        <Button onAction="#handleClose" styleClass="win-btn, win-close" text="✕" />
+                    </HBox>
                 </children>
             </HBox>
 
@@ -56,7 +61,13 @@
 
                                 <VBox spacing="10.0">
                                     <children>
-                                        <Label styleClass="form-label" text="Location (*)" />
+                                        <HBox alignment="CENTER_LEFT" spacing="10.0">
+                                            <children>
+                                                <Label styleClass="form-label" text="Location (*)" />
+                                                <Region HBox.hgrow="ALWAYS" />
+                                                <Button onAction="#handleGeocode" style="-fx-font-size: 10; -fx-padding: 2 8; -fx-background-color: #2d6a4f; -fx-text-fill: white; -fx-background-radius: 4; -fx-cursor: hand;" text="📍 Find on Map" />
+                                            </children>
+                                        </HBox>
                                         <TextField fx:id="locationField" promptText="City, Country..." styleClass="search-field" />
                                     </children>
                                 </VBox>
@@ -122,10 +133,24 @@
 
                                 <HBox alignment="CENTER_RIGHT" spacing="15.0">
                                     <children>
+                                        <Button onAction="#handleAiPredict" styleClass="nav-btn-blog" text="🔮 AI Predict Success" />
+                                        <Region HBox.hgrow="ALWAYS" />
                                         <Button onAction="#cancel" styleClass="btn-outline" text="Cancel" />
                                         <Button fx:id="saveBtn" onAction="#save" styleClass="btn-hero-primary" text="Save Event" />
                                     </children>
                                 </HBox>
+
+                                <VBox fx:id="aiResultBox" managed="false" spacing="10.0" style="-fx-background-color: #f0f7f4; -fx-padding: 15; -fx-background-radius: 8; -fx-border-color: #2d6a4f; -fx-border-width: 0.5;" visible="false">
+                                    <children>
+                                        <HBox spacing="10.0">
+                                            <children>
+                                                <Label style="-fx-font-weight: bold; -fx-text-fill: #2d6a4f;" text="AI Prediction:" />
+                                                <Label fx:id="aiSuccessLabel" style="-fx-font-weight: bold; -fx-text-fill: #fca311;" text="HIGH" />
+                                            </children>
+                                        </HBox>
+                                        <Label fx:id="aiAnalysisLabel" style="-fx-text-fill: #444; -fx-font-size: 13;" text="Analysis goes here..." wrapText="true" />
+                                    </children>
+                                </VBox>
                             </children>
                         </VBox>
                     </children>

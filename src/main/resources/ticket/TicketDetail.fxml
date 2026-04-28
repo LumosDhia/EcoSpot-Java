@@ -96,6 +96,21 @@
                         <!-- Description -->
                         <Label fx:id="descriptionLabel" styleClass="ticket-description" style="-fx-font-size: 16px;" text="Full ticket description goes here..." wrapText="true" />
 
+                        <!-- AI Insights -->
+                        <VBox fx:id="aiInsightsBox" spacing="10.0" style="-fx-background-color: #faf5ff; -fx-padding: 20; -fx-background-radius: 8; -fx-border-color: #e9d5ff; -fx-border-radius: 8;" visible="false" managed="false">
+                            <children>
+                                <HBox alignment="CENTER_LEFT" spacing="10.0">
+                                    <children>
+                                        <Label style="-fx-font-size: 20px;" text="✨" />
+                                        <Label style="-fx-font-weight: bold; -fx-text-fill: #7e22ce; -fx-font-size: 14px;" text="AI INSIGHTS &amp; ROUTING" />
+                                    </children>
+                                </HBox>
+                                <Label fx:id="aiCategoryLabel" style="-fx-text-fill: #9333ea; -fx-font-size: 14px; -fx-font-weight: bold;" />
+                                <Label fx:id="aiNgoLabel" style="-fx-text-fill: #a855f7; -fx-font-size: 13px;" />
+                                <Label fx:id="aiSpamLabel" style="-fx-text-fill: #dc2626; -fx-font-size: 14px; -fx-font-weight: bold;" visible="false" managed="false" wrapText="true" />
+                            </children>
+                        </VBox>
+
                         <!-- Consignes (Instructions) -->
                         <VBox fx:id="consigneBox" spacing="10.0" style="-fx-background-color: #f8fafc; -fx-padding: 20; -fx-background-radius: 8; -fx-border-color: #e2e8f0; -fx-border-radius: 8;">
                             <children>
@@ -138,6 +153,9 @@
                         </VBox>
 
                         <Region prefHeight="20.0" />
+
+                        <!-- NGO Actions -->
+                        <HBox fx:id="ngoActionsBox" alignment="CENTER_LEFT" spacing="15.0" style="-fx-border-color: #e5e7eb transparent transparent transparent; -fx-padding: 30 0 0 0;" visible="false" managed="false" />
 
                         <!-- Action Row -->
                         <HBox fx:id="completionBox" spacing="20.0" alignment="CENTER_LEFT" style="-fx-border-color: #e5e7eb transparent transparent transparent; -fx-padding: 30 0 0 0;">

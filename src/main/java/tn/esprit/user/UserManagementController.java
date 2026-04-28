@@ -88,6 +88,11 @@ public class UserManagementController {
         Label emailLabel = new Label("✉ " + user.getEmail());
         emailLabel.setStyle("-fx-text-fill: #718096; -fx-font-size: 13px;");
         identityText.getChildren().addAll(nameLabel, emailLabel);
+        if (user.isTimedOut()) {
+            Label timeoutBadge = new Label("TIMEOUT");
+            timeoutBadge.setStyle("-fx-background-color: #fff5f5; -fx-text-fill: #e53e3e; -fx-font-size: 9px; -fx-font-weight: bold; -fx-padding: 2 5; -fx-background-radius: 3;");
+            identityText.getChildren().add(timeoutBadge);
+        }
         identityBox.getChildren().addAll(avatar, identityText);
 
         // Role Column
@@ -99,8 +104,31 @@ public class UserManagementController {
         // Management Column
         HBox actions = new HBox(10);
         actions.setAlignment(Pos.CENTER_RIGHT);
-        actions.setMinWidth(150);
+        actions.setMinWidth(180); // Increased width for 3 buttons
         
+        Button timeoutBtn = new Button(user.isTimedOut() ? "🔓" : "⏳");
+        timeoutBtn.setTooltip(new javafx.scene.control.Tooltip(user.isTimedOut() ? "Lift Timeout" : "Apply 24h Timeout"));
+        timeoutBtn.setStyle(user.isTimedOut() 
+            ? "-fx-background-color: #f0fff4; -fx-text-fill: #38a169; -fx-font-size: 14px; -fx-cursor: hand; -fx-padding: 5 10; -fx-background-radius: 5;"
+            : "-fx-background-color: #fffaf0; -fx-text-fill: #dd6b20; -fx-font-size: 14px; -fx-cursor: hand; -fx-padding: 5 10; -fx-background-radius: 5;");
+        
+        // Only allow timing out Community Members (not Admins or NGOs)
+        boolean isCitizen = !"ADMIN".equalsIgnoreCase(user.getRole()) && !"NGO".equalsIgnoreCase(user.getRole());
+        if (!isCitizen && !user.isTimedOut()) {
+            timeoutBtn.setDisable(true);
+            timeoutBtn.setOpacity(0.0); // Hide it but keep space
+            timeoutBtn.setManaged(false);
+        }
+
+        timeoutBtn.setOnAction(e -> {
+            if (user.isTimedOut()) {
+                userService.updateTimeout(user.getId(), null);
+            } else {
+                userService.updateTimeout(user.getId(), java.time.LocalDateTime.now().plusHours(24));
+            }
+            refreshUserList();
+        });
+
         Button editBtn = new Button("✏"); // Edit
         editBtn.setTooltip(new javafx.scene.control.Tooltip("Edit User"));
         editBtn.setStyle("-fx-background-color: #edf2f7; -fx-text-fill: #4a5568; -fx-font-size: 14px; -fx-cursor: hand; -fx-padding: 5 10; -fx-background-radius: 5;");
@@ -129,7 +157,7 @@ public class UserManagementController {
             refreshUserList();
         });
 
-        actions.getChildren().addAll(editBtn, deleteBtn);
+        actions.getChildren().addAll(timeoutBtn, editBtn, deleteBtn);
 
         row.getChildren().addAll(identityBox, roleBadge, actions);
         return row;

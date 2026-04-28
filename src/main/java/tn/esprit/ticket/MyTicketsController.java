@@ -30,6 +30,9 @@ public class MyTicketsController {
     @FXML private FlowPane myTicketsFlowPane;
     @FXML private ChoiceBox<String> statusFilter;
     @FXML private Label userNameLabel;
+    @FXML private HBox timeoutBanner;
+    @FXML private Label timeoutLabel;
+    @FXML private Button newTicketBtn;
 
     private final TicketService ticketService = new TicketService();
     private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
@@ -60,10 +63,42 @@ public class MyTicketsController {
             tn.esprit.user.User u = tn.esprit.util.SessionManager.getCurrentUser();
             userNameLabel.setText(u.getUsername());
             userTickets = ticketService.getByUserId(u.getId());
+            
+            // Handle Timeout Banner
+            if (u.isTimedOut()) {
+                timeoutBanner.setVisible(true);
+                timeoutBanner.setManaged(true);
+                timeoutLabel.setText("Your account is temporarily restricted from submitting or editing tickets due to multiple spam flags. Restored at: " + 
+                    u.getTimeoutUntil().format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")));
+                
+                // Subtle pulse animation
+                javafx.animation.Timeline pulse = new javafx.animation.Timeline(
+                    new javafx.animation.KeyFrame(javafx.util.Duration.ZERO, new javafx.animation.KeyValue(timeoutBanner.opacityProperty(), 0.7)),
+                    new javafx.animation.KeyFrame(javafx.util.Duration.seconds(1), new javafx.animation.KeyValue(timeoutBanner.opacityProperty(), 1.0)),
+                    new javafx.animation.KeyFrame(javafx.util.Duration.seconds(2), new javafx.animation.KeyValue(timeoutBanner.opacityProperty(), 0.7))
+                );
+                pulse.setCycleCount(javafx.animation.Timeline.INDEFINITE);
+                pulse.play();
+
+                if (newTicketBtn != null) {
+                    newTicketBtn.setDisable(true);
+                    newTicketBtn.setOpacity(0.5);
+                }
+            } else {
+                timeoutBanner.setVisible(false);
+                timeoutBanner.setManaged(false);
+                
+                if (newTicketBtn != null) {
+                    newTicketBtn.setDisable(false);
+                    newTicketBtn.setOpacity(1.0);
+                }
+            }
         } else {
             // Guest fallback
             userNameLabel.setText("Guest");
             userTickets = java.util.Collections.emptyList();
+            timeoutBanner.setVisible(false);
+            timeoutBanner.setManaged(false);
         }
 
         filterAndDisplay();
@@ -274,6 +309,10 @@ public class MyTicketsController {
     }
     @FXML
     private void goToCreateTicket(ActionEvent event) {
+        tn.esprit.user.User u = tn.esprit.util.SessionManager.getCurrentUser();
+        if (u != null && u.isTimedOut()) {
+            return; // Safety check
+        }
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/ticket/CreateTicket.fxml"));
             Parent root = loader.load();

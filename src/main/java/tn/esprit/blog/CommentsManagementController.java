@@ -141,18 +141,24 @@ public class CommentsManagementController {
         );
         colOwnActions.setCellFactory(param -> new TableCell<>() {
             private final Button viewBtn = new Button("View");
+            private final Button editBtn = new Button("Edit");
             private final Button deleteBtn = new Button("Delete");
-            private final HBox pane = new HBox(6, viewBtn, deleteBtn);
+            private final HBox pane = new HBox(6, viewBtn, editBtn, deleteBtn);
             {
                 viewBtn.setStyle("-fx-text-fill: #fdae6b; -fx-background-color: transparent; -fx-border-color: #fdae6b; -fx-border-radius: 3; -fx-font-size: 10; -fx-cursor: hand;");
+                editBtn.setStyle("-fx-text-fill: #3182ce; -fx-background-color: transparent; -fx-border-color: #3182ce; -fx-border-radius: 3; -fx-font-size: 10; -fx-cursor: hand;");
                 deleteBtn.setStyle("-fx-text-fill: #bc4749; -fx-background-color: transparent; -fx-border-color: #bc4749; -fx-border-radius: 3; -fx-font-size: 10; -fx-cursor: hand;");
                 viewBtn.setOnAction(e -> handleView(getTableView().getItems().get(getIndex())));
+                editBtn.setOnAction(e -> handleEdit(getTableView().getItems().get(getIndex())));
                 deleteBtn.setOnAction(e -> handleDelete(getTableView().getItems().get(getIndex())));
             }
             @Override
             protected void updateItem(Void item, boolean empty) {
                 super.updateItem(item, empty);
-                setGraphic(empty ? null : pane);
+                if (empty) { setGraphic(null); return; }
+                Comment comment = getTableView().getItems().get(getIndex());
+                editBtn.setDisable(comment.isFlagged());
+                setGraphic(pane);
             }
         });
 
@@ -217,6 +223,33 @@ public class CommentsManagementController {
         alert.setHeaderText(comment.getAuthorName() + " on " + (comment.getArticleTitle() == null ? "Unknown article" : comment.getArticleTitle()));
         alert.setContentText(comment.getContent());
         alert.showAndWait();
+    }
+
+    private void handleEdit(Comment comment) {
+        TextInputDialog dialog = new TextInputDialog(comment.getContent());
+        dialog.setTitle("Edit comment");
+        dialog.setHeaderText("Edit your comment on: " + (comment.getArticleTitle() != null ? comment.getArticleTitle() : "article"));
+        dialog.setContentText("Content:");
+        dialog.showAndWait().ifPresent(newContent -> {
+            String trimmed = newContent == null ? "" : newContent.trim();
+            if (trimmed.isEmpty()) {
+                new Alert(Alert.AlertType.WARNING, "Comment cannot be empty.").showAndWait();
+                return;
+            }
+            if (trimmed.length() < 5) {
+                new Alert(Alert.AlertType.WARNING, "Comment too short (min 5 chars).").showAndWait();
+                return;
+            }
+            if (trimmed.length() > 500) {
+                new Alert(Alert.AlertType.WARNING, "Comment too long (max 500 chars).").showAndWait();
+                return;
+            }
+            if (commentService.updateContent(comment.getId(), trimmed)) {
+                loadData();
+            } else {
+                new Alert(Alert.AlertType.ERROR, "Failed to update comment.").showAndWait();
+            }
+        });
     }
 
     private void handleDelete(Comment comment) {

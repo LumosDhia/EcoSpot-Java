@@ -395,6 +395,15 @@ public class NewArticleController {
         return true;
     }
 
+    @FXML
+    private void addCategoryFromInput(javafx.event.ActionEvent event) {
+        createCategoryFromInputIfNeeded();
+    }
+
+    @FXML
+    private void addTagsFromInput(javafx.event.ActionEvent event) {
+        createTagsFromInputIfNeeded();
+    }
 
     private void showAlert(String title, String message) {
         Alert alert = new Alert(Alert.AlertType.ERROR);

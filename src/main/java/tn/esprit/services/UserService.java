@@ -4,6 +4,7 @@ import tn.esprit.user.User;
 import tn.esprit.util.MyConnection;
 import tn.esprit.util.SessionManager;
 import java.sql.*;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -19,10 +20,15 @@ public class UserService {
 
     public UserService() {
         cnx = MyConnection.getInstance().getCnx();
+        System.out.println("[UserService] DB connection: " + (cnx != null ? "OK" : "NULL"));
+        try {
+            if (cnx != null) System.out.println("[UserService] DB closed? " + cnx.isClosed());
+        } catch (Exception e) { e.printStackTrace(); }
         ensureTableExists();
         ensureQuickUsersExist();
         ensureQuickAppUsersExist();
         loadUsersFromDb();
+        System.out.println("[UserService] Users loaded from DB: " + users.size());
     }
 
     private void ensureTableExists() {
@@ -33,7 +39,11 @@ public class UserService {
                 "`password` VARCHAR(255)," +
                 "`role` VARCHAR(20)," +
                 "`reset_code` VARCHAR(10)," +
-                "`reset_expires_at` TIMESTAMP NULL" +
+                "`reset_expires_at` TIMESTAMP NULL," +
+                "`avatar_style` VARCHAR(50) DEFAULT 'avataaars'," +
+                "`address` VARCHAR(255)," +
+                "`city` VARCHAR(150)," +
+                "`zipcode` VARCHAR(10)" +
                 ")";
         try {
             Statement st = cnx.createStatement();
@@ -45,6 +55,21 @@ public class UserService {
             }
             if (!hasColumn("user", "reset_expires_at")) {
                 st.execute("ALTER TABLE `user` ADD COLUMN `reset_expires_at` TIMESTAMP NULL");
+            }
+            if (!hasColumn("user", "timeout_until")) {
+                st.execute("ALTER TABLE `user` ADD COLUMN `timeout_until` DATETIME DEFAULT NULL");
+            }
+            if (!hasColumn("user", "address")) {
+                st.execute("ALTER TABLE `user` ADD COLUMN `address` VARCHAR(255)");
+            }
+            if (!hasColumn("user", "city")) {
+                st.execute("ALTER TABLE `user` ADD COLUMN `city` VARCHAR(150)");
+            }
+            if (!hasColumn("user", "zipcode")) {
+                st.execute("ALTER TABLE `user` ADD COLUMN `zipcode` VARCHAR(10)");
+            }
+            if (!hasColumn("user", "avatar_style")) {
+                st.execute("ALTER TABLE `user` ADD COLUMN `avatar_style` VARCHAR(50) DEFAULT 'avataaars'");
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -59,13 +84,19 @@ public class UserService {
             Statement st = cnx.createStatement();
             ResultSet rs = st.executeQuery(req);
             while (rs.next()) {
-                users.add(new User(
+                User user = new User(
                     rs.getInt("id"),
                     rs.getString("username"),
                     rs.getString("email"),
                     rs.getString("password"),
-                    rs.getString("role")
-                ));
+                    rs.getString("role"),
+                    rs.getTimestamp("timeout_until") != null ? rs.getTimestamp("timeout_until").toLocalDateTime() : null
+                );
+                user.setAvatarStyle(rs.getString("avatar_style"));
+                user.setAddress(rs.getString("address"));
+                user.setCity(rs.getString("city"));
+                user.setZipcode(rs.getString("zipcode"));
+                users.add(user);
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -84,6 +115,15 @@ public class UserService {
             selectPs.setString(1, email);
             try (ResultSet rs = selectPs.executeQuery()) {
                 if (rs.next()) {
+                    int id = rs.getInt("id");
+                    // Force password/role sync for quick users
+                    String updateReq = "UPDATE `user` SET password = ?, role = ? WHERE id = ?";
+                    try (PreparedStatement updatePs = cnx.prepareStatement(updateReq)) {
+                        updatePs.setString(1, password);
+                        updatePs.setString(2, role);
+                        updatePs.setInt(3, id);
+                        updatePs.executeUpdate();
+                    }
                     return;
                 }
             }
@@ -92,12 +132,13 @@ public class UserService {
             return;
         }
 
-        String insertReq = "INSERT INTO `user` (`username`, `email`, `password`, `role`) VALUES (?, ?, ?, ?)";
+        String insertReq = "INSERT INTO `user` (`username`, `email`, `password`, `role`, `avatar_style`) VALUES (?, ?, ?, ?, ?)";
         try (PreparedStatement insertPs = cnx.prepareStatement(insertReq)) {
             insertPs.setString(1, username);
             insertPs.setString(2, email);
             insertPs.setString(3, password);
             insertPs.setString(4, role);
+            insertPs.setString(5, AvatarService.getRandomStyle());
             insertPs.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -107,11 +148,16 @@ public class UserService {
     public User authenticate(String email, String password) {
         if (email == null || password == null) return null;
         loadUsersFromDb();
+        System.out.println("[AUTH DEBUG] Attempting login: email='" + email + "' password='" + password + "'");
+        System.out.println("[AUTH DEBUG] Total users in DB: " + users.size());
         for (User user : users) {
+            System.out.println("[AUTH DEBUG]   DB user: email='" + user.getEmail() + "' password='" + user.getPassword() + "' role=" + user.getRole());
             if (user.getEmail().equals(email) && user.getPassword().equals(password)) {
+                System.out.println("[AUTH DEBUG] ✅ MATCH FOUND!");
                 return user;
             }
         }
+        System.out.println("[AUTH DEBUG] ❌ No match found.");
         return null;
     }
 
@@ -371,25 +417,28 @@ public class UserService {
         // 6. Terms Validation
         if (!termsAccepted) return "You should agree to our terms.";
 
-        // 7. Duplicate Check (Check LAST so other validations run first for unit tests)
+        // 7. Duplicate Check
         for (User u : users) {
             if (u.getEmail().equals(email)) return "Email already exists.";
         }
 
         // 8. Save to DB
-        String req = "INSERT INTO `user` (`username`, `email`, `password`, `role`) VALUES (?, ?, ?, ?)";
+        String req = "INSERT INTO `user` (`username`, `email`, `password`, `role`, `avatar_style`, `address`, `city`, `zipcode`) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
         try {
             PreparedStatement ps = cnx.prepareStatement(req);
             ps.setString(1, firstName + " " + lastName);
             ps.setString(2, email);
             ps.setString(3, password);
             ps.setString(4, "USER");
+            ps.setString(5, AvatarService.getRandomStyle());
+            ps.setString(6, address);
+            ps.setString(7, city);
+            ps.setString(8, zipCode);
             ps.executeUpdate();
             upsertAppUserRoleByEmail(email, "ROLE_USER");
             loadUsersFromDb();
             return "SUCCESS";
         } catch (SQLException e) {
-            // e.printStackTrace();
             return "Database Error: " + e.getMessage();
         }
     }
@@ -426,13 +475,14 @@ public class UserService {
         }
 
         // 7. Save to DB
-        String req = "INSERT INTO `user` (`username`, `email`, `password`, `role`) VALUES (?, ?, ?, ?)";
+        String req = "INSERT INTO `user` (`username`, `email`, `password`, `role`, `avatar_style`) VALUES (?, ?, ?, ?, ?)";
         try {
             PreparedStatement ps = cnx.prepareStatement(req);
             ps.setString(1, firstName + " " + lastName);
             ps.setString(2, email);
             ps.setString(3, password);
             ps.setString(4, role);
+            ps.setString(5, AvatarService.getRandomStyle());
             ps.executeUpdate();
             upsertAppUserRoleByEmail(email, toAppUserRole(role));
             loadUsersFromDb();
@@ -506,6 +556,7 @@ public class UserService {
         }
         ensureQuickAppUser(trimmedEmail, firstName, lastName, role);
     }
+
     public boolean setResetCode(String email, String code) {
         String req = "UPDATE `user` SET reset_code = ?, reset_expires_at = DATE_ADD(NOW(), INTERVAL 15 MINUTE) WHERE email = ?";
         try (PreparedStatement ps = cnx.prepareStatement(req)) {
@@ -547,6 +598,42 @@ public class UserService {
         } catch (SQLException e) {
             e.printStackTrace();
             return false;
+        }
+    }
+
+    public void updateTimeout(int id, LocalDateTime until) {
+        String req = "UPDATE `user` SET timeout_until = ? WHERE id = ?";
+        try (PreparedStatement ps = cnx.prepareStatement(req)) {
+            if (until == null) {
+                ps.setNull(1, Types.TIMESTAMP);
+            } else {
+                ps.setTimestamp(1, Timestamp.valueOf(until));
+            }
+            ps.setInt(2, id);
+            ps.executeUpdate();
+            loadUsersFromDb();
+            
+            // Sync with active session if applicable
+            tn.esprit.user.User current = SessionManager.getCurrentUser();
+            if (current != null && current.getId() == id) {
+                current.setTimeoutUntil(until);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void updateAvatarStyle(int id, String newStyle) {
+        if (id < 0) return;
+        String req = "UPDATE `user` SET avatar_style = ? WHERE id = ?";
+        try {
+            PreparedStatement ps = cnx.prepareStatement(req);
+            ps.setString(1, newStyle);
+            ps.setInt(2, id);
+            ps.executeUpdate();
+            loadUsersFromDb(); // Refresh cache
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
     }
 }

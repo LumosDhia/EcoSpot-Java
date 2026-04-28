@@ -192,23 +192,27 @@ public class PendingTicketsController {
 
     private void loadImageRobustly(String rawPath, javafx.scene.image.ImageView view) {
         try {
-            String imgPath = rawPath;
-            if (imgPath.startsWith("/uploads/")) {
-                imgPath = "http://127.0.0.1:8000" + imgPath;
-            }
-            javafx.scene.image.Image img = new javafx.scene.image.Image(imgPath, true);
+            // 1. Try local Java-uploaded image first
+            String localUrl = tn.esprit.util.ImageUploadUtils.getImageUrl("tickets", rawPath);
+            javafx.scene.image.Image img = new javafx.scene.image.Image(localUrl, true);
             view.setImage(img);
-            
-            img.errorProperty().addListener((obs, oldVal, newVal) -> {
-                if (newVal) {
-                    try {
-                        String fb = "http://localhost/ecospot-web/public" + rawPath;
-                        javafx.scene.image.Image fbImg = new javafx.scene.image.Image(fb, true);
-                        view.setImage(fbImg);
-                        fbImg.errorProperty().addListener((o, old, nw) -> {
-                            if (nw) { view.setManaged(false); view.setVisible(false); }
-                        });
-                    } catch (Exception ex) { view.setManaged(false); view.setVisible(false); }
+            view.setManaged(true);
+            view.setVisible(true);
+
+            // 2. Fallback sequence
+            img.errorProperty().addListener((obs, o, n) -> {
+                if (n) {
+                    String symfonyUrl = rawPath.startsWith("/uploads/") ? "http://127.0.0.1:8000" + rawPath : rawPath;
+                    javafx.scene.image.Image sf = new javafx.scene.image.Image(symfonyUrl, true);
+                    view.setImage(sf);
+                    
+                    sf.errorProperty().addListener((o2, ov2, nv2) -> {
+                        if (nv2) {
+                            javafx.scene.image.Image fb = new javafx.scene.image.Image("http://localhost/ecospot-web/public" + rawPath, true);
+                            view.setImage(fb);
+                            fb.errorProperty().addListener((o3, ov3, nv3) -> { if (nv3) { view.setManaged(false); view.setVisible(false); } });
+                        }
+                    });
                 }
             });
         } catch (Exception e) {
