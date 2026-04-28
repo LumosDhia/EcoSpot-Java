@@ -48,6 +48,17 @@ public class TicketService implements GlobalInterface<Ticket> {
                 ")";
         try (Statement st = cnx.createStatement()) {
             st.execute(req);
+            
+            // Add new columns if they don't exist
+            if (!hasColumn("ticket", "ai_category")) {
+                st.execute("ALTER TABLE `ticket` ADD COLUMN `ai_category` VARCHAR(100)");
+            }
+            if (!hasColumn("ticket", "ai_suggested_ngo")) {
+                st.execute("ALTER TABLE `ticket` ADD COLUMN `ai_suggested_ngo` VARCHAR(255)");
+            }
+            if (!hasColumn("ticket", "spam_reason")) {
+                st.execute("ALTER TABLE `ticket` ADD COLUMN `spam_reason` TEXT");
+            }
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -307,9 +318,9 @@ public class TicketService implements GlobalInterface<Ticket> {
         t.setCompletionImage(rs.getString("completion_image"));
         t.setConsignes(consigneService.getByTicketId(t.getId()));
         t.setSpam(rs.getBoolean("is_spam"));
-        t.setAiCategory(rs.getString("ai_category"));
-        t.setAiSuggestedNgo(rs.getString("ai_suggested_ngo"));
-        t.setSpamReason(rs.getString("spam_reason"));
+        if (hasColumn("ticket", "ai_category")) t.setAiCategory(rs.getString("ai_category"));
+        if (hasColumn("ticket", "ai_suggested_ngo")) t.setAiSuggestedNgo(rs.getString("ai_suggested_ngo"));
+        if (hasColumn("ticket", "spam_reason")) t.setSpamReason(rs.getString("spam_reason"));
         t.setCreatedAt(rs.getTimestamp("created_at").toLocalDateTime());
         Timestamp ach = rs.getTimestamp("achieved_at");
         if (ach != null) t.setAchievedAt(ach.toLocalDateTime());

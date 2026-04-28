@@ -154,7 +154,6 @@ public class TicketDetailController {
             try {
                 String imgPath = t.getImage();
                 if (imgPath.startsWith("/uploads/")) {
-                    // Prepend standard local Symfony dev server port
                     imgPath = "http://127.0.0.1:8000" + imgPath;
                 }
                 
