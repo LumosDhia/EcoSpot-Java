@@ -153,12 +153,9 @@ public class TicketDetailController {
         if (t.getImage() != null && !t.getImage().isEmpty()) {
             try {
                 String imgPath = t.getImage();
-<<<<<<< HEAD
                 if (imgPath.startsWith("/uploads/")) {
                     imgPath = "http://127.0.0.1:8000" + imgPath;
                 }
-=======
->>>>>>> 855544ec1f0da8fa388b7da2471b2ad72ba813cc
                 
                 // 1. Try local Java-uploaded image first
                 String localUrl = tn.esprit.util.ImageUploadUtils.getImageUrl("tickets", imgPath);
