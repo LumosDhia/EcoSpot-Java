@@ -20,10 +20,15 @@ public class UserService {
 
     public UserService() {
         cnx = MyConnection.getInstance().getCnx();
+        System.out.println("[UserService] DB connection: " + (cnx != null ? "OK" : "NULL"));
+        try {
+            if (cnx != null) System.out.println("[UserService] DB closed? " + cnx.isClosed());
+        } catch (Exception e) { e.printStackTrace(); }
         ensureTableExists();
         ensureQuickUsersExist();
         ensureQuickAppUsersExist();
         loadUsersFromDb();
+        System.out.println("[UserService] Users loaded from DB: " + users.size());
     }
 
     private void ensureTableExists() {
@@ -63,8 +68,9 @@ public class UserService {
             if (!hasColumn("user", "zipcode")) {
                 st.execute("ALTER TABLE `user` ADD COLUMN `zipcode` VARCHAR(10)");
             }
-            // Fix: ensure avatar_style always has a default value for tests
-            st.execute("ALTER TABLE `user` MODIFY COLUMN `avatar_style` VARCHAR(50) DEFAULT 'avataaars'");
+            if (!hasColumn("user", "avatar_style")) {
+                st.execute("ALTER TABLE `user` ADD COLUMN `avatar_style` VARCHAR(50) DEFAULT 'avataaars'");
+            }
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -109,6 +115,15 @@ public class UserService {
             selectPs.setString(1, email);
             try (ResultSet rs = selectPs.executeQuery()) {
                 if (rs.next()) {
+                    int id = rs.getInt("id");
+                    // Force password/role sync for quick users
+                    String updateReq = "UPDATE `user` SET password = ?, role = ? WHERE id = ?";
+                    try (PreparedStatement updatePs = cnx.prepareStatement(updateReq)) {
+                        updatePs.setString(1, password);
+                        updatePs.setString(2, role);
+                        updatePs.setInt(3, id);
+                        updatePs.executeUpdate();
+                    }
                     return;
                 }
             }
@@ -133,11 +148,16 @@ public class UserService {
     public User authenticate(String email, String password) {
         if (email == null || password == null) return null;
         loadUsersFromDb();
+        System.out.println("[AUTH DEBUG] Attempting login: email='" + email + "' password='" + password + "'");
+        System.out.println("[AUTH DEBUG] Total users in DB: " + users.size());
         for (User user : users) {
+            System.out.println("[AUTH DEBUG]   DB user: email='" + user.getEmail() + "' password='" + user.getPassword() + "' role=" + user.getRole());
             if (user.getEmail().equals(email) && user.getPassword().equals(password)) {
+                System.out.println("[AUTH DEBUG] ✅ MATCH FOUND!");
                 return user;
             }
         }
+        System.out.println("[AUTH DEBUG] ❌ No match found.");
         return null;
     }
 
