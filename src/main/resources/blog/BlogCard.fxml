@@ -42,13 +42,14 @@
             <Region styleClass="card-divider" />
 
             <!-- Stats row -->
-            <HBox alignment="CENTER_LEFT" spacing="12.0" styleClass="card-stats-row">
+            <HBox alignment="CENTER_LEFT" spacing="8.0" styleClass="card-stats-row">
                <children>
-                  <Label fx:id="viewsLabel" styleClass="stat-item" text="👁 3" />
-                  <Label fx:id="likesLabel" styleClass="stat-item" text="👍 0" />
-                  <Label fx:id="dislikesLabel" styleClass="stat-item" text="👎 0" />
-                  <Label fx:id="readTimeLabel" styleClass="stat-item" text="📖 1m" />
-                  <Label fx:id="commentsLabel" styleClass="stat-item" text="💬 0" />
+                  <Label fx:id="viewsLabel" styleClass="stat-badge-chip" text="👁 0" />
+                  <Label fx:id="likesLabel" styleClass="stat-badge-chip" text="👍 0" />
+                  <Label fx:id="dislikesLabel" styleClass="stat-badge-chip" text="👎 0" />
+                  <Label fx:id="commentsLabel" styleClass="stat-badge-chip" text="💬 0" />
+                  <Region HBox.hgrow="ALWAYS" />
+                  <Label fx:id="readTimeLabel" styleClass="stat-badge-chip-alt" text="📖 1m" />
                </children>
             </HBox>
 

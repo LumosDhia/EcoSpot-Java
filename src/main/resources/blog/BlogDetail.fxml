@@ -3,6 +3,7 @@
 <?import java.net.URL?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ChoiceBox?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.Separator?>
@@ -169,6 +170,13 @@
                                                          <Button fx:id="aiStopBtn" onAction="#handleTtsStop" styleClass="ai-control-btn, ai-stop-btn" text="⏹ Stop" />
                                                       </children>
                                                    </HBox>
+                                                   <Separator orientation="VERTICAL" prefHeight="20.0" />
+                                                   <VBox spacing="2.0">
+                                                      <children>
+                                                         <ChoiceBox fx:id="langChoice" prefWidth="110.0" styleClass="blog-sort-choice" style="-fx-font-size: 11px;" />
+                                                         <Button onAction="#handleTranslate" styleClass="ai-control-btn" style="-fx-background-color: #6366f1; -fx-text-fill: white;" text="🌍 Translate" />
+                                                      </children>
+                                                   </VBox>
                                                 </children>
                                              </HBox>
 

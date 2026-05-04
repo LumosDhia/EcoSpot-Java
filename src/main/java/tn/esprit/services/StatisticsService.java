@@ -241,8 +241,8 @@ public class StatisticsService {
 
     public int getCommentsByPeriod(LocalDate from, LocalDate to, String ownerEmail) {
         String sql = ownerEmail == null
-            ? "SELECT COUNT(*) FROM comment WHERE DATE(created_at) BETWEEN ? AND ?"
-            : "SELECT COUNT(*) FROM comment c JOIN article a ON a.id = c.article_id JOIN user u ON u.id = a.created_by_id WHERE DATE(c.created_at) BETWEEN ? AND ? AND LOWER(u.email) = LOWER(?)";
+            ? "SELECT COUNT(*) FROM `comment` WHERE DATE(created_at) BETWEEN ? AND ?"
+            : "SELECT COUNT(*) FROM `comment` c JOIN article a ON a.id = c.article_id JOIN user u ON u.id = a.created_by_id WHERE DATE(c.created_at) BETWEEN ? AND ? AND LOWER(u.email) = LOWER(?)";
         try (PreparedStatement ps = cnx.prepareStatement(sql)) {
             ps.setDate(1, java.sql.Date.valueOf(from));
             ps.setDate(2, java.sql.Date.valueOf(to));
@@ -260,12 +260,12 @@ public class StatisticsService {
             ? "SELECT COUNT(DISTINCT user_identifier) FROM (" +
               "  SELECT CONVERT(user_id USING utf8mb4) as user_identifier FROM article_reaction_event WHERE reaction = 'LIKE' AND DATE(acted_at) BETWEEN ? AND ? " +
               "  UNION " +
-              "  SELECT CONVERT(author_name USING utf8mb4) FROM comment WHERE DATE(created_at) BETWEEN ? AND ?" +
+              "  SELECT CONVERT(author_name USING utf8mb4) FROM `comment` WHERE DATE(created_at) BETWEEN ? AND ?" +
               ") as interactions"
             : "SELECT COUNT(DISTINCT user_identifier) FROM (" +
               "  SELECT CONVERT(are.user_id USING utf8mb4) as user_identifier FROM article_reaction_event are WHERE are.reaction = 'LIKE' AND DATE(are.acted_at) BETWEEN ? AND ? AND are.article_id IN (" + NGO_ARTICLE_IDS + ") " +
               "  UNION " +
-              "  SELECT CONVERT(c.author_name USING utf8mb4) FROM comment c WHERE DATE(c.created_at) BETWEEN ? AND ? AND c.article_id IN (" + NGO_ARTICLE_IDS + ")" +
+              "  SELECT CONVERT(c.author_name USING utf8mb4) FROM `comment` c WHERE DATE(c.created_at) BETWEEN ? AND ? AND c.article_id IN (" + NGO_ARTICLE_IDS + ")" +
               ") as interactions";
         try (PreparedStatement ps = cnx.prepareStatement(sql)) {
             if (ownerEmail == null) {
@@ -631,7 +631,7 @@ public class StatisticsService {
 
     public List<Map<String, Object>> getArticleComments(int articleId) {
         List<Map<String, Object>> result = new ArrayList<>();
-        String sql = "SELECT COALESCE(NULLIF(author_name,''), NULLIF(author,''), 'Anonymous') AS author, content, created_at FROM comment WHERE article_id = ? ORDER BY created_at DESC";
+        String sql = "SELECT COALESCE(NULLIF(author_name,''), 'Anonymous') AS author, content, created_at FROM `comment` WHERE article_id = ? ORDER BY created_at DESC";
         try (PreparedStatement ps = cnx.prepareStatement(sql)) {
             ps.setInt(1, articleId);
             ResultSet rs = ps.executeQuery();
@@ -653,13 +653,13 @@ public class StatisticsService {
               "(SELECT COUNT(*) FROM article_view_event WHERE article_id = a.id AND DATE(viewed_at) BETWEEN ? AND ?) as views, " +
               "(SELECT COUNT(*) FROM article_reaction_event WHERE article_id = a.id AND reaction = 'LIKE' AND DATE(acted_at) BETWEEN ? AND ?) as likes, " +
               "(SELECT COUNT(*) FROM article_reaction_event WHERE article_id = a.id AND reaction = 'DISLIKE' AND DATE(acted_at) BETWEEN ? AND ?) as dislikes, " +
-              "(SELECT COUNT(*) FROM comment WHERE article_id = a.id AND DATE(created_at) BETWEEN ? AND ?) as comments " +
+              "(SELECT COUNT(*) FROM `comment` WHERE article_id = a.id AND DATE(created_at) BETWEEN ? AND ?) as comments " +
               "FROM article a LEFT JOIN user u ON u.id = a.created_by_id"
             : "SELECT a.id, a.title, COALESCE(a.published_at, a.created_at) AS published_at, COALESCE(u.username, 'EcoSpot Contributor') as author, " +
               "(SELECT COUNT(*) FROM article_view_event WHERE article_id = a.id AND DATE(viewed_at) BETWEEN ? AND ?) as views, " +
               "(SELECT COUNT(*) FROM article_reaction_event WHERE article_id = a.id AND reaction = 'LIKE' AND DATE(acted_at) BETWEEN ? AND ?) as likes, " +
               "(SELECT COUNT(*) FROM article_reaction_event WHERE article_id = a.id AND reaction = 'DISLIKE' AND DATE(acted_at) BETWEEN ? AND ?) as dislikes, " +
-              "(SELECT COUNT(*) FROM comment WHERE article_id = a.id AND DATE(created_at) BETWEEN ? AND ?) as comments " +
+              "(SELECT COUNT(*) FROM `comment` WHERE article_id = a.id AND DATE(created_at) BETWEEN ? AND ?) as comments " +
               "FROM article a JOIN user u ON u.id = a.created_by_id WHERE LOWER(u.email) = LOWER(?)";
         try (PreparedStatement ps = cnx.prepareStatement(sql)) {
             if (ownerEmail == null) {

@@ -16,6 +16,13 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.web.WebView;
 import javafx.stage.Stage;
+import javafx.scene.control.ChoiceBox;
+import javafx.collections.FXCollections;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import org.json.JSONObject;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -41,6 +48,7 @@ public class BlogDetailController {
     @FXML private WebView contentWebView;
     @FXML private FlowPane tagsFlowPane;
     @FXML private ImageView currentUserAvatar;
+    @FXML private ChoiceBox<String> langChoice;
 
     // Comments
     @FXML private VBox commentsContainer;
@@ -115,6 +123,11 @@ public class BlogDetailController {
                 event.consume();
             }
         });
+
+        if (langChoice != null) {
+            langChoice.setItems(FXCollections.observableArrayList("French", "Arabic", "English", "Spanish", "German"));
+            langChoice.setValue("French");
+        }
     }
 
     private ScrollPane findParentScrollPane(javafx.scene.Node node) {
@@ -316,6 +329,56 @@ public class BlogDetailController {
         aiPlayBtn.setDisable(false);
         aiPauseBtn.setDisable(true);
         aiStatusLabel.setText("Ready to read aloud");
+    }
+
+    @FXML
+    private void handleTranslate() {
+        String targetLabel = langChoice.getValue();
+        String targetCode = "fr";
+        if ("Arabic".equals(targetLabel)) targetCode = "ar";
+        else if ("Spanish".equals(targetLabel)) targetCode = "es";
+        else if ("German".equals(targetLabel)) targetCode = "de";
+        else if ("English".equals(targetLabel)) targetCode = "en";
+
+        String textToTranslate = extractPlainText();
+        if (textToTranslate == null || textToTranslate.isBlank()) return;
+
+        final String finalTargetCode = targetCode;
+        aiStatusLabel.setText("🌍 Translating...");
+        
+        new Thread(() -> {
+            try {
+                JSONObject json = new JSONObject();
+                json.put("text", textToTranslate);
+                json.put("target", finalTargetCode);
+
+                HttpClient client = HttpClient.newHttpClient();
+                HttpRequest request = HttpRequest.newBuilder()
+                        .uri(URI.create("http://localhost:8002/translate"))
+                        .header("Content-Type", "application/json")
+                        .POST(HttpRequest.BodyPublishers.ofString(json.toString()))
+                        .build();
+
+                HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+                if (response.statusCode() == 200) {
+                    JSONObject resp = new JSONObject(response.body());
+                    String translated = resp.getString("translated_text");
+                    Platform.runLater(() -> {
+                        contentWebView.getEngine().loadContent("<div style='font-family: sans-serif;'>" + translated + "</div>");
+                        aiStatusLabel.setText("✅ Translated to " + targetLabel);
+                        // Also update hero title for full experience
+                        if (translated.length() > 50) {
+                             // Try to translate title separately? Or just keep it.
+                        }
+                    });
+                } else {
+                    Platform.runLater(() -> aiStatusLabel.setText("❌ Translation failed"));
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+                Platform.runLater(() -> aiStatusLabel.setText("❌ Error: " + e.getMessage()));
+            }
+        }).start();
     }
 
     private void startSpeaking(String text) {

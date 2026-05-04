@@ -22,24 +22,19 @@ public class EmailService {
         props.put("mail.smtp.auth", "true");
         props.put("mail.smtp.host", host);
         props.put("mail.smtp.port", "465");
-        props.put("mail.smtp.socketFactory.port", "465");
-        props.put("mail.smtp.socketFactory.class", "javax.net.ssl.SSLSocketFactory");
-        props.put("mail.smtp.ssl.checkserveridentity", "false");
-        props.put("mail.smtp.trust", "*");
+        props.put("mail.smtp.ssl.enable", "true");
+        props.put("mail.smtp.ssl.trust", host);
 
-        Session session = Session.getInstance(props, new Authenticator() {
-            @Override
-            protected PasswordAuthentication getPasswordAuthentication() {
-                return new PasswordAuthentication(user, pass);
-            }
-        });
-
+        Session session = Session.getInstance(props);
         Message message = new MimeMessage(session);
         message.setFrom(new InternetAddress(user));
         message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(to));
         message.setSubject(subject);
         message.setContent(body, "text/html; charset=utf-8");
 
-        Transport.send(message);
+        try (Transport transport = session.getTransport("smtp")) {
+            transport.connect(host, user, pass);
+            transport.sendMessage(message, message.getAllRecipients());
+        }
     }
 }

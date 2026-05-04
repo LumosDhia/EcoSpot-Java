@@ -111,6 +111,11 @@
                                                 <ChoiceBox fx:id="sortChoice" prefWidth="170.0" styleClass="blog-sort-choice" />
                                             </children>
                                         </VBox>
+                                        <VBox spacing="4.0" alignment="BOTTOM_CENTER">
+                                            <children>
+                                                <Button onAction="#handleExportRSS" styleClass="pagination-nav-btn" text="📡 RSS Feed" style="-fx-background-color: #f97316; -fx-text-fill: white;" />
+                                            </children>
+                                        </VBox>
                                     </children>
                                 </HBox>
 

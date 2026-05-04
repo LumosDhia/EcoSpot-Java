@@ -3,11 +3,13 @@ package tn.esprit.util;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.sql.Statement;
 
 public class StatisticsCollector {
 
     private static StatisticsCollector instance;
     private StatisticsCollector() {
+        ensureTablesExist();
     }
 
     private Connection getCnx() {
@@ -19,6 +21,52 @@ public class StatisticsCollector {
             instance = new StatisticsCollector();
         }
         return instance;
+    }
+
+    private void ensureTablesExist() {
+        String[] queries = {
+            "CREATE TABLE IF NOT EXISTS article_view_event (" +
+            "  id INT AUTO_VALUE PRIMARY KEY, " +
+            "  article_id INT NOT NULL, " +
+            "  session_id VARCHAR(255), " +
+            "  user_id INT, " +
+            "  viewed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP" +
+            ")",
+            "CREATE TABLE IF NOT EXISTS article_reaction_event (" +
+            "  id INT AUTO_INCREMENT PRIMARY KEY, " +
+            "  article_id INT NOT NULL, " +
+            "  user_id INT, " +
+            "  reaction VARCHAR(20), " +
+            "  acted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP" +
+            ")",
+            "CREATE TABLE IF NOT EXISTS search_term_log (" +
+            "  id INT AUTO_INCREMENT PRIMARY KEY, " +
+            "  term VARCHAR(255), " +
+            "  result_count INT, " +
+            "  searched_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP" +
+            ")",
+            "CREATE TABLE IF NOT EXISTS article_stats_daily (" +
+            "  article_id INT NOT NULL, " +
+            "  stat_date DATE NOT NULL, " +
+            "  views INT DEFAULT 0, " +
+            "  likes INT DEFAULT 0, " +
+            "  dislikes INT DEFAULT 0, " +
+            "  comments INT DEFAULT 0, " +
+            "  PRIMARY KEY (article_id, stat_date)" +
+            ")"
+        };
+
+        // Fix AUTO_INCREMENT typo in first query if needed
+        queries[0] = queries[0].replace("AUTO_VALUE", "AUTO_INCREMENT");
+
+        try (Connection c = getCnx(); Statement st = c.createStatement()) {
+            for (String q : queries) {
+                st.execute(q);
+            }
+            System.out.println("✅ Statistics tables verified/created.");
+        } catch (SQLException e) {
+            System.err.println("❌ Failed to ensure statistics tables: " + e.getMessage());
+        }
     }
 
     public void recordView(int articleId, String sessionId, Integer userId) {

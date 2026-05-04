@@ -500,6 +500,28 @@
     -fx-font-size: 11px;
 }
 
+.stat-badge-chip {
+    -fx-background-color: #f1f5f9;
+    -fx-text-fill: #475569;
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+    -fx-padding: 3 8;
+    -fx-background-radius: 6;
+    -fx-border-color: #e2e8f0;
+    -fx-border-width: 0.5;
+}
+
+.stat-badge-chip-alt {
+    -fx-background-color: #f0fdf4;
+    -fx-text-fill: #166534;
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+    -fx-padding: 3 8;
+    -fx-background-radius: 6;
+    -fx-border-color: #dcfce7;
+    -fx-border-width: 0.5;
+}
+
 .article-author {
     -fx-text-fill: #475569;
     -fx-font-size: 13px;

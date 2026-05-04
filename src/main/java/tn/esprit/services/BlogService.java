@@ -216,11 +216,7 @@ public class BlogService implements GlobalInterface<Blog> {
                 String role = rs.getString("role");
                 b.setCreatedByEmail(rs.getString("author_email"));
                 if (authorName != null) {
-                    if ("ADMIN".equalsIgnoreCase(role)) {
-                        b.setAuthor("Admin [" + authorName + "]");
-                    } else {
-                        b.setAuthor(authorName);
-                    }
+                    b.setAuthor(authorName);
                 } else {
                     b.setAuthor("Admin");
                 }
