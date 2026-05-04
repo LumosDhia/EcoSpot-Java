@@ -36,7 +36,6 @@ public class NewArticleController {
     @FXML private Label revisionNoteLabel;
     @FXML private TextField unsplashSearchField;
     @FXML private HBox unsplashResults;
-    @FXML private TextField seoTitleField;
     @FXML private TextArea seoDescriptionArea;
     @FXML private TextField seoKeywordsField;
 
@@ -138,34 +137,7 @@ public class NewArticleController {
                 });
     }
 
-    @FXML
-    private void showSeoTitleIdeas() {
-        String currentTitle = titleField.getText();
-        String content = contentEditor.getHtmlText();
 
-        if (content.length() < 50) {
-            showAlert("Error", "Please write some content first so AI can brainstorm SEO titles.", Alert.AlertType.WARNING);
-            return;
-        }
-
-        aiSeoService.generateTitleIdeas(currentTitle, content)
-                .thenAccept(titles -> {
-                    javafx.application.Platform.runLater(() -> {
-                        if (titles != null && !titles.isEmpty()) {
-                            ChoiceDialog<String> dialog = new ChoiceDialog<>(titles.get(0), titles);
-                            dialog.setTitle("AI SEO Title Ideas");
-                            dialog.setHeaderText("Choose a catchy SEO title:");
-                            dialog.setContentText("Suggested Titles:");
-                            
-                            dialog.showAndWait().ifPresent(selectedTitle -> {
-                                seoTitleField.setText(selectedTitle);
-                            });
-                        } else {
-                            showAlert("AI Error", "Failed to generate SEO title ideas.", Alert.AlertType.ERROR);
-                        }
-                    });
-                });
-    }
 
     @FXML
     private void generateSeoWithAi() {
@@ -181,7 +153,6 @@ public class NewArticleController {
                 .thenAccept(result -> {
                     javafx.application.Platform.runLater(() -> {
                         if (result != null) {
-                            seoTitleField.setText(result.title);
                             seoDescriptionArea.setText(result.description);
                             seoKeywordsField.setText(result.keywords);
                         } else {

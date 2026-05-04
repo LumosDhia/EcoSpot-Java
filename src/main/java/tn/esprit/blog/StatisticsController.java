@@ -39,8 +39,6 @@ public class StatisticsController {
     @FXML private LineChart<String, Number> viewsLineChart;
     @FXML private BarChart<String, Number> viewsBarChart;
     @FXML private BarChart<Number, String> categoryChart;
-    @FXML private BarChart<String, Number> searchTermsChart;
-    @FXML private BarChart<String, Number> hourlyChart;
     @FXML private ListView<String> topArticlesList;
     @FXML private Pagination articlesPagination;
     @FXML private Button manageArticlesBtn;
@@ -130,32 +128,52 @@ public class StatisticsController {
         else start = end.minusDays(29);
 
         // Load KPIs
-        totalViewsLabel.setText(String.valueOf(statsService.getViewsByPeriod(start, end, ownerEmail)));
+        int totalViews = statsService.getViewsByPeriod(start, end, ownerEmail);
+        totalViewsLabel.setText(String.valueOf(totalViews));
         totalArticlesLabel.setText(String.valueOf(statsService.getPublishedArticlesByPeriod(start, end, ownerEmail)));
-        totalCommentsLabel.setText(String.valueOf(statsService.getCommentsByPeriod(start, end, ownerEmail)));
+        
+        int comments = statsService.getCommentsByPeriod(start, end, ownerEmail);
+        totalCommentsLabel.setText(String.valueOf(comments));
 
         Map<String, Integer> reactions = statsService.getReactionsByPeriod(start, end, ownerEmail);
         int likes = reactions.getOrDefault("LIKE", 0);
-        int dislikes = reactions.getOrDefault("DISLIKE", 0);
-        engagementLabel.setText(String.valueOf(likes + dislikes));
+        int uniqueEngagedUsers = statsService.getUniqueEngagedUsersCount(start, end, ownerEmail);
+        
+        double engagementRate = totalViews == 0 ? 0 : ((double)uniqueEngagedUsers / totalViews) * 100;
+        engagementLabel.setText(String.format("%.1f%%", engagementRate));
 
         // Prepare time series data
         List<Map<String, Object>> timeSeries = new java.util.ArrayList<>();
         if ("Today".equals(period)) {
             List<Map<String, Object>> rawData = statsService.getViewsHourly(end, ownerEmail);
             for (int i = 0; i < 24; i++) {
-                String label = String.format("%02d:00", i);
-                int views = 0;
+                // Check :00
+                String label00 = String.format("%02d:00", i);
+                int views00 = 0;
                 for (Map<String, Object> row : rawData) {
-                    if (label.equals(row.get("date"))) {
-                        views = (int) row.get("views");
+                    if (label00.equals(row.get("date"))) {
+                        views00 = (int) row.get("views");
                         break;
                     }
                 }
-                Map<String, Object> map = new java.util.HashMap<>();
-                map.put("date", label);
-                map.put("views", views);
-                timeSeries.add(map);
+                Map<String, Object> map00 = new java.util.HashMap<>();
+                map00.put("date", label00);
+                map00.put("views", views00);
+                timeSeries.add(map00);
+
+                // Check :30
+                String label30 = String.format("%02d:30", i);
+                int views30 = 0;
+                for (Map<String, Object> row : rawData) {
+                    if (label30.equals(row.get("date"))) {
+                        views30 = (int) row.get("views");
+                        break;
+                    }
+                }
+                Map<String, Object> map30 = new java.util.HashMap<>();
+                map30.put("date", label30);
+                map30.put("views", views30);
+                timeSeries.add(map30);
             }
         } else if ("Last 12 Months".equals(period)) {
             List<Map<String, Object>> rawData = statsService.getViewsMonthly(start, end, ownerEmail);
@@ -253,25 +271,9 @@ public class StatisticsController {
         }
         categoryChart.getData().clear();
         categoryChart.getData().add(catSeries);
+    }
 
-        // Load Hourly Chart
-        XYChart.Series<String, Number> hourlySeries = new XYChart.Series<>();
-        List<Map<String, Object>> hours = statsService.getViewsByHourOfDay(ownerEmail);
-        for (Map<String, Object> h : hours) {
-            hourlySeries.getData().add(new XYChart.Data<>(h.get("hour").toString() + ":00", (Number) h.get("views")));
-        }
-        hourlyChart.getData().clear();
-        hourlyChart.getData().add(hourlySeries);
-
-        // Load Search Terms (global — not article-scoped)
-        XYChart.Series<String, Number> searchSeries = new XYChart.Series<>();
-        List<Map<String, Object>> searches = statsService.getTopSearchTerms(start, end, 5);
-        for (Map<String, Object> s : searches) {
-            searchSeries.getData().add(new XYChart.Data<>(s.get("term").toString(), (Number) s.get("count")));
-        }
-        searchTermsChart.getData().clear();
-        searchTermsChart.getData().add(searchSeries);
-    }    @FXML
+    @FXML
     private void handleExportCSV(ActionEvent event) {
         javafx.stage.FileChooser fileChooser = new javafx.stage.FileChooser();
         fileChooser.setTitle("Save Statistics CSV");

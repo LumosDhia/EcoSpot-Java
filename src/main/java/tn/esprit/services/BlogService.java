@@ -37,38 +37,41 @@ public class BlogService implements GlobalInterface<Blog> {
     @Override
     public void add2(Blog blog) {
         String req = "INSERT INTO article (title, content, image, created_at, published_at, slug, created_by_id, writer_id, category_id, views, admin_revision_note, status) " +
-                     "VALUES (?, ?, ?, NOW(), ?, ?, ?, ?, ?, 0, ?, ?)";
+                     "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 0, ?, ?)";
         try (PreparedStatement ps = getCnx().prepareStatement(req, Statement.RETURN_GENERATED_KEYS)) {
             ps.setString(1, blog.getTitle());
             ps.setString(2, blog.getContent());
             ps.setString(3, blog.getImage() != null ? blog.getImage() : "");
+            
+            LocalDateTime now = LocalDateTime.now();
+            ps.setTimestamp(4, Timestamp.valueOf(now));
 
             if (blog.getIsPublished()) {
-                ps.setTimestamp(4, Timestamp.valueOf(LocalDateTime.now()));
+                ps.setTimestamp(5, Timestamp.valueOf(LocalDateTime.now()));
             } else {
-                ps.setNull(4, Types.TIMESTAMP);
+                ps.setNull(5, Types.TIMESTAMP);
             }
 
             String slug = blog.getTitle().toLowerCase().replace(" ", "-").replaceAll("[^a-z0-9-]", "");
             slug = slug + "-" + System.currentTimeMillis() % 1000;
             blog.setSlug(slug);
-            ps.setString(5, slug);
+            ps.setString(6, slug);
 
             int userId = resolveCurrentUserId();
             if (userId <= 0) {
                 throw new IllegalStateException("No valid user session found.");
             }
-            ps.setInt(6, userId);
             ps.setInt(7, userId);
+            ps.setInt(8, userId);
 
             if (blog.getCategory() != null) {
-                ps.setInt(8, blog.getCategory().getId());
+                ps.setInt(9, blog.getCategory().getId());
             } else {
-                ps.setNull(8, Types.INTEGER);
+                ps.setNull(9, Types.INTEGER);
             }
 
-            ps.setString(9, blog.getAdminRevisionNote());
-            ps.setString(10, blog.getIsPublished() ? "published" : "draft");
+            ps.setString(10, blog.getAdminRevisionNote());
+            ps.setString(11, blog.getIsPublished() ? "published" : "draft");
 
             ps.executeUpdate();
 
@@ -78,8 +81,6 @@ public class BlogService implements GlobalInterface<Blog> {
                 blog.setId(articleId);
                 saveTags(articleId, blog.getTags());
             }
-
-            System.out.println("Article added successfully!");
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -123,7 +124,6 @@ public class BlogService implements GlobalInterface<Blog> {
         try (PreparedStatement ps = getCnx().prepareStatement(req)) {
             ps.setInt(1, blog.getId());
             ps.executeUpdate();
-            System.out.println("Article deleted successfully!");
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -158,8 +158,6 @@ public class BlogService implements GlobalInterface<Blog> {
             ps.executeUpdate();
 
             saveTags(blog.getId(), blog.getTags());
-
-            System.out.println("Article updated successfully!");
         } catch (SQLException e) {
             e.printStackTrace();
         }

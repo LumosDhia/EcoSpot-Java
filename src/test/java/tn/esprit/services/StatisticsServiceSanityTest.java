@@ -28,7 +28,7 @@ public class StatisticsServiceSanityTest {
     @Test
     public void testTablesExist() throws SQLException {
         DatabaseMetaData md = cnx.getMetaData();
-        String[] tables = {"article", "app_user", "article_view_event", "article_reaction_java", "comment", "category"};
+        String[] tables = {"article", "user", "article_view_event", "article_reaction_java", "comment", "category"};
         for (String table : tables) {
             ResultSet rs = md.getTables(null, null, table, null);
             assertTrue(rs.next(), "Table " + table + " should exist");

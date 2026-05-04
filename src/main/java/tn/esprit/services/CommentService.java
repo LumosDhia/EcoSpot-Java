@@ -75,6 +75,25 @@ public class CommentService {
         }
     }
 
+    private String filterProfanity(String text) {
+        if (text == null || text.isBlank()) return text;
+        try {
+            java.net.http.HttpClient client = java.net.http.HttpClient.newHttpClient();
+            String encodedText = java.net.URLEncoder.encode(text, java.nio.charset.StandardCharsets.UTF_8.toString());
+            java.net.http.HttpRequest request = java.net.http.HttpRequest.newBuilder()
+                    .uri(java.net.URI.create("https://www.purgomalum.com/service/plain?text=" + encodedText))
+                    .GET()
+                    .build();
+            java.net.http.HttpResponse<String> response = client.send(request, java.net.http.HttpResponse.BodyHandlers.ofString());
+            if (response.statusCode() == 200) {
+                return response.body();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return text;
+    }
+
     public boolean add(Comment c) {
         lastErrorMessage = null;
         Connection conn = getCnx();
@@ -83,18 +102,21 @@ public class CommentService {
             return false;
         }
 
+        // Apply PurgoMalum Profanity Filter
+        c.setContent(filterProfanity(c.getContent()));
+
         User currentUser = SessionManager.getCurrentUser();
         String authorName = (currentUser != null && currentUser.getUsername() != null)
                 ? currentUser.getUsername()
                 : (c.getAuthorName() != null && !c.getAuthorName().equalsIgnoreCase("Anonymous User") ? c.getAuthorName() : getGuestName(0));
 
-        String req = "INSERT INTO `comment` (article_id, content, created_at, author_name) VALUES (?, ?, NOW(), ?)";
+        String req = "INSERT INTO `comment` (article_id, content, created_at, author_name) VALUES (?, ?, ?, ?)";
         try (PreparedStatement ps = conn.prepareStatement(req)) {
             ps.setInt(1, c.getArticleId());
             ps.setString(2, c.getContent());
-            ps.setString(3, authorName);
+            ps.setTimestamp(3, Timestamp.valueOf(LocalDateTime.now()));
+            ps.setString(4, authorName);
             int affected = ps.executeUpdate();
-            System.out.println("DEBUG: Comment INSERT successful. ArticleID: " + c.getArticleId() + ", Affected: " + affected);
             return affected > 0;
         } catch (SQLException e) {
             lastErrorMessage = e.getMessage();
@@ -151,10 +173,8 @@ public class CommentService {
                 );
 
                 try { comment.setAvatarStyle(rs.getString("avatar_style")); } catch (Exception ignored) {}
-
                 comments.add(comment);
             }
-            System.out.println("DEBUG: Found " + comments.size() + " comments for article " + articleId);
         } catch (SQLException e) {
             System.err.println("SQL Error fetching comments: " + e.getMessage());
             e.printStackTrace();
@@ -223,6 +243,10 @@ public class CommentService {
     public boolean updateContent(int id, String content) {
         Connection conn = getCnx();
         if (conn == null) return false;
+        
+        // Apply PurgoMalum Profanity Filter
+        content = filterProfanity(content);
+        
         String req = "UPDATE `comment` SET content = ? WHERE id = ?";
         try (PreparedStatement ps = conn.prepareStatement(req)) {
             ps.setString(1, content);

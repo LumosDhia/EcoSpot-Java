@@ -61,13 +61,25 @@ public class EventDetailController {
                              (event.getEndedAt() != null ? event.getEndedAt().format(DateTimeFormatter.ofPattern("MMM dd, yyyy")) : ""));
         }
 
+        eventImg.setVisible(false);
+        eventImg.setManaged(false);
         if (event.getImage() != null && !event.getImage().isEmpty()) {
-            try {
-                String imgUrl = tn.esprit.util.ImageUploadUtils.getImageUrl("events", event.getImage());
-                eventImg.setImage(new Image(imgUrl, true));
-            } catch (Exception e) {
-                // Ignore
-            }
+            String localUrl = tn.esprit.util.ImageUploadUtils.getImageUrl("events", event.getImage());
+            Image img = new Image(localUrl, true);
+            img.progressProperty().addListener((obs, oldVal, newVal) -> {
+                if (newVal.doubleValue() >= 1.0 && !img.isError()) {
+                    javafx.application.Platform.runLater(() -> {
+                        eventImg.setImage(img);
+                        eventImg.setVisible(true);
+                        eventImg.setManaged(true);
+                    });
+                }
+            });
+            img.errorProperty().addListener((obs, oldVal, newVal) -> {
+                if (newVal) {
+                    System.err.println("[Event Image] Failed to load: " + localUrl);
+                }
+            });
         }
 
         loadSponsors();
@@ -164,32 +176,53 @@ public class EventDetailController {
 
     private void loadMap() {
         if (mapView == null || event == null) return;
-        
+
         double lat = event.getLatitude();
         double lon = event.getLongitude();
-        
-        // Default to Tunis if coordinates are missing
+
         if (lat == 0 && lon == 0) {
             lat = 36.8065;
             lon = 10.1815;
         }
 
-        String content = "<!DOCTYPE html><html><head>" +
+        // Explicit pixel height is CRITICAL for Leaflet in JavaFX WebView.
+        // Percentage heights don't resolve when using loadContent(), causing blank tiles.
+        final double mapHeight = 290;
+        final String safeName = event.getName().replace("'", "\\'").replace("\"", "\\\"");
+        final String safeLoc  = event.getLocation().replace("'", "\\'").replace("\"", "\\\"");
+        final double fLat = lat;
+        final double fLon = lon;
+
+        String html = "<!DOCTYPE html><html><head><meta charset='UTF-8'>" +
                 "<link rel='stylesheet' href='https://unpkg.com/leaflet@1.9.4/dist/leaflet.css'/>" +
                 "<script src='https://unpkg.com/leaflet@1.9.4/dist/leaflet.js'></script>" +
-                "<style>#map { height: 100vh; margin: 0; padding: 0; }</style>" +
-                "</head><body><div id='map'></div><script>" +
-                "var map = L.map('map').setView([" + lat + ", " + lon + "], 13);" +
-                "L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {" +
-                "    attribution: '&copy; OpenStreetMap contributors'" +
-                "}).addTo(map);" +
-                "L.marker([" + lat + ", " + lon + "]).addTo(map)" +
-                "    .bindPopup('<b>" + event.getName().replace("'", "\\'") + "</b><br>" + event.getLocation().replace("'", "\\'") + "')" +
-                "    .openPopup();" +
+                "<style>" +
+                "  * { margin:0; padding:0; box-sizing:border-box; }" +
+                "  body { background:#f3f4f6; overflow:hidden; }" +
+                "  #map { width:100%; height:" + (int) mapHeight + "px; }" +
+                "</style></head><body>" +
+                "<div id='map'></div><script>" +
+                "  var map = L.map('map', {" +
+                "    zoomControl: true," +
+                "    zoomAnimation: false," +
+                "    fadeAnimation: false," +
+                "    markerZoomAnimation: false" +
+                "  }).setView([" + fLat + "," + fLon + "], 13);" +
+                "  L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {" +
+                "    maxZoom: 19," +
+                "    attribution: '&copy; OpenStreetMap contributors &copy; CARTO'" +
+                "  }).addTo(map);" +
+                "  L.marker([" + fLat + "," + fLon + "]).addTo(map)" +
+                "    .bindPopup('<b>" + safeName + "</b><br>" + safeLoc + "').openPopup();" +
+                "  setTimeout(function() { map.invalidateSize(); }, 500);" +
                 "</script></body></html>";
 
-        mapView.getEngine().loadContent(content);
+        WebEngine engine = mapView.getEngine();
+        engine.setJavaScriptEnabled(true);
+        engine.setUserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36");
+        engine.loadContent(html);
     }
+
 
     private void updateCapacityState() {
         if (event == null) {

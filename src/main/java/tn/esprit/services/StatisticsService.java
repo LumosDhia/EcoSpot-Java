@@ -83,20 +83,35 @@ public class StatisticsService {
 
     public List<Map<String, Object>> getViewsHourly(LocalDate date, String ownerEmail) {
         List<Map<String, Object>> result = new ArrayList<>();
+        // Smart Rounding Logic:
+        // 0-15m -> Hour:00
+        // 16-45m -> Hour:30
+        // 46-59m -> Next Hour:00
         String sql = ownerEmail == null
-            ? "SELECT HOUR(viewed_at) as hr, COUNT(*) as views FROM article_view_event WHERE DATE(viewed_at) = ? GROUP BY hr ORDER BY hr"
-            : "SELECT HOUR(ave.viewed_at) as hr, COUNT(*) as views FROM article_view_event ave " +
-              "WHERE DATE(ave.viewed_at) = ? " +
-              "AND ave.article_id IN (" + NGO_ARTICLE_IDS + ") GROUP BY hr ORDER BY hr";
+            ? "SELECT " +
+              "CASE " +
+              "  WHEN MINUTE(viewed_at) BETWEEN 0 AND 15 THEN DATE_FORMAT(viewed_at, '%H:00') " +
+              "  WHEN MINUTE(viewed_at) BETWEEN 16 AND 45 THEN DATE_FORMAT(viewed_at, '%H:30') " +
+              "  ELSE DATE_FORMAT(viewed_at + INTERVAL 1 HOUR, '%H:00') " +
+              "END as bucket, COUNT(*) as views " +
+              "FROM article_view_event WHERE DATE(viewed_at) = ? GROUP BY bucket ORDER BY bucket"
+            : "SELECT " +
+              "CASE " +
+              "  WHEN MINUTE(ave.viewed_at) BETWEEN 0 AND 15 THEN DATE_FORMAT(ave.viewed_at, '%H:00') " +
+              "  WHEN MINUTE(ave.viewed_at) BETWEEN 16 AND 45 THEN DATE_FORMAT(ave.viewed_at, '%H:30') " +
+              "  ELSE DATE_FORMAT(ave.viewed_at + INTERVAL 1 HOUR, '%H:00') " +
+              "END as bucket, COUNT(*) as views " +
+              "FROM article_view_event ave WHERE DATE(ave.viewed_at) = ? AND ave.article_id IN (" + NGO_ARTICLE_IDS + ") GROUP BY bucket ORDER BY bucket";
+        
         try (PreparedStatement ps = cnx.prepareStatement(sql)) {
             ps.setDate(1, java.sql.Date.valueOf(date));
             if (ownerEmail != null) ps.setString(2, ownerEmail);
             ResultSet rs = ps.executeQuery();
             while (rs.next()) {
-                Map<String, Object> map = new HashMap<>();
-                map.put("date", String.format("%02d:00", rs.getInt("hr")));
-                map.put("views", rs.getInt("views"));
-                result.add(map);
+                Map<String, Object> row = new HashMap<>();
+                row.put("date", rs.getString("bucket"));
+                row.put("views", rs.getInt("views"));
+                result.add(row);
             }
         } catch (SQLException e) { e.printStackTrace(); }
         return result;
@@ -232,6 +247,40 @@ public class StatisticsService {
             ps.setDate(1, java.sql.Date.valueOf(from));
             ps.setDate(2, java.sql.Date.valueOf(to));
             if (ownerEmail != null) ps.setString(3, ownerEmail);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) return rs.getInt(1);
+        } catch (SQLException e) { e.printStackTrace(); }
+        return 0;
+    }
+
+    public int getUniqueEngagedUsersCount(LocalDate from, LocalDate to, String ownerEmail) {
+        // Numerator: Unique users who LIKED OR COMMENTED
+        // We use author_name from comments and map to user IDs to deduplicate with reaction events
+        String sql = ownerEmail == null
+            ? "SELECT COUNT(DISTINCT user_identifier) FROM (" +
+              "  SELECT CONVERT(user_id USING utf8mb4) as user_identifier FROM article_reaction_event WHERE reaction = 'LIKE' AND DATE(acted_at) BETWEEN ? AND ? " +
+              "  UNION " +
+              "  SELECT CONVERT(author_name USING utf8mb4) FROM comment WHERE DATE(created_at) BETWEEN ? AND ?" +
+              ") as interactions"
+            : "SELECT COUNT(DISTINCT user_identifier) FROM (" +
+              "  SELECT CONVERT(are.user_id USING utf8mb4) as user_identifier FROM article_reaction_event are WHERE are.reaction = 'LIKE' AND DATE(are.acted_at) BETWEEN ? AND ? AND are.article_id IN (" + NGO_ARTICLE_IDS + ") " +
+              "  UNION " +
+              "  SELECT CONVERT(c.author_name USING utf8mb4) FROM comment c WHERE DATE(c.created_at) BETWEEN ? AND ? AND c.article_id IN (" + NGO_ARTICLE_IDS + ")" +
+              ") as interactions";
+        try (PreparedStatement ps = cnx.prepareStatement(sql)) {
+            if (ownerEmail == null) {
+                ps.setDate(1, java.sql.Date.valueOf(from));
+                ps.setDate(2, java.sql.Date.valueOf(to));
+                ps.setDate(3, java.sql.Date.valueOf(from));
+                ps.setDate(4, java.sql.Date.valueOf(to));
+            } else {
+                ps.setDate(1, java.sql.Date.valueOf(from));
+                ps.setDate(2, java.sql.Date.valueOf(to));
+                ps.setString(3, ownerEmail);
+                ps.setDate(4, java.sql.Date.valueOf(from));
+                ps.setDate(5, java.sql.Date.valueOf(to));
+                ps.setString(6, ownerEmail);
+            }
             ResultSet rs = ps.executeQuery();
             if (rs.next()) return rs.getInt(1);
         } catch (SQLException e) { e.printStackTrace(); }
@@ -406,9 +455,8 @@ public class StatisticsService {
     public List<Map<String, Object>> getTopArticlesByEngagement(int limit) {
         List<Map<String, Object>> result = new ArrayList<>();
         String sql = "SELECT a.id, a.title, " +
-                     "(COUNT(DISTINCT ave.id) + COUNT(DISTINCT c.id) + COUNT(DISTINCT are.id)) as engagement " +
+                     "(COUNT(DISTINCT c.id) + COUNT(DISTINCT are.id)) as engagement " +
                      "FROM article a " +
-                     "LEFT JOIN article_view_event ave ON ave.article_id = a.id " +
                      "LEFT JOIN comment c ON c.article_id = a.id " +
                      "LEFT JOIN article_reaction_event are ON are.article_id = a.id " +
                      "GROUP BY a.id, a.title ORDER BY engagement DESC LIMIT ?";
@@ -506,7 +554,7 @@ public class StatisticsService {
     // Phase 4.5 Per-Article Drilldown
     public Map<String, Object> getArticleBasicStats(int articleId) {
         Map<String, Object> result = new HashMap<>();
-        String sql = "SELECT a.title, COALESCE(u.username, 'EcoSpot Contributor') as author, a.published_at, " +
+        String sql = "SELECT a.title, COALESCE(u.username, 'EcoSpot Contributor') as author, COALESCE(a.published_at, a.created_at) AS published_at, " +
                      "(SELECT COUNT(*) FROM article_view_event WHERE article_id = a.id) as views, " +
                      "(SELECT COUNT(*) FROM article_reaction_event WHERE article_id = a.id AND reaction = 'LIKE') as likes, " +
                      "(SELECT COUNT(*) FROM article_reaction_event WHERE article_id = a.id AND reaction = 'DISLIKE') as dislikes, " +
@@ -601,13 +649,13 @@ public class StatisticsService {
     public List<Map<String, Object>> getDetailedArticleStats(LocalDate from, LocalDate to, String ownerEmail) {
         List<Map<String, Object>> result = new ArrayList<>();
         String sql = ownerEmail == null
-            ? "SELECT a.id, a.title, a.published_at, COALESCE(u.username, 'EcoSpot Contributor') as author, " +
+            ? "SELECT a.id, a.title, COALESCE(a.published_at, a.created_at) AS published_at, COALESCE(u.username, 'EcoSpot Contributor') as author, " +
               "(SELECT COUNT(*) FROM article_view_event WHERE article_id = a.id AND DATE(viewed_at) BETWEEN ? AND ?) as views, " +
               "(SELECT COUNT(*) FROM article_reaction_event WHERE article_id = a.id AND reaction = 'LIKE' AND DATE(acted_at) BETWEEN ? AND ?) as likes, " +
               "(SELECT COUNT(*) FROM article_reaction_event WHERE article_id = a.id AND reaction = 'DISLIKE' AND DATE(acted_at) BETWEEN ? AND ?) as dislikes, " +
               "(SELECT COUNT(*) FROM comment WHERE article_id = a.id AND DATE(created_at) BETWEEN ? AND ?) as comments " +
               "FROM article a LEFT JOIN user u ON u.id = a.created_by_id"
-            : "SELECT a.id, a.title, a.published_at, COALESCE(u.username, 'EcoSpot Contributor') as author, " +
+            : "SELECT a.id, a.title, COALESCE(a.published_at, a.created_at) AS published_at, COALESCE(u.username, 'EcoSpot Contributor') as author, " +
               "(SELECT COUNT(*) FROM article_view_event WHERE article_id = a.id AND DATE(viewed_at) BETWEEN ? AND ?) as views, " +
               "(SELECT COUNT(*) FROM article_reaction_event WHERE article_id = a.id AND reaction = 'LIKE' AND DATE(acted_at) BETWEEN ? AND ?) as likes, " +
               "(SELECT COUNT(*) FROM article_reaction_event WHERE article_id = a.id AND reaction = 'DISLIKE' AND DATE(acted_at) BETWEEN ? AND ?) as dislikes, " +

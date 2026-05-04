@@ -17,6 +17,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import javafx.stage.FileChooser;
 import tn.esprit.util.ImageUploadUtils;
+import tn.esprit.services.GeocodingService;
 
 public class EventFormController {
 
@@ -36,20 +37,37 @@ public class EventFormController {
     @FXML private Label aiSuccessLabel;
     @FXML private Label aiAnalysisLabel;
 
+    // Location Map Search
+    @FXML private Button searchLocationBtn;
+    @FXML private Label locationErrorLabel;
+    @FXML private ListView<GeocodingService.Place> locationResultsList;
+
     private tn.esprit.services.EventService eventService = new tn.esprit.services.EventService();
     private tn.esprit.services.SponsorService sponsorService = new tn.esprit.services.SponsorService();
     private OpenRouterEventService aiService = new OpenRouterEventService();
-    private tn.esprit.services.GeocodingService geocodingService = new tn.esprit.services.GeocodingService();
+    private GeocodingService geocodingService = new GeocodingService();
     private Event currentEvent;
-    private double currentLat = 0;
-    private double currentLon = 0;
     private boolean isEdit = false;
     private java.util.List<Sponsor> selectedSponsors = new java.util.ArrayList<>();
     private File selectedImageFile;
+    private double selectedLat = 0.0;
+    private double selectedLon = 0.0;
 
     @FXML
     public void initialize() {
         tn.esprit.util.NavigationHistory.track(saveBtn, "/event/EventForm.fxml");
+        
+        if (locationResultsList != null) {
+            locationResultsList.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
+                if (newVal != null) {
+                    locationField.setText(newVal.getDisplayName());
+                    selectedLat = newVal.getLat();
+                    selectedLon = newVal.getLon();
+                    locationResultsList.setVisible(false);
+                    locationResultsList.setManaged(false);
+                }
+            });
+        }
     }
 
     private void updateSponsorsFlow() {
@@ -114,6 +132,8 @@ public class EventFormController {
 
         nameField.setText(event.getName());
         locationField.setText(event.getLocation());
+        this.selectedLat = event.getLatitude();
+        this.selectedLon = event.getLongitude();
         capacityField.setText(String.valueOf(event.getCapacity()));
         if (event.getImage() != null) {
             imageNameLabel.setText(event.getImage());
@@ -124,37 +144,39 @@ public class EventFormController {
         
         // Load sponsors
         this.selectedSponsors = sponsorService.getSponsorsForEvent(event.getId());
-        this.currentLat = event.getLatitude();
-        this.currentLon = event.getLongitude();
         updateSponsorsFlow();
     }
 
     @FXML
-    private void handleGeocode() {
+    void handleLocationSearch(ActionEvent event) {
         String query = locationField.getText().trim();
-        if (query.isEmpty()) {
-            showAlert("Input Required", "Please enter a location name first.");
+        if (query.length() < 3) {
+            locationErrorLabel.setText("Please enter at least 3 characters to search.");
+            locationErrorLabel.setVisible(true);
+            locationErrorLabel.setManaged(true);
             return;
         }
 
-        saveBtn.setDisable(true);
+        searchLocationBtn.setDisable(true);
+        searchLocationBtn.setText("...");
+
         new Thread(() -> {
-            java.util.List<tn.esprit.services.GeocodingService.Place> results = geocodingService.search(query);
+            java.util.List<GeocodingService.Place> results = geocodingService.search(query);
             javafx.application.Platform.runLater(() -> {
-                saveBtn.setDisable(false);
+                searchLocationBtn.setDisable(false);
+                searchLocationBtn.setText("Search");
                 if (results.isEmpty()) {
-                    showAlert("Location Not Found", "Could not find coordinates for: " + query);
+                    locationErrorLabel.setText("No locations found for: " + query);
+                    locationErrorLabel.setVisible(true);
+                    locationErrorLabel.setManaged(true);
+                    locationResultsList.setVisible(false);
+                    locationResultsList.setManaged(false);
                 } else {
-                    tn.esprit.services.GeocodingService.Place top = results.get(0);
-                    this.currentLat = top.getLat();
-                    this.currentLon = top.getLon();
-                    
-                    // Show confirmation
-                    Alert ok = new Alert(Alert.AlertType.INFORMATION);
-                    ok.setTitle("Location Verified");
-                    ok.setHeaderText(top.getDisplayName());
-                    ok.setContentText(String.format("Coordinates captured: %.5f, %.5f", currentLat, currentLon));
-                    ok.show();
+                    locationResultsList.getItems().setAll(results);
+                    locationResultsList.setVisible(true);
+                    locationResultsList.setManaged(true);
+                    locationErrorLabel.setVisible(false);
+                    locationErrorLabel.setManaged(false);
                 }
             });
         }).start();
@@ -211,6 +233,8 @@ public class EventFormController {
 
             currentEvent.setName(nameField.getText());
             currentEvent.setLocation(locationField.getText());
+            currentEvent.setLatitude(selectedLat);
+            currentEvent.setLongitude(selectedLon);
             currentEvent.setCapacity(Integer.parseInt(capacityField.getText()));
             
             if (selectedImageFile != null) {
@@ -227,8 +251,6 @@ public class EventFormController {
             currentEvent.setStartedAt(LocalDateTime.of(startDatePicker.getValue(), LocalTime.of(9, 0)));
             currentEvent.setEndedAt(LocalDateTime.of(endDatePicker.getValue(), LocalTime.of(17, 0)));
             currentEvent.setDescription(descriptionArea.getText());
-            currentEvent.setLatitude(currentLat);
-            currentEvent.setLongitude(currentLon);
 
             if (isEdit) {
                 eventService.update(currentEvent);
@@ -287,6 +309,11 @@ public class EventFormController {
 
         if (!isEdit && selectedImageFile == null) {
             showAlert("Missing Photo", "Please select an image for the event.");
+            return false;
+        }
+
+        if (selectedLat == 0 && selectedLon == 0) {
+            showAlert("Invalid Location", "Please search and select a valid location from the list.");
             return false;
         }
 

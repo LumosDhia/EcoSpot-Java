@@ -6,7 +6,7 @@ import java.sql.*;
 
 /**
  * Idempotent schema patcher — run once per JVM before any blog/stats tests.
- * Drops obsolete app_user FK constraints, converts UUID columns to INT,
+ * Drops obsolete user FK constraints, converts UUID columns to INT,
  * and creates missing tables. Safe to run on both old and new schemas.
  */
 public class TestDatabaseMigration {
@@ -20,11 +20,11 @@ public class TestDatabaseMigration {
         Connection cnx = MyConnection.getInstance().getCnx();
         try (Statement st = cnx.createStatement()) {
 
-            // ── 1. Drop all FK constraints on `article` that point to app_user ──
+            // ── 1. Drop all FK constraints on `article` that point to user ──
             try (ResultSet rs = cnx.prepareStatement(
                     "SELECT CONSTRAINT_NAME FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE " +
                     "WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'article' " +
-                    "AND REFERENCED_TABLE_NAME = 'app_user'").executeQuery()) {
+                    "AND REFERENCED_TABLE_NAME = 'user'").executeQuery()) {
                 while (rs.next()) {
                     String name = rs.getString("CONSTRAINT_NAME");
                     tryExec(st, "ALTER TABLE `article` DROP FOREIGN KEY `" + name + "`");

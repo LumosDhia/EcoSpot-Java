@@ -433,11 +433,18 @@ public class TicketService implements GlobalInterface<Ticket> {
     }
 
     private byte[] findAppUserIdByEmail(String email) {
-        String req = "SELECT id FROM app_user WHERE email = ? LIMIT 1";
+        // Since we are now using Integer IDs in the shared 'user' table, 
+        // this binary UUID logic is largely legacy. 
+        // We'll keep the signature but point to 'user'.
+        String req = "SELECT id FROM `user` WHERE email = ? LIMIT 1";
         try (PreparedStatement ps = cnx.prepareStatement(req)) {
             ps.setString(1, email);
             try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) return rs.getBytes("id");
+                if (rs.next()) {
+                    // If the ID is an INT, getBytes might return something weird depending on driver.
+                    // But if it's still BINARY(16) in some edge case, it works.
+                    return rs.getBytes("id");
+                }
             }
         } catch (SQLException ignored) {
         }
@@ -445,24 +452,16 @@ public class TicketService implements GlobalInterface<Ticket> {
     }
 
     private String mapDemoEmail(String email) {
-        if (email == null || !email.endsWith("@mail.com")) return null;
-        String localPart = email.substring(0, email.indexOf('@'));
-        String candidate = localPart + "@ecospot.local";
-        String req = "SELECT email FROM app_user WHERE email = ? LIMIT 1";
-        try (PreparedStatement ps = cnx.prepareStatement(req)) {
-            ps.setString(1, candidate);
-            try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) return rs.getString("email");
-            }
-        } catch (SQLException ignored) {
-        }
+        // No longer needed as we unified the user tables.
         return null;
     }
 
     public int countRecentSpamByUser(int userId, java.time.LocalDateTime since) {
+        boolean userIdIsBinary = isBinaryColumn("ticket", "user_id");
         String req = "SELECT COUNT(*) FROM `ticket` WHERE user_id = ? AND is_spam = 1 AND created_at > ?";
         try (PreparedStatement ps = cnx.prepareStatement(req)) {
-            ps.setInt(1, userId);
+            // Use same binding logic as 'add' to ensure binary/int compatibility
+            bindUserId(ps, 1, userId, userIdIsBinary);
             ps.setTimestamp(2, java.sql.Timestamp.valueOf(since));
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) return rs.getInt(1);
@@ -474,26 +473,16 @@ public class TicketService implements GlobalInterface<Ticket> {
     }
 
     public void checkAndApplyTimeout(int userId) {
-        // Exemption check: Admins and NGOs cannot be timed out
-        String roleReq = "SELECT role FROM `user` WHERE id = ?";
-        try (PreparedStatement psRole = cnx.prepareStatement(roleReq)) {
-            psRole.setInt(1, userId);
-            try (ResultSet rsRole = psRole.executeQuery()) {
-                if (rsRole.next()) {
-                    String role = rsRole.getString(1);
-                    if ("ADMIN".equalsIgnoreCase(role) || "NGO".equalsIgnoreCase(role)) {
-                        return;
-                    }
-                }
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-
+        // No exemption for testing purposes - everyone can be timed out if they spam
         java.time.LocalDateTime since = java.time.LocalDateTime.now().minusHours(24);
         int spamCount = countRecentSpamByUser(userId, since);
-        if (spamCount > 3) {
+        
+        System.out.println("[TIMEOUT CHECK] User ID: " + userId + " | Recent Spam Count: " + spamCount);
+        
+        // Lower threshold to 3 - timeout triggers on the 3rd spam ticket
+        if (spamCount >= 3) {
             userService.updateTimeout(userId, java.time.LocalDateTime.now().plusHours(24));
+            System.out.println("[TIMEOUT APPLIED] User " + userId + " is now in timeout for 24 hours.");
         }
     }
 

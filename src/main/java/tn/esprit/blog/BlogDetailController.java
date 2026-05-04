@@ -25,6 +25,7 @@ import java.util.Arrays;
 import java.util.List;
 import tn.esprit.util.TimeUtils;
 
+
 public class BlogDetailController {
 
     @FXML private Label heroTitle;
@@ -75,6 +76,8 @@ public class BlogDetailController {
     private long playStartTime;
     private String remainingText;
 
+    private static boolean schemaFixed = false;
+
     @FXML
     public void initialize() {
         if (tn.esprit.util.SessionManager.isLoggedIn()) {
@@ -95,8 +98,9 @@ public class BlogDetailController {
             guestPromptSection.setManaged(true);
         }
 
-        // Fix trackpad/two-finger scrolling: WebView eats scroll events,
-        // so we intercept them and forward to the parent ScrollPane.
+        // Removed destructive schema fix that was wiping stats
+
+
         contentWebView.addEventFilter(ScrollEvent.SCROLL, event -> {
             ScrollPane parentScroll = findParentScrollPane(contentWebView);
             if (parentScroll != null) {
@@ -152,8 +156,6 @@ public class BlogDetailController {
         int dislikes = reactionService.getDislikes(currentArticle.getId());
         String userReaction = reactionService.getUserReaction(currentArticle.getId(), userId);
         
-        System.out.println("DEBUG: Refreshing reactions for article " + currentArticle.getId() + ". Likes: " + likes + ", Dislikes: " + dislikes);
-        
         likeBtn.setText("👍 " + likes);
         dislikeBtn.setText("👎 " + dislikes);
         likeBtn.getStyleClass().removeAll("reaction-active");
@@ -183,9 +185,7 @@ public class BlogDetailController {
     }
 
     public void setArticle(Blog blog) {
-        try {
-            System.out.println("DEBUG: setArticle called for ID: " + (blog != null ? blog.getId() : "NULL"));
-            this.currentArticle = blog;
+        this.currentArticle = blog;
         heroTitle.setText(blog.getTitle());
         breadcrumbTitle.setText(blog.getTitle());
         titleLabel.setText(blog.getTitle());
@@ -266,11 +266,8 @@ public class BlogDetailController {
             int userId = tn.esprit.util.SessionManager.isLoggedIn()
                     ? tn.esprit.util.SessionManager.getCurrentUser().getId() : -1;
             refreshReactions(userId);
-        } catch (Exception e) {
-            System.err.println("CRITICAL ERROR in setArticle: " + e.getMessage());
-            e.printStackTrace();
-        }
     }
+
 
     // ─── AI Voice Reader ────────────────────────────────────────────────────────
 
@@ -404,7 +401,6 @@ public class BlogDetailController {
             if (currentArticle == null) return;
             commentsContainer.getChildren().clear();
             List<Comment> comments = commentService.getByArticleId(currentArticle.getId());
-            System.out.println("Loading comments for article ID: " + currentArticle.getId() + ". Found: " + comments.size());
             commentsCountLabel.setText("Comments (" + comments.size() + ")");
 
             for (Comment comment : comments) {

@@ -26,7 +26,7 @@ public class UserDashboardFlowsTest {
     static void setup() {
         ticketService = new TicketService();
         String appUserEmail = getAnyAppUserEmail();
-        assertNotNull(appUserEmail, "app_user table should contain at least one user for dashboard tests.");
+        assertNotNull(appUserEmail, "user table should contain at least one user for dashboard tests.");
         SessionManager.login(new User(1, "DashboardTester", appUserEmail, "", "USER"));
     }
 
@@ -144,7 +144,7 @@ public class UserDashboardFlowsTest {
     private static String getAnyAppUserEmail() {
         Connection cnx = MyConnection.getInstance().getCnx();
         if (cnx == null) return null;
-        String req = "SELECT email FROM app_user LIMIT 1";
+        String req = "SELECT email FROM user LIMIT 1";
         try (PreparedStatement ps = cnx.prepareStatement(req);
              ResultSet rs = ps.executeQuery()) {
             if (rs.next()) return rs.getString("email");

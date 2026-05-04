@@ -19,17 +19,19 @@ public class ReactionService {
     }
 
     private void ensureTable() {
+        // We ensure the table exists and matches our schema. 
+        // Sync check: both Symfony and Java now use the unified 'user' table with Integer IDs.
         String sql = "CREATE TABLE IF NOT EXISTS article_reaction (" +
                 "id INT AUTO_INCREMENT PRIMARY KEY," +
                 "article_id INT NOT NULL," +
                 "user_id INT NOT NULL," +
                 "type ENUM('like','dislike') NOT NULL," +
                 "UNIQUE KEY uniq_article_user (article_id, user_id)" +
-                ")";
+                ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;";
         try (Statement st = getCnx().createStatement()) {
             st.execute(sql);
         } catch (SQLException e) {
-            e.printStackTrace();
+            System.err.println("Note: article_reaction table check/creation: " + e.getMessage());
         }
     }
 
@@ -108,9 +110,7 @@ public class ReactionService {
             ps.setString(2, type);
             ResultSet rs = ps.executeQuery();
             if (rs.next()) {
-                int count = rs.getInt(1);
-                System.out.println(">>> LIVE DB COUNT Article " + articleId + " (" + type + "): " + count);
-                return count;
+                return rs.getInt(1);
             }
         } catch (SQLException e) {
             System.err.println("SQL Error counting reactions: " + e.getMessage());
