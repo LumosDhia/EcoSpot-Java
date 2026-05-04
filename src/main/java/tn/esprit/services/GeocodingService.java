@@ -42,8 +42,8 @@ public class GeocodingService {
             URL url = new URL(urlString);
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("GET");
-            // Nominatim requires a User-Agent
-            conn.setRequestProperty("User-Agent", "EcoSpot-Java-App");
+            // Nominatim requires a User-Agent with an email address for contact
+            conn.setRequestProperty("User-Agent", "EcoSpot-Java-App (contact@ecospot.tn)");
 
             if (conn.getResponseCode() == 200) {
                 BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()));

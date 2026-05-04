@@ -214,7 +214,7 @@ public class EventDetailController {
                 "  }).addTo(map);" +
                 "  L.marker([" + fLat + "," + fLon + "]).addTo(map)" +
                 "    .bindPopup('<b>" + safeName + "</b><br>" + safeLoc + "').openPopup();" +
-                "  setTimeout(function() { map.invalidateSize(); }, 500);" +
+                "  new ResizeObserver(() => map.invalidateSize()).observe(document.getElementById('map'));" +
                 "</script></body></html>";
 
         WebEngine engine = mapView.getEngine();
