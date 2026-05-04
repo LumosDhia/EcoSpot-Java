@@ -24,7 +24,7 @@ public class TicketServiceTest {
     public static void setup() {
         ticketService = new TicketService();
         String appUserEmail = getAnyAppUserEmail();
-        assertNotNull(appUserEmail, "Need at least one app_user row for TicketServiceTest.");
+        assertNotNull(appUserEmail, "Need at least one user row for TicketServiceTest.");
         SessionManager.login(new User(1, "TicketServiceTester", appUserEmail, "", "USER"));
     }
 
@@ -149,7 +149,7 @@ public class TicketServiceTest {
     private static String getAnyAppUserEmail() {
         Connection cnx = MyConnection.getInstance().getCnx();
         if (cnx == null) return null;
-        String req = "SELECT email FROM app_user LIMIT 1";
+        String req = "SELECT email FROM user LIMIT 1";
         try (PreparedStatement ps = cnx.prepareStatement(req);
              ResultSet rs = ps.executeQuery()) {
             if (rs.next()) return rs.getString("email");

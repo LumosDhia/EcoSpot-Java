@@ -40,17 +40,37 @@ public class BlogCardController {
 
     private void loadThumbnail(String url) {
         articleImage.setImage(fallbackImage());
-        if (url == null || url.isEmpty()) return;
+        if (url == null || url.trim().isEmpty()) return;
+        
         try {
-            Image img = new Image(url, true);
+            // If the URL doesn't have a protocol, it might be a local file path
+            String finalUrl = url;
+            if (!url.startsWith("http") && !url.startsWith("file:")) {
+                finalUrl = "file:" + url;
+            }
+
+            Image img = new Image(finalUrl, true);
+            
+            // Check if already loaded (from cache)
+            if (img.getProgress() >= 1.0 && !img.isError()) {
+                articleImage.setImage(img);
+                return;
+            }
+
             img.errorProperty().addListener((obs, old, err) -> {
-                if (err) articleImage.setImage(fallbackImage());
+                if (err) {
+                    System.err.println("Failed to load image: " + url);
+                    articleImage.setImage(fallbackImage());
+                }
             });
+            
             img.progressProperty().addListener((obs, old, prog) -> {
-                if (prog.doubleValue() >= 1.0 && !img.isError()) articleImage.setImage(img);
+                if (prog.doubleValue() >= 1.0 && !img.isError()) {
+                    articleImage.setImage(img);
+                }
             });
         } catch (Exception e) {
-            // fallback already set
+            System.err.println("Error creating image: " + e.getMessage());
         }
     }
 

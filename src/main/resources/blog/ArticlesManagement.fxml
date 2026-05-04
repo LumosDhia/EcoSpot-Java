@@ -102,7 +102,10 @@
                                     <columnResizePolicy><TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/></columnResizePolicy>
                                     <columns>
                                         <TableColumn fx:id="colId" prefWidth="40.0" text="Id" />
-                                        <TableColumn fx:id="colTitle" prefWidth="400.0" text="Title" />
+                                        <TableColumn fx:id="colTitle" prefWidth="300.0" text="Title" />
+                                        <TableColumn fx:id="colViews" prefWidth="60.0" text="👁 Views" />
+                                        <TableColumn fx:id="colLikes" prefWidth="60.0" text="👍 Likes" />
+                                        <TableColumn fx:id="colDislikes" prefWidth="60.0" text="👎 Dislikes" />
                                         <TableColumn fx:id="colStatus" prefWidth="80.0" text="Status" />
                                         <TableColumn fx:id="colCreated" prefWidth="120.0" text="Created" />
                                         <TableColumn fx:id="colPublished" prefWidth="120.0" text="Published" />
@@ -121,8 +124,6 @@
                                         <HBox alignment="CENTER_LEFT">
                                             <children>
                                                 <Label fx:id="ngoSectionTitleLabel" style="-fx-font-size: 16; -fx-font-weight: bold; -fx-text-fill: #555;" text="NGO articles" />
-                                                <Region HBox.hgrow="ALWAYS" />
-                                                <Button onAction="#goToNewArticle" styleClass="btn-new-article" text="✍ Write new article" />
                                             </children>
                                         </HBox>
                                         <Label fx:id="ngoSectionSubtitleLabel" style="-fx-font-size: 12; -fx-text-fill: #557999; -fx-font-weight: bold;" text="You can only view, delete, or return for revision. No editing or publishing." />
@@ -134,8 +135,11 @@
                                     <columnResizePolicy><TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/></columnResizePolicy>
                                     <columns>
                                         <TableColumn fx:id="colNgoId" prefWidth="40.0" text="Id" />
-                                        <TableColumn fx:id="colNgoTitle" prefWidth="350.0" text="Title" />
-                                        <TableColumn fx:id="colNgoWriter" prefWidth="150.0" text="Writer" />
+                                        <TableColumn fx:id="colNgoTitle" prefWidth="250.0" text="Title" />
+                                        <TableColumn fx:id="colNgoViews" prefWidth="60.0" text="👁 Views" />
+                                        <TableColumn fx:id="colNgoLikes" prefWidth="60.0" text="👍 Likes" />
+                                        <TableColumn fx:id="colNgoDislikes" prefWidth="60.0" text="👎 Dislikes" />
+                                        <TableColumn fx:id="colNgoWriter" prefWidth="120.0" text="Writer" />
                                         <TableColumn fx:id="colNgoStatus" prefWidth="80.0" text="Status" />
                                         <TableColumn fx:id="colNgoCreated" prefWidth="120.0" text="Created" />
                                         <TableColumn fx:id="colNgoActions" prefWidth="150.0" text="Actions" />

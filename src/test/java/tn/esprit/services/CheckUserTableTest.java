@@ -10,8 +10,8 @@ public class CheckUserTableTest {
         Connection cnx = MyConnection.getInstance().getCnx();
         try {
             DatabaseMetaData md = cnx.getMetaData();
-            ResultSet rs = md.getColumns(null, null, "app_user", null);
-            System.out.println("--- COLUMNS OF app_user TABLE ---");
+            ResultSet rs = md.getColumns(null, null, "user", null);
+            System.out.println("--- COLUMNS OF user TABLE ---");
             while (rs.next()) {
                 System.out.println("Col: " + rs.getString("COLUMN_NAME") + " | Type: " + rs.getString("TYPE_NAME"));
             }

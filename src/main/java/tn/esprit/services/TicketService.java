@@ -48,6 +48,17 @@ public class TicketService implements GlobalInterface<Ticket> {
                 ")";
         try (Statement st = cnx.createStatement()) {
             st.execute(req);
+            
+            // Add new columns if they don't exist
+            if (!hasColumn("ticket", "ai_category")) {
+                st.execute("ALTER TABLE `ticket` ADD COLUMN `ai_category` VARCHAR(100)");
+            }
+            if (!hasColumn("ticket", "ai_suggested_ngo")) {
+                st.execute("ALTER TABLE `ticket` ADD COLUMN `ai_suggested_ngo` VARCHAR(255)");
+            }
+            if (!hasColumn("ticket", "spam_reason")) {
+                st.execute("ALTER TABLE `ticket` ADD COLUMN `spam_reason` TEXT");
+            }
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -162,43 +173,53 @@ public class TicketService implements GlobalInterface<Ticket> {
     @Override
     public void update(Ticket ticket) {
         String req = "UPDATE `ticket` SET title=?, description=?, location=?, image=?, status=?, priority=?, domain=?, latitude=?, longitude=?, assigned_ngo_id=?, admin_notes=?, completed_by_id=?, completion_message=?, completion_image=?, is_spam=?, ai_category=?, ai_suggested_ngo=?, spam_reason=?, achieved_at=? WHERE id=?";
-        try (PreparedStatement ps = cnx.prepareStatement(req)) {
-            ps.setString(1, ticket.getTitle());
-            ps.setString(2, ticket.getDescription());
-            ps.setString(3, ticket.getLocation());
-            ps.setString(4, ticket.getImage());
-            ps.setString(5, ticket.getStatus().name());
-            ps.setString(6, ticket.getPriority().name());
-            ps.setString(7, ticket.getDomain() != null ? ticket.getDomain().name() : null);
-            ps.setDouble(8, ticket.getLatitude());
-            ps.setDouble(9, ticket.getLongitude());
-            
-            if (ticket.getAssignedNgoId() != null && ticket.getAssignedNgoId() > 0) ps.setInt(10, ticket.getAssignedNgoId());
-            else ps.setNull(10, Types.INTEGER);
-            
-            ps.setString(11, ticket.getAdminNotes());
-            
-            if (ticket.getCompletedById() != null) ps.setInt(12, ticket.getCompletedById());
-            else ps.setNull(12, Types.INTEGER);
-            
-            ps.setString(13, ticket.getCompletionMessage());
-            ps.setString(14, ticket.getCompletionImage());
-            ps.setBoolean(15, ticket.isSpam());
-            ps.setString(16, ticket.getAiCategory());
-            ps.setString(17, ticket.getAiSuggestedNgo());
-            ps.setString(18, ticket.getSpamReason());
-            
-            if (ticket.getAchievedAt() != null) ps.setTimestamp(19, Timestamp.valueOf(ticket.getAchievedAt()));
-            else ps.setNull(19, Types.TIMESTAMP);
-            
-            ps.setInt(20, ticket.getId());
-            ps.executeUpdate();
+        try {
+            cnx.setAutoCommit(false);
+            try (PreparedStatement ps = cnx.prepareStatement(req)) {
+                ps.setString(1, ticket.getTitle());
+                ps.setString(2, ticket.getDescription());
+                ps.setString(3, ticket.getLocation());
+                ps.setString(4, ticket.getImage());
+                ps.setString(5, ticket.getStatus().name());
+                ps.setString(6, ticket.getPriority().name());
+                ps.setString(7, ticket.getDomain() != null ? ticket.getDomain().name() : null);
+                ps.setDouble(8, ticket.getLatitude());
+                ps.setDouble(9, ticket.getLongitude());
+                
+                if (ticket.getAssignedNgoId() != null && ticket.getAssignedNgoId() > 0) ps.setInt(10, ticket.getAssignedNgoId());
+                else ps.setNull(10, Types.INTEGER);
+                
+                ps.setString(11, ticket.getAdminNotes());
+                
+                if (ticket.getCompletedById() != null) ps.setInt(12, ticket.getCompletedById());
+                else ps.setNull(12, Types.INTEGER);
+                
+                ps.setString(13, ticket.getCompletionMessage());
+                ps.setString(14, ticket.getCompletionImage());
+                ps.setBoolean(15, ticket.isSpam());
+                ps.setString(16, ticket.getAiCategory());
+                ps.setString(17, ticket.getAiSuggestedNgo());
+                ps.setString(18, ticket.getSpamReason());
+                
+                if (ticket.getAchievedAt() != null) ps.setTimestamp(19, Timestamp.valueOf(ticket.getAchievedAt()));
+                else ps.setNull(19, Types.TIMESTAMP);
+                
+                ps.setInt(20, ticket.getId());
+                ps.executeUpdate();
 
-            // Update Consignes: Delete and Re-add
-            consigneService.deleteByTicketId(ticket.getId());
-            for (Consigne c : ticket.getConsignes()) {
-                c.setTicketId(ticket.getId());
-                consigneService.add(c);
+                // Update Consignes: Delete and Re-add within same transaction
+                consigneService.deleteByTicketId(ticket.getId());
+                for (Consigne c : ticket.getConsignes()) {
+                    c.setTicketId(ticket.getId());
+                    consigneService.add(c);
+                }
+                
+                cnx.commit();
+            } catch (SQLException e) {
+                cnx.rollback();
+                throw e;
+            } finally {
+                cnx.setAutoCommit(true);
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -260,6 +281,36 @@ public class TicketService implements GlobalInterface<Ticket> {
         return tickets;
     }
 
+    public List<Ticket> getByNgoId(int ngoId) {
+        List<Ticket> tickets = new ArrayList<>();
+        String req = "SELECT * FROM `ticket` WHERE assigned_ngo_id = ? ORDER BY created_at DESC";
+        try (PreparedStatement ps = cnx.prepareStatement(req)) {
+            ps.setInt(1, ngoId);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    tickets.add(mapTicket(rs));
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return tickets;
+    }
+
+    public List<Ticket> getAvailableForNgo() {
+        List<Ticket> tickets = new ArrayList<>();
+        String req = "SELECT * FROM `ticket` WHERE status = 'PUBLISHED' AND (assigned_ngo_id IS NULL OR assigned_ngo_id = 0) ORDER BY created_at DESC";
+        try (PreparedStatement ps = cnx.prepareStatement(req);
+             ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                tickets.add(mapTicket(rs));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return tickets;
+    }
+
     public Ticket getById(int id) {
         String req = "SELECT * FROM `ticket` WHERE id = ? LIMIT 1";
         try (PreparedStatement ps = cnx.prepareStatement(req)) {
@@ -307,9 +358,9 @@ public class TicketService implements GlobalInterface<Ticket> {
         t.setCompletionImage(rs.getString("completion_image"));
         t.setConsignes(consigneService.getByTicketId(t.getId()));
         t.setSpam(rs.getBoolean("is_spam"));
-        t.setAiCategory(rs.getString("ai_category"));
-        t.setAiSuggestedNgo(rs.getString("ai_suggested_ngo"));
-        t.setSpamReason(rs.getString("spam_reason"));
+        if (hasColumn("ticket", "ai_category")) t.setAiCategory(rs.getString("ai_category"));
+        if (hasColumn("ticket", "ai_suggested_ngo")) t.setAiSuggestedNgo(rs.getString("ai_suggested_ngo"));
+        if (hasColumn("ticket", "spam_reason")) t.setSpamReason(rs.getString("spam_reason"));
         t.setCreatedAt(rs.getTimestamp("created_at").toLocalDateTime());
         Timestamp ach = rs.getTimestamp("achieved_at");
         if (ach != null) t.setAchievedAt(ach.toLocalDateTime());
@@ -382,11 +433,18 @@ public class TicketService implements GlobalInterface<Ticket> {
     }
 
     private byte[] findAppUserIdByEmail(String email) {
-        String req = "SELECT id FROM app_user WHERE email = ? LIMIT 1";
+        // Since we are now using Integer IDs in the shared 'user' table, 
+        // this binary UUID logic is largely legacy. 
+        // We'll keep the signature but point to 'user'.
+        String req = "SELECT id FROM `user` WHERE email = ? LIMIT 1";
         try (PreparedStatement ps = cnx.prepareStatement(req)) {
             ps.setString(1, email);
             try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) return rs.getBytes("id");
+                if (rs.next()) {
+                    // If the ID is an INT, getBytes might return something weird depending on driver.
+                    // But if it's still BINARY(16) in some edge case, it works.
+                    return rs.getBytes("id");
+                }
             }
         } catch (SQLException ignored) {
         }
@@ -394,24 +452,16 @@ public class TicketService implements GlobalInterface<Ticket> {
     }
 
     private String mapDemoEmail(String email) {
-        if (email == null || !email.endsWith("@mail.com")) return null;
-        String localPart = email.substring(0, email.indexOf('@'));
-        String candidate = localPart + "@ecospot.local";
-        String req = "SELECT email FROM app_user WHERE email = ? LIMIT 1";
-        try (PreparedStatement ps = cnx.prepareStatement(req)) {
-            ps.setString(1, candidate);
-            try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) return rs.getString("email");
-            }
-        } catch (SQLException ignored) {
-        }
+        // No longer needed as we unified the user tables.
         return null;
     }
 
     public int countRecentSpamByUser(int userId, java.time.LocalDateTime since) {
+        boolean userIdIsBinary = isBinaryColumn("ticket", "user_id");
         String req = "SELECT COUNT(*) FROM `ticket` WHERE user_id = ? AND is_spam = 1 AND created_at > ?";
         try (PreparedStatement ps = cnx.prepareStatement(req)) {
-            ps.setInt(1, userId);
+            // Use same binding logic as 'add' to ensure binary/int compatibility
+            bindUserId(ps, 1, userId, userIdIsBinary);
             ps.setTimestamp(2, java.sql.Timestamp.valueOf(since));
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) return rs.getInt(1);
@@ -423,26 +473,16 @@ public class TicketService implements GlobalInterface<Ticket> {
     }
 
     public void checkAndApplyTimeout(int userId) {
-        // Exemption check: Admins and NGOs cannot be timed out
-        String roleReq = "SELECT role FROM `user` WHERE id = ?";
-        try (PreparedStatement psRole = cnx.prepareStatement(roleReq)) {
-            psRole.setInt(1, userId);
-            try (ResultSet rsRole = psRole.executeQuery()) {
-                if (rsRole.next()) {
-                    String role = rsRole.getString(1);
-                    if ("ADMIN".equalsIgnoreCase(role) || "NGO".equalsIgnoreCase(role)) {
-                        return;
-                    }
-                }
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-
+        // No exemption for testing purposes - everyone can be timed out if they spam
         java.time.LocalDateTime since = java.time.LocalDateTime.now().minusHours(24);
         int spamCount = countRecentSpamByUser(userId, since);
-        if (spamCount > 3) {
+        
+        System.out.println("[TIMEOUT CHECK] User ID: " + userId + " | Recent Spam Count: " + spamCount);
+        
+        // Lower threshold to 3 - timeout triggers on the 3rd spam ticket
+        if (spamCount >= 3) {
             userService.updateTimeout(userId, java.time.LocalDateTime.now().plusHours(24));
+            System.out.println("[TIMEOUT APPLIED] User " + userId + " is now in timeout for 24 hours.");
         }
     }
 

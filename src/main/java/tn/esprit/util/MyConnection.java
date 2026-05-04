@@ -26,6 +26,13 @@ public class MyConnection {
     }
 
     public Connection getCnx() {
+        try {
+            if (cnx == null || cnx.isClosed()) {
+                cnx = DriverManager.getConnection(URL, USR, PWD);
+            }
+        } catch (SQLException e) {
+            // Silently fail here, we'll handle the null return in services
+        }
         return cnx;
     }
 

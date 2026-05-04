@@ -21,6 +21,7 @@ public class Blog {
     private int commentsCount;
     private boolean isPublished = false;
     private String adminRevisionNote;
+    private String slug;
     private List<Comment> comments = new ArrayList<>();
 
     public Blog() {}
@@ -36,7 +37,7 @@ public class Blog {
         this.views = 0;
         this.likesCount = 0;
         this.dislikesCount = 0;
-        this.readingTime = 5; // Default 5 min
+        this.readingTime = 5;
         this.commentsCount = 0;
     }
 
@@ -66,7 +67,8 @@ public class Blog {
     public int getDislikesCount() { return dislikesCount; }
     public void setDislikesCount(int dislikesCount) { this.dislikesCount = dislikesCount; }
     public int getReadingTime() {
-        if (content == null || content.isEmpty()) return 0;
+        if (readingTime > 0) return readingTime;
+        if (content == null || content.isBlank()) return 0;
         String[] words = content.split("\\s+");
         return (int) Math.ceil(words.length / 200.0);
     }
@@ -78,6 +80,8 @@ public class Blog {
     public void setIsPublished(boolean isPublished) { this.isPublished = isPublished; }
     public String getAdminRevisionNote() { return adminRevisionNote; }
     public void setAdminRevisionNote(String adminRevisionNote) { this.adminRevisionNote = adminRevisionNote; }
+    public String getSlug() { return slug; }
+    public void setSlug(String slug) { this.slug = slug; }
     public List<Comment> getComments() { return comments; }
     public void setComments(List<Comment> comments) { this.comments = comments; }
 }

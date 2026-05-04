@@ -62,9 +62,15 @@ public class LoginController {
             Parent root = FXMLLoader.load(getClass().getResource("/user/FaceLogin.fxml"));
             Stage stage = new Stage();
             stage.initModality(Modality.APPLICATION_MODAL);
+            stage.initOwner(((Node) event.getSource()).getScene().getWindow());
             stage.setTitle("EcoSpot - Face ID Login");
             stage.setScene(new Scene(root));
-            stage.show();
+            stage.showAndWait();
+            
+            // After modal closes, check if we are logged in
+            if (tn.esprit.util.SessionManager.isLoggedIn()) {
+                navigate(event, "/home/Home.fxml");
+            }
         } catch (IOException e) {
             e.printStackTrace();
             showError("Could not load Face Login view.");
@@ -78,17 +84,17 @@ public class LoginController {
 
     @FXML
     void handleQuickAdmin(ActionEvent event) {
-        performLogin("admin@mail.com", "admin123", event);
+        performLogin("admin@ecospot.local", "admin123", event);
     }
-
+    
     @FXML
     void handleQuickNGO(ActionEvent event) {
-        performLogin("ngo@mail.com", "ngo123", event);
+        performLogin("ngo@ecospot.local", "ngo123", event);
     }
-
+    
     @FXML
     void handleQuickUser(ActionEvent event) {
-        performLogin("user@mail.com", "user123", event);
+        performLogin("user@ecospot.local", "user123", event);
     }
 
     private void performLogin(String email, String password, ActionEvent event) {

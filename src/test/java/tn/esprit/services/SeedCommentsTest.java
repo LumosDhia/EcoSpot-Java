@@ -16,7 +16,7 @@ public class SeedCommentsTest {
             
             // 2. Find a valid user ID (binary)
             byte[] userId = null;
-            ResultSet rsUser = cnx.createStatement().executeQuery("SELECT id FROM app_user LIMIT 1");
+            ResultSet rsUser = cnx.createStatement().executeQuery("SELECT id FROM user LIMIT 1");
             if (rsUser.next()) userId = rsUser.getBytes(1);
             
             String insertSql = "INSERT INTO comment (author, content, created_at, flagged, article_id, author_user_id, hidden_from_public) VALUES (?, ?, ?, ?, ?, ?, ?)";

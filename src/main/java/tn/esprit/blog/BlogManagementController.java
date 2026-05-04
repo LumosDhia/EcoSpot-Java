@@ -17,9 +17,13 @@ import tn.esprit.services.BlogService;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
 import java.io.IOException;
+import java.io.File;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+import javafx.stage.FileChooser;
+import tn.esprit.util.RSSGenerator;
 
 public class BlogManagementController {
 
@@ -76,7 +80,12 @@ public class BlogManagementController {
         sortChoice.setItems(FXCollections.observableArrayList("Newest", "Oldest", "Most Viewed"));
         sortChoice.setValue("Newest");
 
-        refreshData();
+        try {
+            refreshData();
+        } catch (Exception e) {
+            System.err.println("Failed to load blog data: " + e.getMessage());
+            e.printStackTrace();
+        }
 
         searchField.textProperty().addListener((obs, old, val) -> {
             currentPage = 0;
@@ -239,6 +248,44 @@ public class BlogManagementController {
                 displayCurrentPage();
             });
             pageButtonsBox.getChildren().add(btn);
+        }
+    }
+
+    @FXML
+    private void handleExportRSS() {
+        if (filteredBlogs.isEmpty()) {
+            System.out.println("No articles to export.");
+            return;
+        }
+
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Save RSS Feed");
+        fileChooser.setInitialFileName("ecospot_blog_feed.xml");
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("XML Files", "*.xml"));
+        
+        File file = fileChooser.showSaveDialog(searchField.getScene().getWindow());
+        if (file != null) {
+            String category = selectedCategory != null ? selectedCategory.getName() : "All Articles";
+            String rssContent = RSSGenerator.generateRSS(filteredBlogs, category);
+            try {
+                Files.writeString(file.toPath(), rssContent);
+                System.out.println("RSS feed exported to: " + file.getAbsolutePath());
+                
+                // Show success feedback (optional, using simple console for now)
+                Label feedback = new Label("✅ RSS Exported!");
+                feedback.setStyle("-fx-text-fill: #10b981; -fx-font-weight: bold;");
+                activeFiltersBox.getChildren().add(feedback);
+                activeFiltersBox.setVisible(true);
+                activeFiltersBox.setManaged(true);
+                
+                new Thread(() -> {
+                    try { Thread.sleep(3000); } catch (InterruptedException ignored) {}
+                    Platform.runLater(() -> activeFiltersBox.getChildren().remove(feedback));
+                }).start();
+                
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 

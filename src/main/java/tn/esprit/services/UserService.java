@@ -3,6 +3,7 @@ package tn.esprit.services;
 import tn.esprit.user.User;
 import tn.esprit.util.MyConnection;
 import tn.esprit.util.SessionManager;
+import org.mindrot.jbcrypt.BCrypt;
 import java.sql.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -20,10 +21,15 @@ public class UserService {
 
     public UserService() {
         cnx = MyConnection.getInstance().getCnx();
+        System.out.println("[UserService] DB connection: " + (cnx != null ? "OK" : "NULL"));
+        try {
+            if (cnx != null) System.out.println("[UserService] DB closed? " + cnx.isClosed());
+        } catch (Exception e) { e.printStackTrace(); }
         ensureTableExists();
         ensureQuickUsersExist();
         ensureQuickAppUsersExist();
         loadUsersFromDb();
+        System.out.println("[UserService] Users loaded from DB: " + users.size());
     }
 
     private void ensureTableExists() {
@@ -63,6 +69,24 @@ public class UserService {
             if (!hasColumn("user", "zipcode")) {
                 st.execute("ALTER TABLE `user` ADD COLUMN `zipcode` VARCHAR(10)");
             }
+            if (!hasColumn("user", "avatar_style")) {
+                st.execute("ALTER TABLE `user` ADD COLUMN `avatar_style` VARCHAR(50) DEFAULT 'avataaars'");
+            }
+            if (!hasColumn("user", "roles")) {
+                st.execute("ALTER TABLE `user` ADD COLUMN `roles` LONGTEXT");
+                st.execute("UPDATE `user` SET `roles` = '[\"ROLE_USER\"]' WHERE `roles` IS NULL");
+            }
+            if (!hasColumn("user", "created_at")) {
+                st.execute("ALTER TABLE `user` ADD COLUMN `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP");
+            } else {
+                // Ensure existing column has a default
+                st.execute("ALTER TABLE `user` MODIFY COLUMN `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP");
+            }
+            if (!hasColumn("user", "face_enrolled")) {
+                st.execute("ALTER TABLE `user` ADD COLUMN `face_enrolled` TINYINT(1) DEFAULT 0");
+            } else {
+                st.execute("ALTER TABLE `user` MODIFY COLUMN `face_enrolled` TINYINT(1) DEFAULT 0");
+            }
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -81,7 +105,7 @@ public class UserService {
                     rs.getString("username"),
                     rs.getString("email"),
                     rs.getString("password"),
-                    rs.getString("role"),
+                    cleanRole(rs.getString("role")),
                     rs.getTimestamp("timeout_until") != null ? rs.getTimestamp("timeout_until").toLocalDateTime() : null
                 );
                 user.setAvatarStyle(rs.getString("avatar_style"));
@@ -95,34 +119,65 @@ public class UserService {
         }
     }
 
+    private String cleanRole(String role) {
+        if (role == null) return "USER";
+        String r = role.toUpperCase();
+        if (r.contains("ROLE_ADMIN")) return "ADMIN";
+        if (r.contains("ROLE_NGO")) return "NGO";
+        if (r.contains("ROLE_USER")) return "USER";
+        // Fallback for simple strings
+        if (r.contains("ADMIN")) return "ADMIN";
+        if (r.contains("NGO")) return "NGO";
+        return "USER";
+    }
+
     private void ensureQuickUsersExist() {
-        ensureQuickUser("Admin User", "admin@mail.com", "admin123", "ADMIN");
-        ensureQuickUser("NGO Organization", "ngo@mail.com", "ngo123", "NGO");
-        ensureQuickUser("Regular User", "user@mail.com", "user123", "USER");
+        ensureQuickUser("Admin User", "admin@ecospot.local", "admin123", "ADMIN");
+        ensureQuickUser("NGO Organization", "ngo@ecospot.local", "ngo123", "NGO");
+        ensureQuickUser("Regular User", "user@ecospot.local", "user123", "USER");
     }
 
     private void ensureQuickUser(String username, String email, String password, String role) {
-        String selectReq = "SELECT id FROM `user` WHERE email = ?";
-        try (PreparedStatement selectPs = cnx.prepareStatement(selectReq)) {
-            selectPs.setString(1, email);
-            try (ResultSet rs = selectPs.executeQuery()) {
-                if (rs.next()) {
-                    return;
+        if (email == null || email.trim().isEmpty()) return;
+
+        try {
+            String checkReq = "SELECT password FROM `user` WHERE email = ?";
+            try (PreparedStatement checkPs = cnx.prepareStatement(checkReq)) {
+                checkPs.setString(1, email);
+                try (ResultSet rs = checkPs.executeQuery()) {
+                    if (rs.next()) {
+                        String currentPw = rs.getString("password");
+                        boolean match = false;
+                        if (currentPw != null && (currentPw.startsWith("$2a$") || currentPw.startsWith("$2y$"))) {
+                            try { match = BCrypt.checkpw(password, currentPw); } catch (Exception ignored) {}
+                        } else {
+                            match = password.equals(currentPw);
+                        }
+
+                        if (!match) {
+                            String updateReq = "UPDATE `user` SET password = ?, role = ? WHERE email = ?";
+                            try (PreparedStatement updatePs = cnx.prepareStatement(updateReq)) {
+                                updatePs.setString(1, BCrypt.hashpw(password, BCrypt.gensalt()));
+                                updatePs.setString(2, role);
+                                updatePs.setString(3, email);
+                                updatePs.executeUpdate();
+                            }
+                        }
+                        return;
+                    }
                 }
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return;
-        }
 
-        String insertReq = "INSERT INTO `user` (`username`, `email`, `password`, `role`, `avatar_style`) VALUES (?, ?, ?, ?, ?)";
-        try (PreparedStatement insertPs = cnx.prepareStatement(insertReq)) {
-            insertPs.setString(1, username);
-            insertPs.setString(2, email);
-            insertPs.setString(3, password);
-            insertPs.setString(4, role);
-            insertPs.setString(5, AvatarService.getRandomStyle());
-            insertPs.executeUpdate();
+            // Insert new user
+            String insertReq = "INSERT INTO `user` (`username`, `email`, `password`, `role`, `avatar_style`) VALUES (?, ?, ?, ?, ?)";
+            try (PreparedStatement insertPs = cnx.prepareStatement(insertReq)) {
+                insertPs.setString(1, username);
+                insertPs.setString(2, email);
+                insertPs.setString(3, BCrypt.hashpw(password, BCrypt.gensalt()));
+                insertPs.setString(4, role);
+                insertPs.setString(5, AvatarService.getRandomStyle());
+                insertPs.executeUpdate();
+            }
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -131,11 +186,36 @@ public class UserService {
     public User authenticate(String email, String password) {
         if (email == null || password == null) return null;
         loadUsersFromDb();
+        System.out.println("[AUTH DEBUG] Attempting login: email='" + email + "' password='" + password + "'");
+        System.out.println("[AUTH DEBUG] Total users in DB: " + users.size());
         for (User user : users) {
-            if (user.getEmail().equals(email) && user.getPassword().equals(password)) {
+            System.out.println("[AUTH DEBUG]   DB user: email='" + user.getEmail() + "' password='" + user.getPassword() + "' role=" + user.getRole());
+            
+            boolean match = false;
+            String dbPassword = user.getPassword();
+            if (dbPassword != null && (dbPassword.startsWith("$2a$") || dbPassword.startsWith("$2y$"))) {
+                try {
+                    // Standard jBCrypt doesn't like $2y$ prefix from PHP/Symfony, 
+                    // but it works if we treat it as $2a$ during the check.
+                    String checkPw = dbPassword;
+                    if (dbPassword.startsWith("$2y$")) {
+                        checkPw = "$2a$" + dbPassword.substring(4);
+                    }
+                    match = BCrypt.checkpw(password, checkPw);
+                } catch (Exception e) {
+                    System.err.println("[AUTH DEBUG] BCrypt check failed: " + e.getMessage());
+                }
+            } else {
+                // Fallback for plain text (migration period)
+                match = user.getPassword().equals(password);
+            }
+
+            if (user.getEmail().equals(email) && match) {
+                System.out.println("[AUTH DEBUG] ✅ MATCH FOUND!");
                 return user;
             }
         }
+        System.out.println("[AUTH DEBUG] ❌ No match found.");
         return null;
     }
 
@@ -151,95 +231,7 @@ public class UserService {
     }
 
     private void ensureQuickAppUsersExist() {
-        if (!hasTable("app_user")) return;
-        ensureQuickAppUser("admin@mail.com", "Admin", "User", "ROLE_ADMIN");
-        ensureQuickAppUser("ngo@mail.com", "NGO", "Organization", "ROLE_NGO");
-        ensureQuickAppUser("user@mail.com", "Regular", "User", "ROLE_USER");
-
-        ensureQuickAppUser("admin@ecospot.local", "Admin", "User", "ROLE_ADMIN");
-        ensureQuickAppUser("ngo@ecospot.local", "NGO", "Organization", "ROLE_NGO");
-        ensureQuickAppUser("user@ecospot.local", "Regular", "User", "ROLE_USER");
-    }
-
-    private void ensureQuickAppUser(String email, String firstName, String lastName, String role) {
-        String selectReq = "SELECT 1 FROM app_user WHERE email = ? LIMIT 1";
-        try (PreparedStatement ps = cnx.prepareStatement(selectReq)) {
-            ps.setString(1, email);
-            try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) return;
-            }
-        } catch (SQLException e) {
-            return;
-        }
-
-        boolean hasId = hasColumn("app_user", "id");
-        boolean hasEmail = hasColumn("app_user", "email");
-        boolean hasPassword = hasColumn("app_user", "password");
-        boolean hasRoles = hasColumn("app_user", "roles");
-        boolean hasFirstname = hasColumn("app_user", "firstname");
-        boolean hasLastname = hasColumn("app_user", "lastname");
-        boolean hasIsVerified = hasColumn("app_user", "is_verified");
-        boolean hasEnabled = hasColumn("app_user", "enabled");
-        boolean hasCreatedAt = hasColumn("app_user", "created_at");
-        boolean hasUpdatedAt = hasColumn("app_user", "updated_at");
-
-        StringBuilder columns = new StringBuilder();
-        StringBuilder values = new StringBuilder();
-        List<Object> params = new ArrayList<>();
-
-        if (hasId) {
-            appendColumn(columns, values, "id", "UUID_TO_BIN(UUID())");
-        }
-        if (hasEmail) {
-            appendColumn(columns, values, "email", "?");
-            params.add(email);
-        }
-        if (hasPassword) {
-            appendColumn(columns, values, "password", "?");
-            params.add("123456");
-        }
-        if (hasRoles) {
-            appendColumn(columns, values, "roles", "?");
-            params.add(role);
-        }
-        if (hasFirstname) {
-            appendColumn(columns, values, "firstname", "?");
-            params.add(firstName);
-        }
-        if (hasLastname) {
-            appendColumn(columns, values, "lastname", "?");
-            params.add(lastName);
-        }
-        if (hasIsVerified) {
-            appendColumn(columns, values, "is_verified", "?");
-            params.add(Boolean.TRUE);
-        }
-        if (hasEnabled) {
-            appendColumn(columns, values, "enabled", "?");
-            params.add(Boolean.TRUE);
-        }
-        if (hasCreatedAt) {
-            appendColumn(columns, values, "created_at", "NOW()");
-        }
-        if (hasUpdatedAt) {
-            appendColumn(columns, values, "updated_at", "NOW()");
-        }
-
-        if (columns.length() == 0) return;
-
-        String req = "INSERT INTO app_user (" + columns + ") VALUES (" + values + ")";
-        try (PreparedStatement ps = cnx.prepareStatement(req)) {
-            int i = 1;
-            for (Object param : params) {
-                if (param instanceof Boolean) {
-                    ps.setBoolean(i++, (Boolean) param);
-                } else {
-                    ps.setString(i++, String.valueOf(param));
-                }
-            }
-            ps.executeUpdate();
-        } catch (SQLException ignored) {
-        }
+        // Redundant after unification. Both projects now share the 'user' table.
     }
 
     private void appendColumn(StringBuilder columns, StringBuilder values, String column, String valueExpr) {
@@ -401,17 +393,18 @@ public class UserService {
         }
 
         // 8. Save to DB
-        String req = "INSERT INTO `user` (`username`, `email`, `password`, `role`, `avatar_style`, `address`, `city`, `zipcode`) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+        String req = "INSERT INTO `user` (`username`, `email`, `password`, `role`, `roles`, `avatar_style`, `address`, `city`, `zipcode`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
         try {
             PreparedStatement ps = cnx.prepareStatement(req);
             ps.setString(1, firstName + " " + lastName);
             ps.setString(2, email);
-            ps.setString(3, password);
+            ps.setString(3, BCrypt.hashpw(password, BCrypt.gensalt()));
             ps.setString(4, "USER");
-            ps.setString(5, AvatarService.getRandomStyle());
-            ps.setString(6, address);
-            ps.setString(7, city);
-            ps.setString(8, zipCode);
+            ps.setString(5, "[\"ROLE_USER\"]");
+            ps.setString(6, AvatarService.getRandomStyle());
+            ps.setString(7, address);
+            ps.setString(8, city);
+            ps.setString(9, zipCode);
             ps.executeUpdate();
             upsertAppUserRoleByEmail(email, "ROLE_USER");
             loadUsersFromDb();
@@ -453,14 +446,15 @@ public class UserService {
         }
 
         // 7. Save to DB
-        String req = "INSERT INTO `user` (`username`, `email`, `password`, `role`, `avatar_style`) VALUES (?, ?, ?, ?, ?)";
+        String req = "INSERT INTO `user` (`username`, `email`, `password`, `role`, `roles`, `avatar_style`) VALUES (?, ?, ?, ?, ?, ?)";
         try {
             PreparedStatement ps = cnx.prepareStatement(req);
             ps.setString(1, firstName + " " + lastName);
             ps.setString(2, email);
-            ps.setString(3, password);
+            ps.setString(3, BCrypt.hashpw(password, BCrypt.gensalt()));
             ps.setString(4, role);
-            ps.setString(5, AvatarService.getRandomStyle());
+            ps.setString(5, "[\"" + toAppUserRole(role) + "\"]");
+            ps.setString(6, AvatarService.getRandomStyle());
             ps.executeUpdate();
             upsertAppUserRoleByEmail(email, toAppUserRole(role));
             loadUsersFromDb();
@@ -494,45 +488,7 @@ public class UserService {
     }
 
     private void upsertAppUserRoleByEmail(String email, String role) {
-        if (email == null || email.trim().isEmpty() || !hasTable("app_user")) return;
-
-        String trimmedEmail = email.trim();
-        String selectReq = "SELECT 1 FROM app_user WHERE email = ? LIMIT 1";
-        try (PreparedStatement ps = cnx.prepareStatement(selectReq)) {
-            ps.setString(1, trimmedEmail);
-            try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) {
-                    if (hasColumn("app_user", "roles")) {
-                        try (PreparedStatement updatePs = cnx.prepareStatement("UPDATE app_user SET roles = ? WHERE email = ?")) {
-                            updatePs.setString(1, role);
-                            updatePs.setString(2, trimmedEmail);
-                            updatePs.executeUpdate();
-                        }
-                    }
-                    return;
-                }
-            }
-        } catch (SQLException e) {
-            return;
-        }
-
-        String firstName = "User";
-        String lastName = "Account";
-        User known = null;
-        for (User u : users) {
-            if (u.getEmail() != null && u.getEmail().equalsIgnoreCase(trimmedEmail)) {
-                known = u;
-                break;
-            }
-        }
-        if (known != null && known.getUsername() != null && !known.getUsername().trim().isEmpty()) {
-            String[] parts = known.getUsername().trim().split("\\s+", 2);
-            firstName = parts[0];
-            if (parts.length > 1) {
-                lastName = parts[1];
-            }
-        }
-        ensureQuickAppUser(trimmedEmail, firstName, lastName, role);
+        // Redundant. Managed via triggers or shared table updates in Symfony/Java entities.
     }
 
     public boolean setResetCode(String email, String code) {
@@ -565,7 +521,7 @@ public class UserService {
     public boolean updatePassword(String email, String newPassword) {
         String req = "UPDATE `user` SET password = ?, reset_code = NULL WHERE email = ?";
         try (PreparedStatement ps = cnx.prepareStatement(req)) {
-            ps.setString(1, newPassword);
+            ps.setString(1, BCrypt.hashpw(newPassword, BCrypt.gensalt()));
             ps.setString(2, email);
             int updated = ps.executeUpdate();
             if (updated > 0) {

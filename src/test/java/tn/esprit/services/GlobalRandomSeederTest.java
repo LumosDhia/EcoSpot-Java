@@ -24,7 +24,7 @@ public class GlobalRandomSeederTest {
             // Let's try to find a valid user.
             int intUserId = 1;
             byte[] binUserId = null;
-            ResultSet rsUser = cnx.createStatement().executeQuery("SELECT id FROM app_user LIMIT 1");
+            ResultSet rsUser = cnx.createStatement().executeQuery("SELECT id FROM user LIMIT 1");
             if (rsUser.next()) {
                 // If ID is returned as bytes or int
                 Object obj = rsUser.getObject(1);

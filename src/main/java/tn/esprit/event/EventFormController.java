@@ -259,18 +259,21 @@ public class EventFormController {
             }
 
             // Save Many-to-Many Sponsor links
-            // 1. Remove old links if editing
-            if (isEdit) {
-                // We need a method in SponsorService to clear all sponsors for an event
-                // or just unassign all.
-                for (Sponsor s : sponsorService.getSponsorsForEvent(currentEvent.getId())) {
+            // 1. Get current assigned sponsors to compare
+            java.util.List<Sponsor> currentlyAssigned = sponsorService.getSponsorsForEvent(currentEvent.getId());
+            
+            // 2. Remove those that are no longer selected
+            for (Sponsor s : currentlyAssigned) {
+                if (selectedSponsors.stream().noneMatch(sel -> sel.getId() == s.getId())) {
                     sponsorService.unassignSponsorFromEvent(currentEvent.getId(), s.getId());
                 }
             }
             
-            // 2. Add new links
-            for (Sponsor s : selectedSponsors) {
-                sponsorService.assignSponsorToEvent(currentEvent.getId(), s.getId());
+            // 3. Add new ones
+            for (Sponsor sel : selectedSponsors) {
+                if (currentlyAssigned.stream().noneMatch(cur -> cur.getId() == sel.getId())) {
+                    sponsorService.assignSponsorToEvent(currentEvent.getId(), sel.getId());
+                }
             }
 
             goBack(null);

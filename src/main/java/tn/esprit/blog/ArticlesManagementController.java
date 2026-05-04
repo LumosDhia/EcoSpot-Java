@@ -22,29 +22,62 @@ import java.util.stream.Collectors;
 
 public class ArticlesManagementController {
 
-    @FXML private TableView<Blog> adminArticlesTable;
-    @FXML private TableColumn<Blog, Integer> colId;
-    @FXML private TableColumn<Blog, String> colTitle;
-    @FXML private TableColumn<Blog, String> colStatus;
-    @FXML private TableColumn<Blog, LocalDateTime> colCreated;
-    @FXML private TableColumn<Blog, LocalDateTime> colPublished;
-    @FXML private TableColumn<Blog, Void> colActions;
+    @FXML
+    private TableView<Blog> adminArticlesTable;
+    @FXML
+    private TableColumn<Blog, Integer> colId;
+    @FXML
+    private TableColumn<Blog, String> colTitle;
+    @FXML
+    private TableColumn<Blog, Integer> colViews;
+    @FXML
+    private TableColumn<Blog, Integer> colLikes;
+    @FXML
+    private TableColumn<Blog, Integer> colDislikes;
+    @FXML
+    private TableColumn<Blog, String> colStatus;
+    @FXML
+    private TableColumn<Blog, LocalDateTime> colCreated;
+    @FXML
+    private TableColumn<Blog, LocalDateTime> colPublished;
+    @FXML
+    private TableColumn<Blog, Void> colActions;
 
-    @FXML private TableView<Blog> ngoArticlesTable;
-    @FXML private TableColumn<Blog, Integer> colNgoId;
-    @FXML private TableColumn<Blog, String> colNgoTitle;
-    @FXML private TableColumn<Blog, String> colNgoWriter;
-    @FXML private TableColumn<Blog, String> colNgoStatus;
-    @FXML private TableColumn<Blog, LocalDateTime> colNgoCreated;
-    @FXML private TableColumn<Blog, Void> colNgoActions;
+    @FXML
+    private TableView<Blog> ngoArticlesTable;
+    @FXML
+    private TableColumn<Blog, Integer> colNgoId;
+    @FXML
+    private TableColumn<Blog, String> colNgoTitle;
+    @FXML
+    private TableColumn<Blog, Integer> colNgoViews;
+    @FXML
+    private TableColumn<Blog, Integer> colNgoLikes;
+    @FXML
+    private TableColumn<Blog, Integer> colNgoDislikes;
+    @FXML
+    private TableColumn<Blog, String> colNgoWriter;
+    @FXML
+    private TableColumn<Blog, String> colNgoStatus;
+    @FXML
+    private TableColumn<Blog, LocalDateTime> colNgoCreated;
+    @FXML
+    private TableColumn<Blog, Void> colNgoActions;
 
-    @FXML private Button homeBtn;
-    @FXML private VBox adminSectionBox;
-    @FXML private VBox ngoSectionBox;
-    @FXML private Label breadcrumbPrefixLabel;
-    @FXML private Label breadcrumbTitleLabel;
-    @FXML private Label ngoSectionTitleLabel;
-    @FXML private Label ngoSectionSubtitleLabel;
+    @FXML
+    private Button homeBtn;
+    @FXML
+    private VBox adminSectionBox;
+    @FXML
+    private VBox ngoSectionBox;
+    @FXML
+    private Label breadcrumbPrefixLabel;
+    @FXML
+    private Label breadcrumbTitleLabel;
+    @FXML
+    private Label ngoSectionTitleLabel;
+    @FXML
+    private Label ngoSectionSubtitleLabel;
 
     private BlogService blogService = new BlogService();
     private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
@@ -70,6 +103,9 @@ public class ArticlesManagementController {
         // Admin Table setup
         colId.setCellValueFactory(new PropertyValueFactory<>("id"));
         colTitle.setCellValueFactory(new PropertyValueFactory<>("title"));
+        colViews.setCellValueFactory(new PropertyValueFactory<>("views"));
+        colLikes.setCellValueFactory(new PropertyValueFactory<>("likesCount"));
+        colDislikes.setCellValueFactory(new PropertyValueFactory<>("dislikesCount"));
         colStatus.setCellFactory(column -> new TableCell<>() {
             @Override
             protected void updateItem(String item, boolean empty) {
@@ -82,14 +118,16 @@ public class ArticlesManagementController {
                 }
             }
         });
-        
+
         colCreated.setCellValueFactory(new PropertyValueFactory<>("publishedAt"));
         colCreated.setCellFactory(column -> new TableCell<>() {
             @Override
             protected void updateItem(LocalDateTime item, boolean empty) {
                 super.updateItem(item, empty);
-                if (empty || item == null) setText(null);
-                else setText(item.format(formatter));
+                if (empty || item == null)
+                    setText(null);
+                else
+                    setText(item.format(formatter));
             }
         });
 
@@ -98,8 +136,10 @@ public class ArticlesManagementController {
             @Override
             protected void updateItem(LocalDateTime item, boolean empty) {
                 super.updateItem(item, empty);
-                if (empty || item == null) setText(null);
-                else setText(item.format(formatter));
+                if (empty || item == null)
+                    setText(null);
+                else
+                    setText(item.format(formatter));
             }
         });
 
@@ -108,6 +148,9 @@ public class ArticlesManagementController {
         // NGO Table setup
         colNgoId.setCellValueFactory(new PropertyValueFactory<>("id"));
         colNgoTitle.setCellValueFactory(new PropertyValueFactory<>("title"));
+        colNgoViews.setCellValueFactory(new PropertyValueFactory<>("views"));
+        colNgoLikes.setCellValueFactory(new PropertyValueFactory<>("likesCount"));
+        colNgoDislikes.setCellValueFactory(new PropertyValueFactory<>("dislikesCount"));
         colNgoWriter.setCellValueFactory(new PropertyValueFactory<>("author"));
         colNgoStatus.setCellFactory(column -> new TableCell<>() {
             @Override
@@ -126,8 +169,10 @@ public class ArticlesManagementController {
             @Override
             protected void updateItem(LocalDateTime item, boolean empty) {
                 super.updateItem(item, empty);
-                if (empty || item == null) setText(null);
-                else setText(item.format(formatter));
+                if (empty || item == null)
+                    setText(null);
+                else
+                    setText(item.format(formatter));
             }
         });
 
@@ -143,11 +188,15 @@ public class ArticlesManagementController {
             private final HBox pane = new HBox(5, viewBtn, editBtn, deleteBtn, revisionBtn);
 
             {
-                viewBtn.setStyle("-fx-text-fill: #fdae6b; -fx-background-color: transparent; -fx-border-color: #fdae6b; -fx-border-radius: 3; -fx-font-size: 10; -fx-cursor: hand;");
-                editBtn.setStyle("-fx-text-fill: #f1933e; -fx-background-color: transparent; -fx-border-color: #f1933e; -fx-border-radius: 3; -fx-font-size: 10; -fx-cursor: hand;");
-                deleteBtn.setStyle("-fx-text-fill: #bc4749; -fx-background-color: transparent; -fx-border-color: #bc4749; -fx-border-radius: 3; -fx-font-size: 10; -fx-cursor: hand;");
-                revisionBtn.setStyle("-fx-text-fill: #557999; -fx-background-color: transparent; -fx-border-color: #557999; -fx-border-radius: 3; -fx-font-size: 10; -fx-cursor: hand;");
-                
+                viewBtn.setStyle(
+                        "-fx-text-fill: #fdae6b; -fx-background-color: transparent; -fx-border-color: #fdae6b; -fx-border-radius: 3; -fx-font-size: 10; -fx-cursor: hand;");
+                editBtn.setStyle(
+                        "-fx-text-fill: #f1933e; -fx-background-color: transparent; -fx-border-color: #f1933e; -fx-border-radius: 3; -fx-font-size: 10; -fx-cursor: hand;");
+                deleteBtn.setStyle(
+                        "-fx-text-fill: #bc4749; -fx-background-color: transparent; -fx-border-color: #bc4749; -fx-border-radius: 3; -fx-font-size: 10; -fx-cursor: hand;");
+                revisionBtn.setStyle(
+                        "-fx-text-fill: #557999; -fx-background-color: transparent; -fx-border-color: #557999; -fx-border-radius: 3; -fx-font-size: 10; -fx-cursor: hand;");
+
                 // In admin screen, NGO table uses "Revision" instead of edit.
                 // In NGO mode, NGO table allows editing own articles.
                 if (!isAdminTable && !allowNgoEdit) {
@@ -278,17 +327,21 @@ public class ArticlesManagementController {
     }
 
     private Button createStatusBadge(Blog blog) {
-        boolean revisionRequested = blog.getAdminRevisionNote() != null && !blog.getAdminRevisionNote().trim().isEmpty();
+        boolean revisionRequested = blog.getAdminRevisionNote() != null
+                && !blog.getAdminRevisionNote().trim().isEmpty();
         Button btn;
         if (revisionRequested && !blog.getIsPublished()) {
             btn = new Button("Revision requested");
-            btn.setStyle("-fx-background-color: #fef3c7; -fx-text-fill: #92400e; -fx-font-size: 10; -fx-font-weight: bold; -fx-background-radius: 4;");
+            btn.setStyle(
+                    "-fx-background-color: #fef3c7; -fx-text-fill: #92400e; -fx-font-size: 10; -fx-font-weight: bold; -fx-background-radius: 4;");
         } else if (blog.getIsPublished()) {
             btn = new Button("Published");
-            btn.setStyle("-fx-background-color: #2d6a4f; -fx-text-fill: white; -fx-font-size: 10; -fx-background-radius: 4;");
+            btn.setStyle(
+                    "-fx-background-color: #2d6a4f; -fx-text-fill: white; -fx-font-size: 10; -fx-background-radius: 4;");
         } else {
             btn = new Button("Draft");
-            btn.setStyle("-fx-background-color: #6c757d; -fx-text-fill: white; -fx-font-size: 10; -fx-background-radius: 4;");
+            btn.setStyle(
+                    "-fx-background-color: #6c757d; -fx-text-fill: white; -fx-font-size: 10; -fx-background-radius: 4;");
         }
         return btn;
     }
@@ -303,7 +356,7 @@ public class ArticlesManagementController {
     private void loadData() {
         List<Blog> allBlogs = blogService.getAll();
         User currentUser = tn.esprit.util.SessionManager.getCurrentUser();
-        
+
         ObservableList<Blog> adminList;
         ObservableList<Blog> ngoList;
 
@@ -312,23 +365,21 @@ public class ArticlesManagementController {
             String ownerEmail = blogService.resolveCurrentOwnerEmail();
             adminList = FXCollections.observableArrayList();
             ngoList = FXCollections.observableArrayList(
-                allBlogs.stream()
-                    .filter(b -> ownerEmail != null && b.getCreatedByEmail() != null && b.getCreatedByEmail().equalsIgnoreCase(ownerEmail))
-                    .collect(Collectors.toList())
-            );
+                    allBlogs.stream()
+                            .filter(b -> ownerEmail != null && b.getCreatedByEmail() != null
+                                    && b.getCreatedByEmail().equalsIgnoreCase(ownerEmail))
+                            .collect(Collectors.toList()));
         } else {
             configureForAdminDashboard();
             adminList = FXCollections.observableArrayList(
-                allBlogs.stream()
-                    .filter(b -> b.getAuthor() != null && b.getAuthor().startsWith("Admin"))
-                    .collect(Collectors.toList())
-            );
+                    allBlogs.stream()
+                            .filter(b -> b.getAuthor() != null && b.getAuthor().startsWith("Admin"))
+                            .collect(Collectors.toList()));
 
             ngoList = FXCollections.observableArrayList(
-                allBlogs.stream()
-                    .filter(b -> b.getAuthor() == null || !b.getAuthor().startsWith("Admin"))
-                    .collect(Collectors.toList())
-            );
+                    allBlogs.stream()
+                            .filter(b -> b.getAuthor() == null || !b.getAuthor().startsWith("Admin"))
+                            .collect(Collectors.toList()));
         }
 
         adminArticlesTable.setItems(adminList);
@@ -395,7 +446,7 @@ public class ArticlesManagementController {
             e.printStackTrace();
         }
     }
-    
+
     @FXML
     private void goToBlog(ActionEvent event) {
         navigate(event, "/blog/BlogManagement.fxml");
@@ -430,6 +481,7 @@ public class ArticlesManagementController {
             e.printStackTrace();
         }
     }
+
     @FXML
     private void handleMinimize() {
         tn.esprit.util.WindowUtils.minimize(homeBtn);

@@ -43,7 +43,7 @@
                                 <Button onAction="#goToCompletions" styleClass="sidebar-item" text="✅ Completions" />
                                 <Button onAction="#goToUserManagement" styleClass="sidebar-item" text="👥 Users" />
                                 <Button onAction="#goToSponsorManagement" styleClass="sidebar-item" text="🤝 Sponsors" />
-                                <Button onAction="#goToAnalytics" styleClass="sidebar-item" text="📊 AI Analytics" />
+
                             </children>
                         </VBox>
 
@@ -53,6 +53,7 @@
                                 <Button onAction="#goToBlogManagement" styleClass="sidebar-item" text="📰 My articles" />
                                 <Button onAction="#goToCommentsManagement" styleClass="sidebar-item" text="💬 Comments" />
                                 <Button onAction="#goToStatistics" styleClass="sidebar-item" text="📊 My statistics" />
+                                <Button onAction="#goToNgoTickets" styleClass="sidebar-item" text="📋 Ticket management" />
                                 <Button onAction="#goToEventManagement" styleClass="sidebar-item" text="📅 My events" />
                                 <Button onAction="#goToAchievements" styleClass="sidebar-item" text="🏆 My achievements" />
                             </children>
@@ -294,36 +295,7 @@
                                                 </VBox>
                                             </children>
                                         </VBox>
-                                        <VBox onMouseClicked="#goToAnalyticsGrid" styleClass="stat-card" style="-fx-border-color: #52a472; -fx-border-width: 2; -fx-border-radius: 12; -fx-background-color: #f0fdf4;">
-                                            <children>
-                                                <VBox alignment="CENTER" spacing="15.0">
-                                                    <children>
-                                                        <StackPane styleClass="dashboard-icon-container" style="-fx-background-color: #dcfce7;">
-                                                            <children>
-                                                                <Label styleClass="dashboard-icon" style="-fx-text-fill: #166534;" text="&#xE9D9;" />
-                                                            </children>
-                                                        </StackPane>
-                                                        <Label styleClass="card-title-lg" style="-fx-text-fill: #166534;" text="AI Analytics" />
-                                                        <Label styleClass="card-subtitle" style="-fx-text-fill: #15803d;" text="Real-time ticket trends &amp; impact" textAlignment="CENTER" wrapText="true" />
-                                                    </children>
-                                                </VBox>
-                                            </children>
-                                        </VBox>
-                                        <VBox onMouseClicked="#goToMapGrid" styleClass="stat-card" style="-fx-border-color: #3b82f6; -fx-border-width: 2; -fx-border-radius: 12; -fx-background-color: #eff6ff;">
-                                            <children>
-                                                <VBox alignment="CENTER" spacing="15.0">
-                                                    <children>
-                                                        <StackPane styleClass="dashboard-icon-container" style="-fx-background-color: #dbeafe;">
-                                                            <children>
-                                                                <Label styleClass="dashboard-icon" style="-fx-text-fill: #1d4ed8;" text="&#xE707;" />
-                                                            </children>
-                                                        </StackPane>
-                                                        <Label styleClass="card-title-lg" style="-fx-text-fill: #1d4ed8;" text="Global Map" />
-                                                        <Label styleClass="card-subtitle" style="-fx-text-fill: #1e40af;" text="Interactive view of report hotspots" textAlignment="CENTER" wrapText="true" />
-                                                    </children>
-                                                </VBox>
-                                            </children>
-                                        </VBox>
+
                                     </children>
                                 </FlowPane>
 
@@ -435,6 +407,23 @@
                                                         </StackPane>
                                                         <Label styleClass="card-title-lg" text="My Achievements" />
                                                         <Label styleClass="card-subtitle" text="Review your history of successfully resolved tickets." textAlignment="CENTER" wrapText="true" />
+                                                    </children>
+                                                </VBox>
+                                            </children>
+                                        </VBox>
+                                        
+                                        <!-- NGO Tickets Card -->
+                                        <VBox onMouseClicked="#goToNgoTicketsGrid" styleClass="stat-card">
+                                            <children>
+                                                <VBox alignment="CENTER" spacing="15.0">
+                                                    <children>
+                                                        <StackPane styleClass="dashboard-icon-container" style="-fx-background-color: #ecfdf5;">
+                                                            <children>
+                                                                <Label styleClass="dashboard-icon" style="-fx-text-fill: #10b981;" text="&#xEBE7;" />
+                                                            </children>
+                                                        </StackPane>
+                                                        <Label styleClass="card-title-lg" text="Manage Tickets" />
+                                                        <Label styleClass="card-subtitle" text="Claim community tickets and track your progress." textAlignment="CENTER" wrapText="true" />
                                                     </children>
                                                 </VBox>
                                             </children>

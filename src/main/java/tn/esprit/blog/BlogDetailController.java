@@ -6,14 +6,23 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.web.WebView;
 import javafx.stage.Stage;
+import javafx.scene.control.ChoiceBox;
+import javafx.collections.FXCollections;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import org.json.JSONObject;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -22,6 +31,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.List;
 import tn.esprit.util.TimeUtils;
+
 
 public class BlogDetailController {
 
@@ -38,6 +48,7 @@ public class BlogDetailController {
     @FXML private WebView contentWebView;
     @FXML private FlowPane tagsFlowPane;
     @FXML private ImageView currentUserAvatar;
+    @FXML private ChoiceBox<String> langChoice;
 
     // Comments
     @FXML private VBox commentsContainer;
@@ -73,6 +84,8 @@ public class BlogDetailController {
     private long playStartTime;
     private String remainingText;
 
+    private static boolean schemaFixed = false;
+
     @FXML
     public void initialize() {
         if (tn.esprit.util.SessionManager.isLoggedIn()) {
@@ -92,6 +105,38 @@ public class BlogDetailController {
             guestPromptSection.setVisible(true);
             guestPromptSection.setManaged(true);
         }
+
+        // Removed destructive schema fix that was wiping stats
+
+
+        contentWebView.addEventFilter(ScrollEvent.SCROLL, event -> {
+            ScrollPane parentScroll = findParentScrollPane(contentWebView);
+            if (parentScroll != null) {
+                double deltaY = event.getDeltaY();
+                double vvalue = parentScroll.getVvalue();
+                double contentHeight = parentScroll.getContent().getBoundsInLocal().getHeight();
+                double viewportHeight = parentScroll.getViewportBounds().getHeight();
+                double scrollableHeight = contentHeight - viewportHeight;
+                if (scrollableHeight > 0) {
+                    parentScroll.setVvalue(vvalue - (deltaY / scrollableHeight));
+                }
+                event.consume();
+            }
+        });
+
+        if (langChoice != null) {
+            langChoice.setItems(FXCollections.observableArrayList("French", "Arabic", "English", "Spanish", "German"));
+            langChoice.setValue("French");
+        }
+    }
+
+    private ScrollPane findParentScrollPane(javafx.scene.Node node) {
+        javafx.scene.Node current = node.getParent();
+        while (current != null) {
+            if (current instanceof ScrollPane) return (ScrollPane) current;
+            current = current.getParent();
+        }
+        return null;
     }
 
     private void loadCurrentUserAvatar() {
@@ -124,8 +169,6 @@ public class BlogDetailController {
         int dislikes = reactionService.getDislikes(currentArticle.getId());
         String userReaction = reactionService.getUserReaction(currentArticle.getId(), userId);
         
-        System.out.println("DEBUG: Refreshing reactions for article " + currentArticle.getId() + ". Likes: " + likes + ", Dislikes: " + dislikes);
-        
         likeBtn.setText("👍 " + likes);
         dislikeBtn.setText("👎 " + dislikes);
         likeBtn.getStyleClass().removeAll("reaction-active");
@@ -155,9 +198,7 @@ public class BlogDetailController {
     }
 
     public void setArticle(Blog blog) {
-        try {
-            System.out.println("DEBUG: setArticle called for ID: " + (blog != null ? blog.getId() : "NULL"));
-            this.currentArticle = blog;
+        this.currentArticle = blog;
         heroTitle.setText(blog.getTitle());
         breadcrumbTitle.setText(blog.getTitle());
         titleLabel.setText(blog.getTitle());
@@ -213,16 +254,33 @@ public class BlogDetailController {
         }
 
         contentWebView.getEngine().loadContent(blog.getContent());
+
+        // Auto-resize WebView to fit content (eliminates internal scrollbar)
+        contentWebView.getEngine().getLoadWorker().stateProperty().addListener((obs, oldState, newState) -> {
+            if (newState == javafx.concurrent.Worker.State.SUCCEEDED) {
+                Platform.runLater(() -> {
+                    try {
+                        Object heightObj = contentWebView.getEngine().executeScript(
+                            "Math.max(document.body.scrollHeight, document.documentElement.scrollHeight)"
+                        );
+                        if (heightObj instanceof Number) {
+                            double h = ((Number) heightObj).doubleValue() + 30;
+                            contentWebView.setPrefHeight(h);
+                            contentWebView.setMinHeight(h);
+                            contentWebView.setMaxHeight(h);
+                        }
+                    } catch (Exception ignored) {}
+                });
+            }
+        });
+
         loadComments();
 
             int userId = tn.esprit.util.SessionManager.isLoggedIn()
                     ? tn.esprit.util.SessionManager.getCurrentUser().getId() : -1;
             refreshReactions(userId);
-        } catch (Exception e) {
-            System.err.println("CRITICAL ERROR in setArticle: " + e.getMessage());
-            e.printStackTrace();
-        }
     }
+
 
     // ─── AI Voice Reader ────────────────────────────────────────────────────────
 
@@ -271,6 +329,56 @@ public class BlogDetailController {
         aiPlayBtn.setDisable(false);
         aiPauseBtn.setDisable(true);
         aiStatusLabel.setText("Ready to read aloud");
+    }
+
+    @FXML
+    private void handleTranslate() {
+        String targetLabel = langChoice.getValue();
+        String targetCode = "fr";
+        if ("Arabic".equals(targetLabel)) targetCode = "ar";
+        else if ("Spanish".equals(targetLabel)) targetCode = "es";
+        else if ("German".equals(targetLabel)) targetCode = "de";
+        else if ("English".equals(targetLabel)) targetCode = "en";
+
+        String textToTranslate = extractPlainText();
+        if (textToTranslate == null || textToTranslate.isBlank()) return;
+
+        final String finalTargetCode = targetCode;
+        aiStatusLabel.setText("🌍 Translating...");
+        
+        new Thread(() -> {
+            try {
+                JSONObject json = new JSONObject();
+                json.put("text", textToTranslate);
+                json.put("target", finalTargetCode);
+
+                HttpClient client = HttpClient.newHttpClient();
+                HttpRequest request = HttpRequest.newBuilder()
+                        .uri(URI.create("http://localhost:8002/translate"))
+                        .header("Content-Type", "application/json")
+                        .POST(HttpRequest.BodyPublishers.ofString(json.toString()))
+                        .build();
+
+                HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+                if (response.statusCode() == 200) {
+                    JSONObject resp = new JSONObject(response.body());
+                    String translated = resp.getString("translated_text");
+                    Platform.runLater(() -> {
+                        contentWebView.getEngine().loadContent("<div style='font-family: sans-serif;'>" + translated + "</div>");
+                        aiStatusLabel.setText("✅ Translated to " + targetLabel);
+                        // Also update hero title for full experience
+                        if (translated.length() > 50) {
+                             // Try to translate title separately? Or just keep it.
+                        }
+                    });
+                } else {
+                    Platform.runLater(() -> aiStatusLabel.setText("❌ Translation failed"));
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+                Platform.runLater(() -> aiStatusLabel.setText("❌ Error: " + e.getMessage()));
+            }
+        }).start();
     }
 
     private void startSpeaking(String text) {
@@ -356,7 +464,6 @@ public class BlogDetailController {
             if (currentArticle == null) return;
             commentsContainer.getChildren().clear();
             List<Comment> comments = commentService.getByArticleId(currentArticle.getId());
-            System.out.println("Loading comments for article ID: " + currentArticle.getId() + ". Found: " + comments.size());
             commentsCountLabel.setText("Comments (" + comments.size() + ")");
 
             for (Comment comment : comments) {
@@ -412,7 +519,18 @@ public class BlogDetailController {
 
     // ─── Navigation ─────────────────────────────────────────────────────────────
 
-    @FXML private void goToBlog() { stopTtsAndNavigate("/blog/BlogManagement.fxml", null); }
+    @FXML
+    private void goToBlog() {
+        stopTtsAndNavigate("/blog/BlogManagement.fxml", null);
+    }
+
+    @FXML
+    private void goToBlogReset() {
+        tn.esprit.blog.BlogManagementController.selectedCategory = null;
+        tn.esprit.blog.BlogManagementController.selectedTag = null;
+        tn.esprit.blog.BlogManagementController.selectedAuthor = null;
+        goToBlog();
+    }
     @FXML private void goToHome() { stopTtsAndNavigate("/home/Home.fxml", null); }
     @FXML private void goToArticles() { stopTtsAndNavigate("/blog/ArticlesManagement.fxml", null); }
     @FXML private void goToEvents(javafx.event.ActionEvent e) { handleTtsStop(); navigate(e, "/event/EventManagement.fxml"); }

@@ -142,6 +142,35 @@ public class EventService implements GlobalInterface<Event> {
         return events;
     }
 
+    public Event getById(int id) {
+        String req = "SELECT * FROM event WHERE id = ?";
+        try (PreparedStatement ps = cnx.prepareStatement(req)) {
+            ps.setInt(1, id);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    Event e = new Event();
+                    e.setId(rs.getInt("id"));
+                    e.setName(rs.getString("name"));
+                    e.setSlug(rs.getString("slug"));
+                    e.setDescription(rs.getString("description"));
+                    e.setCapacity(rs.getInt("capacity"));
+                    e.setLocation(rs.getString("location"));
+                    Timestamp start = rs.getTimestamp("started_at");
+                    if (start != null) e.setStartedAt(start.toLocalDateTime());
+                    Timestamp end = rs.getTimestamp("ended_at");
+                    if (end != null) e.setEndedAt(end.toLocalDateTime());
+                    e.setImage(rs.getString("image"));
+                    e.setLatitude(rs.getDouble("latitude"));
+                    e.setLongitude(rs.getDouble("longitude"));
+                    return e;
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
     public boolean joinEvent(int eventId, int userId) {
         ensureParticipantTableExists();
         String insertParticipant = "INSERT IGNORE INTO event_participant (event_id, user_id) VALUES (?, ?)";
@@ -177,7 +206,7 @@ public class EventService implements GlobalInterface<Event> {
                                 .filter(u -> u.getId() == userId)
                                 .findFirst().orElse(null);
 
-                        Event event = getAll().stream().filter(ev -> ev.getId() == eventId).findFirst().orElse(null);
+                        Event event = getById(eventId);
 
                         if (user != null && event != null) {
                             String body = "<h1>EcoSpot Participation Confirmation</h1>" +

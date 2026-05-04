@@ -55,7 +55,7 @@
         <ScrollPane fitToWidth="true" style="-fx-background-color: #f0f7f4; -fx-background: #f0f7f4;">
             <content>
                 <VBox alignment="CENTER" spacing="30.0">
-                    <padding><Insets top="40.0" bottom="40.0" /></padding>
+                    <padding><Insets top="40.0" bottom="80.0" /></padding>
                     <children>
                         <VBox styleClass="register-card" spacing="15.0">
                             <children>

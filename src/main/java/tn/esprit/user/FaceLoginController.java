@@ -193,20 +193,26 @@ public class FaceLoginController {
     private void processResponse(String response, ActionEvent event) {
         // Simple JSON parsing (since we don't have a library like Jackson here yet, 
         // or we can use a regex/substring for simplicity in this specific case)
-        if (response.contains("\"user_id\"") && !response.contains("\"user_id\":null")) {
-            String userId = response.split("\"user_id\":\"")[1].split("\"")[0];
-            statusLabel.setText("Welcome " + userId + "!");
-            statusLabel.setStyle("-fx-text-fill: #2d6a4f;");
-            
-            // Perform login in our system
-            User user = userService.getUserByEmail(userId);
-            if (user != null) {
-                tn.esprit.util.SessionManager.login(user);
-                closeWindow(event);
-                // Trigger navigation in LoginController or handle it here
-                // For simplicity, we'll assume the main window will check session
+        if (response.contains("\"user_id\"") && !response.contains("null")) {
+            // Remove all spaces to handle both '{"user_id":"foo"}' and '{"user_id": "foo"}'
+            String cleanResponse = response.replace(" ", "").replace("\n", "").replace("\r", "");
+            if (cleanResponse.contains("\"user_id\":\"")) {
+                String userId = cleanResponse.split("\"user_id\":\"")[1].split("\"")[0];
+                statusLabel.setText("Welcome " + userId + "!");
+                statusLabel.setStyle("-fx-text-fill: #2d6a4f;");
+                
+                // Perform login in our system
+                User user = userService.getUserByEmail(userId);
+                if (user != null) {
+                    tn.esprit.util.SessionManager.login(user);
+                    closeWindow(event);
+                    // Trigger navigation in LoginController or handle it here
+                    // For simplicity, we'll assume the main window will check session
+                } else {
+                    showError("User found in Face ID but not in Database.");
+                }
             } else {
-                showError("User found in Face ID but not in Database.");
+                showError("Face not recognized.");
             }
         } else {
             showError("Face not recognized.");
