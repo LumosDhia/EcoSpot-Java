@@ -10,7 +10,7 @@ public class MyConnection {
     // DB properties
     final String URL = Config.get("DB_URL", "jdbc:mysql://localhost:3306/projetdev");
     final String USR = Config.get("DB_USER", "root");
-    final String PWD = Config.get("DB_PASS", "root");
+    final String PWD = Config.get("DB_PASS", "Wiem123456");
 
     // Attributes
     // 2. static instance

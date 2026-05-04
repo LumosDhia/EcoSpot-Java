@@ -1,5 +1,5 @@
 @echo off
-set "JAVA_HOME=C:\Program Files\Eclipse Adoptium\jdk-21.0.10.7-hotspot"
+set "JAVA_HOME=C:\Program Files\JetBrains\IntelliJ IDEA 2025.3\jbr"
 setlocal enabledelayedexpansion
 cd /d "%~dp0"
 
